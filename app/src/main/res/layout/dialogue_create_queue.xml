@@ -1,0 +1,27 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etQueueName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Queue Name"/>
+
+    <EditText
+        android:id="@+id/etQueueCapacity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Queue Capacity"
+        android:inputType="number"/>
+
+    <Spinner
+        android:id="@+id/spStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

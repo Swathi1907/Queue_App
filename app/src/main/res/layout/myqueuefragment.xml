@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="#F8FAFC">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+<LinearLayout
+    android:id="@+id/contentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Header -->
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:background="@drawable/myqueue_header"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/myqueue_header"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15sp"
+                android:background="@drawable/myqueue_header"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvQueueName"
+                    android:layout_width="0sp"
+                    android:layout_height="wrap_content"
+android:layout_weight="1"
+                    android:text="Cardiology Queue"
+                    android:textColor="#FFFFFF"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:text="🟢 Active"
+                    android:textColor="#D1FAE5"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Stats Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-165dp"
+        app:cardCornerRadius="24dp"
+        android:layout_marginRight="5sp"
+        android:layout_marginLeft="5sp"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="@android:color/transparent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="169dp"
+            android:orientation="vertical"
+          >
+
+            <!-- Title -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="YOUR STATUS"
+                android:layout_marginTop="6sp"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="378dp"
+                android:layout_height="94dp"
+                android:layout_marginTop="13dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Left -->
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="65dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your Token"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvYourToken"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:layout_marginStart="14sp"
+                        android:layout_marginTop="6sp"
+                        android:background="@drawable/token_circl"
+                        android:gravity="center"
+                        android:text="24"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+
+                <!-- Divider -->
+
+
+                <!-- Right -->
+<Space
+    android:layout_width="9sp"
+    android:layout_height="94dp"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/outline_diversity_3_24"
+                        app:tint="#4ADE80" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="You're in line"
+                        android:id="@+id/tvQueueProgressStatus"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="20dp"
+        android:layout_marginTop="-20dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Heading -->
+
+
+            <!-- Stats -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Serving -->
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/outline_account_circle_24"
+                        app:tint="#056127"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Present"
+                        android:textColor="#6B7280"
+                        android:textSize="13sp"
+                        android:layout_marginTop="6dp"/>
+
+                    <TextView
+                        android:id="@+id/tvCurrentToken"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="15"
+                        android:textStyle="bold"
+                        android:textSize="28sp"
+                        android:textColor="#056127"/>
+
+                </LinearLayout>
+
+                <!-- Divider -->
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="70dp"
+                    android:background="#E5E7EB"/>
+
+                <!-- People Ahead -->
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/outline_diversity_3_24"
+                        app:tint="#2563EB"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ahead"
+                        android:textColor="#6B7280"
+                        android:textSize="13sp"
+                        android:layout_marginTop="6dp"/>
+
+                    <TextView
+                        android:id="@+id/tvPeopleAhead"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textStyle="bold"
+                        android:textSize="28sp"
+                        android:textColor="#2563EB"/>
+
+                </LinearLayout>
+
+                <!-- Divider -->
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="70dp"
+                    android:background="#E5E7EB"/>
+
+                <!-- Estimated Wait -->
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/outline_avg_time_24"
+                        app:tint="#A29A05"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Wait"
+                        android:textColor="#6B7280"
+                        android:textSize="13sp"
+                        android:layout_marginTop="6dp"/>
+
+                    <TextView
+                        android:id="@+id/tvWaitTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5m"
+                        android:textStyle="bold"
+                        android:textSize="28sp"
+                        android:textColor="#A29A05"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="70dp"
+                    android:background="#E5E7EB"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+    <!-- Live Queue -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LIVE QUEUE"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMembers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="16dp"/>
+
+    <!-- Leave Queue -->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLeaveQueue"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="20dp"
+        android:text="Leave Queue"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#EF4444"
+        android:backgroundTint="#FEE2E2"
+        app:cornerRadius="18dp"/>
+
+</LinearLayout>
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/baseline_add_to_queue_24"
+                app:tint="#5B5CEB"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="You're not in any queue"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="#111827"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Join a queue from the Home screen"
+                android:textColor="#6B7280"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+    </FrameLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:backgroundTint="#FFFFFF"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
+    app:strokeColor="#E5E7EB"
+
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="6sp"
+        android:gravity="center_vertical"
+       >
+
+        <!-- Left Content -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Queue Name -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+android:src="@drawable/baseline_area_chart_24"
+                    app:tint="#2563EB"/>
+
+                <TextView
+                    android:id="@+id/tvQueueName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Cardiology"
+                    android:textColor="#111827"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+                <Space
+                    android:layout_width="4sp"
+                    android:layout_height="0dp"/>
+                <TextView
+                    android:id="@+id/tvQueueStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:background="@drawable/bg_status_green"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="● Active"
+                    android:textColor="#15803D"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Queue Info -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_chip_blue"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="10dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/outline_diversity_3_24"
+                        app:tint="#2563EB"/>
+
+                    <TextView
+                        android:id="@+id/tvPeople"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="25 Waiting"
+                        android:textColor="#2563EB"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+<Space
+    android:layout_width="4sp"
+    android:layout_height="0dp"
+/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_chip_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="10dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/outline_avg_time_24"
+                        app:tint="#16A34A"/>
+
+                    <TextView
+                        android:id="@+id/tvAvgTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="45 min"
+                        android:textColor="#16A34A"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+
+
+
+            </LinearLayout>
+
+            <!-- Status -->
+
+
+        </LinearLayout>
+
+        <!-- Join Button -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnjoinqueue"
+            android:layout_width="120dp"
+            android:layout_height="48dp"
+            android:text="+Join"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:backgroundTint="#2563EB"
+            android:layout_marginTop="5sp"
+            app:cornerRadius="24dp"
+            app:icon="@drawable/outline_arrow_forward_24"
+            app:iconGravity="textEnd"
+            app:iconPadding="8dp"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
