@@ -8,6 +8,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.swathi.queue_app.databinding.ActivityMainBinding
 import com.swathi.queue_app.fragments.HomeFragment
 import com.swathi.queue_app.fragments.myqueuefragment
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
 import com.swathi.queue_app.fragments.ProfileFragment
 import com.swathi.queue_app.viewmodel.HomeViewModel
 class MainActivity : AppCompatActivity() {
@@ -29,7 +31,15 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e("FCM", "Failed", task.exception)
+                    return@addOnCompleteListener
+                }
 
+                Log.d("FCM", task.result)
+            }
 
         homeViewModel.activeQueueResponse.observe(this) { response ->
 
