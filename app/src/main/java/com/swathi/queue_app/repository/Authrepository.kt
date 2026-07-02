@@ -29,6 +29,11 @@ class Authrepository {
             println("Repository called")
         }
     )
+    suspend fun saveFcmToken(token: String)=
+        RetrofitInstance.api.saveFcmToken(
+            mapOf("fcmToken" to token)
+        )
+
     suspend fun getProfile() =
        RetrofitInstance. api.getProfile()
 }

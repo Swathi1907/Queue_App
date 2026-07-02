@@ -114,6 +114,11 @@ suspend fun myStatus(
         @Path("queueId") queueId: String
     ): Response<CompleteCurrentResponse>
 
+    @POST("api/auth/saveFcmToken")
+    suspend fun saveFcmToken(
+        @Body body: Map<String, String>
+    ): Response<MessageResponse>
+
 
     @GET("api/notification")
     suspend fun getNotifications():

@@ -14,6 +14,24 @@ class AuthViewModel : ViewModel(){
     val loginresponse = MutableLiveData<Loginresponse>()
     val signupResponse = MutableLiveData<signupresponse>()
     val errorResponse = MutableLiveData<errorResponse>()
+
+    fun saveFcmToken(token: String) {
+
+        viewModelScope.launch {
+
+            try {
+
+                repository.saveFcmToken(token)
+
+            } catch (e: Exception) {
+
+                Log.e("FCM", "Failed to save token", e)
+
+            }
+
+        }
+
+    }
     fun login(
         email: String,
         password: String

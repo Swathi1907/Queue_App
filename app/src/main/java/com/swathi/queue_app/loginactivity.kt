@@ -8,6 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.messaging.FirebaseMessaging
 import com.swathi.queue_app.databinding.LoginBinding
 import com.swathi.queue_app.viewmodel.AuthViewModel
 class loginactivity : AppCompatActivity() { // create a screen called main activity
@@ -39,6 +40,7 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
         }
 // login response is live data so we need to observe it all the time for tbe updates
         viewModel.loginresponse.observe(this) {
+
             val prefs =
                 getSharedPreferences(
                     "app",
@@ -78,6 +80,12 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
                     )
                 )
             }
+            FirebaseMessaging.getInstance().token
+                .addOnSuccessListener { token ->
+
+                    viewModel.saveFcmToken(token)
+
+                }
             finish()
         }
 
