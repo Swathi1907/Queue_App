@@ -20,6 +20,7 @@ class HomeViewModel : ViewModel(){
         try {
             viewModelScope.launch {
             val response = Queuerepository.getAllQueues(hospitalId)
+
                 println(response.code())
 
                 println(response.isSuccessful)
@@ -91,17 +92,14 @@ println("Error: ${e.message}")
     val activeQueueResponse =
         MutableLiveData<ActiveQueueResponse>()
 
-    fun getMyActiveQueue() {
-        Log.d("TRACE", "ViewModel getMyActiveQueue()")
+    fun getMyActiveQueue(caller: String = "Unknown") {
+
+        Log.d("TRACE", "getMyActiveQueue called from $caller")
+
         viewModelScope.launch {
-
-            val response =
-                Queuerepository.getMyActiveQueue()
-
-            if(response.isSuccessful){
-
+            val response = Queuerepository.getMyActiveQueue()
+            if (response.isSuccessful) {
                 response.body()?.let {
-
                     activeQueueResponse.value = it
                 }
             }

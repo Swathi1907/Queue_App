@@ -34,7 +34,7 @@ class HomeFragment : Fragment() {
 
         viewModel.getAllHospitals()
         Log.d("TRACE", "Called from onResume")
-        viewModel.getMyActiveQueue()
+        viewModel.getMyActiveQueue("HomeFragment onResume")
         Log.d("HOME", "onResume called")
     }
     override fun onCreateView(
@@ -89,7 +89,7 @@ class HomeFragment : Fragment() {
         binding.rvhospitals.layoutManager =
             LinearLayoutManager(requireContext())
         Log.d("TRACE", "Called from onViewCreated")
-        viewModel.getMyActiveQueue()
+        viewModel.getMyActiveQueue("HomeFragment onviewcreated")
         viewModel.getNotificationCount()
         viewModel.hospitalResponse.observe(viewLifecycleOwner) { hospitals ->
 
@@ -111,7 +111,7 @@ class HomeFragment : Fragment() {
                 // activeQueueResponse observer will decide whether to call myStatus().
                 Log.d("TRACE", "Called from Socket")
 
-                viewModel.getMyActiveQueue()
+                viewModel.getMyActiveQueue("HomeFragment socket")
             }
         }
       //  viewModel.activeQueueResponse.observe(viewLifecycleOwner) {

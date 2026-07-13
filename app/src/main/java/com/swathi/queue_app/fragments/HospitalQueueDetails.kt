@@ -68,7 +68,8 @@ class HospitalQueueDetails : Fragment() {
 
         binding.rvQueues.layoutManager =
             LinearLayoutManager(requireContext())
-        viewModel.getMyActiveQueue()
+        Log.d("HOSPITAL QUEUE DETAILS","CALLING")
+        viewModel.getMyActiveQueue("HospitalQueueDetails")
 
         viewModel.getAllQueues(hospitalId)
 

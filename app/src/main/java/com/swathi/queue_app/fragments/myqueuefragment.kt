@@ -79,34 +79,33 @@ println("Exit button clicked");
             println("$queueId is null");
         }
 
-        viewModel.exitQueueResponse.observe(viewLifecycleOwner) {
+        /*viewModel.exitQueueResponse.observe(viewLifecycleOwner) {
 
-            if (::queueListener.isInitialized) {
-                SocketManager.getSocket().off("queueUpdated", queueListener)
-            }
+            Log.d("EXIT", "Observer called")
 
             Toast.makeText(
                 requireContext(),
                 "Exited queue successfully",
                 Toast.LENGTH_SHORT
             ).show()
-
+            Log.d("BACKSTACK", "Count = ${parentFragmentManager.backStackEntryCount}")
             parentFragmentManager.popBackStack()
-        }
-        viewModel.queueNotFound.observe(viewLifecycleOwner) { notFound ->
+        }*/
+        viewModel.exitQueueResponse.observe(viewLifecycleOwner) {
 
-            if (notFound) {
+            Log.d("EXIT", "Observer called")
+            Toast.makeText(
+                requireContext(),
+                "Exited queue successfully",
+                Toast.LENGTH_SHORT
+            ).show()
+            // Stop socket updates first
+            SocketManager.getSocket().off("queueUpdated")
 
-                viewModel.resetQueueNotFound()
-
-                Toast.makeText(
-                    requireContext(),
-                    "You have been served",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                parentFragmentManager.popBackStack()
-            }
+            // Then navigate
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, HomeFragment())
+                .commit()
         }
         viewModel.myStatusResponse.observe(viewLifecycleOwner) {
             println("RESPONSE = $it")
@@ -210,26 +209,23 @@ println(it.QueueStatus)
     }
     private fun observeQueueUpdates(queueId: String) {
 
-        queueListener = io.socket.emitter.Emitter.Listener {
+        Log.d("SOCKET", "Registering socket listener")
+
+        SocketManager.getSocket().off("queueUpdated")
+
+        SocketManager.getSocket().on("queueUpdated") {
+
+            Log.d("SOCKET", "Socket callback fired")
 
             requireActivity().runOnUiThread {
-
-                Log.d("SOCKET", "Queue Updated Received")
-
                 viewModel.myStatus(queueId)
                 viewModel.getUserMembers(queueId)
             }
         }
-
-        SocketManager.getSocket().on("queueUpdated", queueListener)
     }
     override fun onDestroyView() {
-
-        if (::queueListener.isInitialized) {
-            SocketManager.getSocket().off("queueUpdated", queueListener)
-        }
-
+        Log.d("SOCKET", "Removing socket listener")
+        SocketManager.getSocket().off("queueUpdated")
         super.onDestroyView()
-        _binding = null
     }
 }
