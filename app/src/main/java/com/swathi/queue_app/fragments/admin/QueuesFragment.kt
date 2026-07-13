@@ -1,5 +1,6 @@
 package com.swathi.queue_app.fragments.admin
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -79,7 +80,11 @@ class QueuesFragment : Fragment() {
                 requireContext()
             )
 
-        viewModel.getAllQueues()
+        val prefs = requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
+
+        val hospitalId = prefs.getString("hospitalId", "")!!
+
+        viewModel.getAllQueues(hospitalId)
 
         viewModel.allqueueResponse.observe(
             viewLifecycleOwner
@@ -124,68 +129,7 @@ class QueuesFragment : Fragment() {
             .addToBackStack(null)
             .commit()
     }
-    private fun showCreateQueueDialog() {
 
-        val dialogView =
-            layoutInflater.inflate(
-                R.layout.dialogue_create_queue,
-                null
-            )
-
-        val etQueueName =
-            dialogView.findViewById<EditText>(
-                R.id.etQueueName
-            )
-
-        val etQueueCapacity =
-            dialogView.findViewById<EditText>(
-                R.id.etQueueCapacity
-            )
-
-        val spStatus =
-            dialogView.findViewById<Spinner>(
-                R.id.spStatus
-            )
-
-        spStatus.adapter =
-            ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                listOf(
-                    "active",
-                    "paused"
-                )
-            )
-
-        MaterialAlertDialogBuilder(
-            requireContext()
-        )
-            .setTitle("Create Queue")
-            .setView(dialogView)
-            .setPositiveButton("Create") { _, _ ->
-
-                val queueName =
-                    etQueueName.text.toString()
-
-                val queueCapacity =
-                    etQueueCapacity.text.toString()
-                        .toIntOrNull() ?: 0
-
-                val status =
-                    spStatus.selectedItem.toString()
-
-                viewmodel.createQueue(
-                    queueName,
-                    queueCapacity,
-                    status
-                )
-            }
-            .setNegativeButton(
-                "Cancel",
-                null
-            )
-            .show()
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

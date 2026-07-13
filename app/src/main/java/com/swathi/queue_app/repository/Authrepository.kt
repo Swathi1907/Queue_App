@@ -36,4 +36,14 @@ class Authrepository {
 
     suspend fun getProfile() =
        RetrofitInstance. api.getProfile()
+
+
+
+    suspend fun verifyHospital(hospitalId: String) =
+        RetrofitInstance.api.verifyHospital(
+            mapOf("hospitalId" to hospitalId)
+        )
+
+    suspend fun getAllHospitals() =
+        RetrofitInstance.api.getAllHospitals()
 }

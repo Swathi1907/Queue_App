@@ -4,9 +4,8 @@ import com.swathi.queue_app.api.RetrofitInstance
 import com.swathi.queue_app.model.CreateQueueRequest
 
 class Queuerepository {
-    suspend fun getAllQueues()= RetrofitInstance.api.getAllQueues().also{
-        println("Queue Repository called");
-    }
+    suspend fun getAllQueues(hospitalId: String) =
+        RetrofitInstance.api.getAllQueues(hospitalId)
     suspend fun joinQueue(
         queueId: String
     ) = RetrofitInstance.api.joinQueue(queueId)
@@ -39,15 +38,24 @@ class Queuerepository {
         queueId: String
     ) = RetrofitInstance.api.getAllMembers(queueId)
     suspend fun getQueueDetails(
-        queueId: String
+        queueId: String?
     ) = RetrofitInstance.api
         .getQueueDetails(queueId)
     suspend fun createQueue(
         queueName: String,
         queueCapacity: Int,
         queueStatus: String,
+        hospitalId: String,
+        doctorName: String,
+        roomNumber:String,
+        floor:String,
+        startTime: String,
+        endTime:String
     ) = RetrofitInstance.api.createQueue(
-        CreateQueueRequest(queueName, queueCapacity ,queueStatus)
+        CreateQueueRequest(queueName, queueCapacity ,queueStatus, hospitalId  ,doctorName, roomNumber,
+            floor,
+            startTime,
+            endTime)
     )
 
     suspend fun getNotificationCount() =
@@ -67,4 +75,6 @@ class Queuerepository {
 
     suspend fun getNotifications() =
         RetrofitInstance.api.getNotifications()
+
+    suspend fun getAllHospitals()= RetrofitInstance.api.getAllHospitals()
 }

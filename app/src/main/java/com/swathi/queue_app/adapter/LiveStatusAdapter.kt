@@ -46,21 +46,35 @@ class LiveStatusAdapter(
 
 
         when (queue.queue_status) {
-            "WAITING_TO_START" ->
-                holder.binding.tvQueueProgressStatus.text = "⏳ Waiting for queue to start"
 
-            "WAITING_FOR_NEXT_CALL" ->
-                holder.binding.tvQueueProgressStatus.text = "⏸ Waiting for admin to call next token"
+            "WAITING_TO_START" -> {
+               holder. binding.tvQueueProgressStatus.text =
+                    "⏳ Queue hasn't started yet"
+            }
 
-            "WAITING" ->
-                holder.binding.tvQueueProgressStatus.text =
-                    "${queue.peopleAhead} people ahead of you"
+            "WAITING_FOR_NEXT_CALL" -> {
+                holder. binding.tvQueueProgressStatus.text =
+                    "🟡 You're next. Waiting for the receptionist to call you."
+            }
 
-            "NEXT" ->
-                holder.binding.tvQueueProgressStatus.text = "🎉 You're next!"
+            "WAITING" -> {
+                holder. binding.tvQueueProgressStatus.text =
+                    "👥 ${queue.peopleAhead} people ahead of you"
+            }
 
-            "SERVING" ->
-                holder.binding.tvQueueProgressStatus.text = "🟢 It's your turn"
+            "NEXT" -> {
+                holder.  binding.tvQueueProgressStatus.text =
+                    "🔔 You're next. Please be ready."
+            }
+
+            "SERVING" -> {
+                holder.  binding.tvQueueProgressStatus.text =
+                    "🟢 It's your turn. Please proceed to the doctor."
+            }
+
+            else -> {
+                holder. binding.tvQueueProgressStatus.text = ""
+            }
         }
 
         holder.binding.tvQueueName.text = queue.queueName

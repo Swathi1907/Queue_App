@@ -16,7 +16,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         Log.d("FCM", "New Token: $token")
 
-        // TODO: Send this token to your Node.js backend
+        // we have to Send this token to our Node.js backend
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

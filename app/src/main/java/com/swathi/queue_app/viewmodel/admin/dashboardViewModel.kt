@@ -22,29 +22,31 @@ class dashboardViewModel: ViewModel() {
         MutableLiveData<adminDashboardresponse>()
 val repository= Dashboardrepository()
 
-    fun dashboard() {
+    fun dashboard(hospitalId: String) {
 
         viewModelScope.launch {
 
             val response =
-                repository.dashboard()
+                repository.dashboard(hospitalId)
 
             if(response.isSuccessful){
 
                 response.body()?.let {
 
                     dashboardResponse.value = it
+
                 }
             }
         }
     }
     private val _activeQueues = MutableLiveData<List<adminactivequeues>>()
     val activeQueues: LiveData<List<adminactivequeues>> = _activeQueues
-    fun getActiveQueues() {
+
+    fun getActiveQueues(hospitalId: String) {
 
         viewModelScope.launch {
 
-            val response = repository.getActiveQueues()
+            val response = repository.getActiveQueues(hospitalId)
 
             if (response.isSuccessful) {
                 _activeQueues.value = response.body()

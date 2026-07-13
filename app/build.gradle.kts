@@ -49,10 +49,13 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
 
     implementation("com.google.firebase:firebase-analytics")
+    // in messaging dependencies specify the versions
     implementation("com.google.firebase:firebase-messaging:25.0.0")
+    implementation("io.socket:socket.io-client:2.1.1") {
+        exclude(group = "org.json", module = "json")
+    }
 
 
-    // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
 
 

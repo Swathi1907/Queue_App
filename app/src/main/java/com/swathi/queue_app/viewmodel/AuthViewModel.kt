@@ -1,10 +1,12 @@
 package com.swathi.queue_app.viewmodel
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.model.Loginresponse
 import com.swathi.queue_app.model.ProfileResponse
+import com.swathi.queue_app.model.VerifyHospitalResponse
 import com.swathi.queue_app.model.errorResponse
 import com.swathi.queue_app.model.signupresponse
 import com.swathi.queue_app.repository.Authrepository
@@ -14,7 +16,11 @@ class AuthViewModel : ViewModel(){
     val loginresponse = MutableLiveData<Loginresponse>()
     val signupResponse = MutableLiveData<signupresponse>()
     val errorResponse = MutableLiveData<errorResponse>()
+    private val _verifyHospitalResponse =
+        MutableLiveData<VerifyHospitalResponse>()
 
+    val verifyHospitalResponse: LiveData<VerifyHospitalResponse> =
+        _verifyHospitalResponse
     fun saveFcmToken(token: String) {
 
         viewModelScope.launch {
@@ -31,6 +37,35 @@ class AuthViewModel : ViewModel(){
 
         }
 
+    }
+
+
+    fun verifyHospital(hospitalId: String) {
+
+        viewModelScope.launch {
+
+            try {
+
+                val response =
+                    repository.verifyHospital(hospitalId)
+
+                if (response.isSuccessful) {
+
+                    response.body()?.let {
+
+                        _verifyHospitalResponse.postValue(it)
+
+                    }
+
+                }
+
+            } catch (e: Exception) {
+
+                Log.e("VERIFY_HOSPITAL", e.message.toString())
+
+            }
+
+        }
     }
     fun login(
         email: String,

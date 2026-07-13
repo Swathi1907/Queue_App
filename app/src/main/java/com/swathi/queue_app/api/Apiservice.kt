@@ -3,6 +3,7 @@ package com.swathi.queue_app.api
 import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.CompleteCurrentResponse
 import com.swathi.queue_app.model.CreateQueueRequest
+import com.swathi.queue_app.model.HospitalModel
 import com.swathi.queue_app.model.Loginrequest
 import com.swathi.queue_app.model.Loginresponse
 import com.swathi.queue_app.model.MemberModel
@@ -15,6 +16,7 @@ import com.swathi.queue_app.model.ProfileResponse
 import com.swathi.queue_app.model.QueueDetailsResponse
 import com.swathi.queue_app.model.QueueModel
 import com.swathi.queue_app.model.QueueStatusResponse
+import com.swathi.queue_app.model.VerifyHospitalResponse
 import com.swathi.queue_app.model.adminDashboardresponse
 import com.swathi.queue_app.model.adminactivequeues
 import com.swathi.queue_app.model.joinQueueResponse
@@ -27,6 +29,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface Apiservice{
     @POST("api/auth/login")
@@ -34,9 +37,12 @@ interface Apiservice{
         @Body request: Loginrequest
     ): Response<Loginresponse>
 
-    @GET("api/queue/allQueues")
-    suspend fun getAllQueues(): Response<List<QueueModel>>
-
+  //  @GET("api/queue/allQueues")
+    //suspend fun getAllQueues(): Response<List<QueueModel>>
+  @GET("api/queue/allQueues")
+  suspend fun getAllQueues(
+      @Query("hospitalId") hospitalId: String
+  ): Response<List<QueueModel>>
     @POST("api/auth/signup")
     suspend fun signup(
         @Body request: signuprequest
@@ -63,7 +69,9 @@ suspend fun myStatus(
     ): Response<MessageResponse>
 
     @GET("api/admin/dashboard")
-    suspend fun dashboard():Response<adminDashboardresponse>
+    suspend fun dashboard(
+        @Query("hospitalId") hospitalId: String
+    ):Response<adminDashboardresponse>
 
     @POST("api/queue/{queueId}/next")
     suspend fun nextToken(
@@ -88,7 +96,7 @@ suspend fun myStatus(
 
     @GET("api/queue/{queueId}/details")
     suspend fun getQueueDetails(
-        @Path("queueId") queueId: String
+        @Path("queueId") queueId: String?
     ): Response<QueueDetailsResponse>
 
     @POST("api/queue/create")
@@ -104,7 +112,9 @@ suspend fun myStatus(
 
 
     @GET("api/queue/admin/activequeues")
-    suspend fun getadminActiveQueues(): Response<List<adminactivequeues>>
+    suspend fun getadminActiveQueues(
+        @Query("hospitalId") hospitalId: String
+    ): Response<List<adminactivequeues>>
 
     @GET("api/auth/profile")
     suspend fun getProfile():
@@ -132,4 +142,13 @@ suspend fun myStatus(
     suspend fun markNotificationsRead():
             Response<NotificationReadResponse>
 
+
+    @POST("api/hospital/verify")
+    suspend fun verifyHospital(
+        @Body body: Map<String, String>
+    ): Response<VerifyHospitalResponse>
+
+    @GET("api/hospital/allHospitals")
+    suspend fun getAllHospitals():
+            Response<List<HospitalModel>>
 }

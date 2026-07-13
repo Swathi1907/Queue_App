@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.swathi.queue_app.SocketManager
 import com.swathi.queue_app.databinding.ProfileBinding
 import com.swathi.queue_app.loginactivity
 import com.swathi.queue_app.viewmodel.AuthViewModel
@@ -65,14 +66,14 @@ class ProfileFragment : Fragment() {
             // Open About Dialog later
         }
 
-        binding.btnLogout.setOnClickListener {
+        binding.btnlogout.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to logout?")
                 .setPositiveButton("Logout") { _, _ ->
-
+                    SocketManager.disconnect()
                     val sharedPref = requireActivity()
-                        .getSharedPreferences("QueuePrefs", Context.MODE_PRIVATE)
+                        .getSharedPreferences("app", Context.MODE_PRIVATE)
 
                     sharedPref.edit().clear().apply()
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.model.ActiveQueueResponse
+import com.swathi.queue_app.model.HospitalModel
 import com.swathi.queue_app.model.NotificationCountResponse
 import com.swathi.queue_app.model.NotificationModel
 import com.swathi.queue_app.model.NotificationReadResponse
@@ -15,11 +16,10 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel(){
     private val Queuerepository= Queuerepository();
     val allqueueResponse= MutableLiveData<List<QueueModel>>()
-    fun getAllQueues(){
+    fun getAllQueues(hospitalId: String){
         try {
             viewModelScope.launch {
-            val response = Queuerepository.getAllQueues()
-
+            val response = Queuerepository.getAllQueues(hospitalId)
                 println(response.code())
 
                 println(response.isSuccessful)
@@ -67,11 +67,32 @@ println("Error: ${e.message}")
             }
         }
     }
+
+    private val _hospitalResponse = MutableLiveData<List<HospitalModel>>()
+    val hospitalResponse: LiveData<List<HospitalModel>> = _hospitalResponse
+
+    fun getAllHospitals() {
+
+        viewModelScope.launch {
+
+            val response = Queuerepository.getAllHospitals()
+
+            if (response.isSuccessful) {
+
+                response.body()?.let {
+                    _hospitalResponse.postValue(it)
+                }
+            }
+        }
+    }
+
+
+
     val activeQueueResponse =
         MutableLiveData<ActiveQueueResponse>()
 
     fun getMyActiveQueue() {
-
+        Log.d("TRACE", "ViewModel getMyActiveQueue()")
         viewModelScope.launch {
 
             val response =

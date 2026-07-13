@@ -72,7 +72,7 @@
             android:paddingHorizontal="14dp"
             android:paddingVertical="6dp"
             android:text="Waiting"
-            android:textStyle="bold"
+
             android:textSize="13sp"
             android:background="@drawable/bg_status_waiting"
             android:textColor="#2563EB"/>

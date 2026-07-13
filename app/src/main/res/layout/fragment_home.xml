@@ -88,6 +88,7 @@
         android:layout_height="56dp"
         android:layout_marginHorizontal="18dp"
         android:elevation="8dp"
+
         app:cardCornerRadius="14dp"
         android:translationY="-28dp"
         app:layout_constraintTop_toBottomOf="@id/cardWelcome"
@@ -98,6 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="Search Queue"
+            android:background="@color/white"
             app:cardElevation="12dp"
             app:strokeWidth="1dp"
             app:strokeColor="#E5E7EB"
@@ -169,7 +171,7 @@
     <!-- Main Queue List -->
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvQueues"
+        android:id="@+id/rvhospitals"
         android:layout_width="0dp"
         android:layout_height="0dp"
 

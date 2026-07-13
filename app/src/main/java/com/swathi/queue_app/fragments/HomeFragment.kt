@@ -1,6 +1,8 @@
 package com.swathi.queue_app.fragments
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.swathi.queue_app.R
+import com.swathi.queue_app.SocketManager
+import com.swathi.queue_app.adapter.HospitalAdapter
 import com.swathi.queue_app.adapter.LiveStatusAdapter
 import com.swathi.queue_app.adapter.QueueAdapter
 import com.swathi.queue_app.databinding.FragmentHomeBinding
+import com.swathi.queue_app.model.HospitalModel
 import com.swathi.queue_app.viewmodel.HomeViewModel
 import com.swathi.queue_app.viewmodel.Queueviewmodel
 import com.swathi.queue_app.model.QueueModel
@@ -23,13 +28,14 @@ class HomeFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
     private val queueViewModel: Queueviewmodel by viewModels()
 
-    private var queuesList: List<QueueModel> = emptyList()
     private var activeQueueId: String? = null
     override fun onResume() {
         super.onResume()
 
-        viewModel.getAllQueues()
+        viewModel.getAllHospitals()
+        Log.d("TRACE", "Called from onResume")
         viewModel.getMyActiveQueue()
+        Log.d("HOME", "onResume called")
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,7 +50,7 @@ class HomeFragment : Fragment() {
         )
 
         return binding.root
-    }
+}
 
     override fun onViewCreated(
         view: View,
@@ -80,21 +86,34 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.rvQueues.layoutManager =
+        binding.rvhospitals.layoutManager =
             LinearLayoutManager(requireContext())
-
-        viewModel.getAllQueues()
+        Log.d("TRACE", "Called from onViewCreated")
         viewModel.getMyActiveQueue()
         viewModel.getNotificationCount()
-        viewModel.allqueueResponse.observe(viewLifecycleOwner) {
+        viewModel.hospitalResponse.observe(viewLifecycleOwner) { hospitals ->
 
-            queuesList = it
+            Log.d("HOME", "Hospitals received = ${hospitals.size}")
+            Log.d("HOME", hospitals.toString())
 
-
-
-            setupQueueAdapter()
+            setupHospitalAdapter(hospitals)
         }
+        SocketManager.getSocket().off("queueUpdated")
+        SocketManager.getSocket().on("queueUpdated") {
 
+            requireActivity().runOnUiThread {
+
+                Log.d("SOCKET", "Queue Updated Received")
+
+                viewModel.getAllHospitals()
+
+                // Only refresh active queue.
+                // activeQueueResponse observer will decide whether to call myStatus().
+                Log.d("TRACE", "Called from Socket")
+
+                viewModel.getMyActiveQueue()
+            }
+        }
       //  viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
         //    activeQueueId =
@@ -103,20 +122,19 @@ class HomeFragment : Fragment() {
               //  else
                 //    null
 
-            //setupQueueAdapter()
+            //setupQueueAdapter()package com.swathi.queue_app.model
+        //
+        //data class CreateQueueRequest(
+        //    val queueName: String,
+        //    val queueCapacity: Int,
+        //    val queueStatus: String,
+        //    val doctorName: String,
+        //   val  roomNumber:String,
+        //  val   floor:String,
+        //   val  startTime: String,
+        //   val  endTime:String
+        //
         //}
-        if (activeQueueId != null) {
-
-            binding.rvLiveStatus.visibility = View.VISIBLE
-            binding.tvLiveStatus.visibility = View.VISIBLE
-
-            queueViewModel.myStatus(activeQueueId!!)
-
-        } else {
-binding.tvLiveStatus.visibility=View.GONE
-            binding.rvLiveStatus.visibility = View.GONE
-            binding.tvLiveStatus.visibility = View.GONE
-        }
         queueViewModel.myStatusResponse.observe(viewLifecycleOwner) {
 
             binding.rvLiveStatus.visibility = View.VISIBLE
@@ -124,61 +142,82 @@ binding.tvLiveStatus.visibility=View.GONE
             binding.rvLiveStatus.adapter =
                 LiveStatusAdapter(listOf(it))
         }
-        viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
+       /* viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
-            activeQueueId =
-                if (it.active) it.queueId else null
+            Log.d(
+                "HOME",
+                "active=${it.active}, queueId=${it.queueId}"
+            )
 
-            if (activeQueueId != null) {
-                queueViewModel.myStatus(activeQueueId!!)
+            activeQueueId = if (it.active) it.queueId else null
+
+            if (it.active) {
+                binding.rvLiveStatus.visibility = View.VISIBLE
+                binding.tvLiveStatus.visibility = View.VISIBLE
+                queueViewModel.myStatus(it.queueId)
             } else {
                 binding.rvLiveStatus.visibility = View.GONE
+                binding.tvLiveStatus.visibility = View.GONE
+                activeQueueId = null
             }
+            }
+*/
+        viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
-            setupQueueAdapter()
+            Log.d("HOME", "active=${it.active}, queueId=${it.queueId}")
+
+            activeQueueId = if (it.active) it.queueId else null
+
+            if (it.active) {
+                binding.rvLiveStatus.visibility = View.VISIBLE
+                binding.tvLiveStatus.visibility = View.VISIBLE
+
+                queueViewModel.myStatus(it.queueId)
+
+            } else {
+
+                activeQueueId = null
+                binding.rvLiveStatus.visibility = View.GONE
+                binding.tvLiveStatus.visibility = View.GONE
+            }
         }
 
-        queueViewModel.Joinqueueresponse.observe(viewLifecycleOwner) {
 
-            Toast.makeText(
-                requireContext(),
-                "Token Number : ${it.tokenNumber}",
-                Toast.LENGTH_LONG
-            ).show()
 
-            activeQueueId = it.queueId
-
-            queueViewModel.myStatus(it.queueId)
-
-            viewModel.getAllQueues()
-            viewModel.getMyActiveQueue()
-        }
     }
 
-    private fun setupQueueAdapter() {
+    private fun setupHospitalAdapter(
+        hospitals: List<HospitalModel>
+    ) {
 
-        binding.rvQueues.adapter =
-            QueueAdapter(
-                queueList = queuesList,
+        binding.rvhospitals.adapter =
+            HospitalAdapter(hospitals) { hospital ->
 
-                onJoinclick = { queue ->
+                openHospitalQueuesFragment(
+                    hospital
+                )
+            }
+    }
+    private fun openHospitalQueuesFragment(
+        hospital: HospitalModel
+    ) {
 
-                    queueViewModel.joinQueue(
-                        queue._id
-                    )
-                },
+        val fragment = HospitalQueueDetails()
 
-                activeQueueId = activeQueueId,
-
-                onViewDetails = { queue ->
-
-                    openMyQueueFragment(
-                        queue._id
-                    )
-                }
+        fragment.arguments = Bundle().apply {
+            putString("hospitalId", hospital.hospitalId)
+            putString("hospitalName", hospital.hospitalName)
+            putString(
+                "hospitalAddress",
+                "${hospital.address}, ${hospital.city}"
             )
-    }
+        }
 
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
     private fun openMyQueueFragment(
         queueId: String
     ) {
@@ -205,7 +244,9 @@ binding.tvLiveStatus.visibility=View.GONE
     }
 
     override fun onDestroyView() {
+        SocketManager.getSocket().off("queueUpdated")
         super.onDestroyView()
         _binding = null
+
     }
 }

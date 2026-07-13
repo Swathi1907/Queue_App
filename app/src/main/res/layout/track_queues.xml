@@ -2,143 +2,156 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
+    android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:backgroundTint="#FFFFFF"
     app:cardCornerRadius="18dp"
     app:cardElevation="3dp"
     app:strokeColor="#E5E7EB"
-
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="6sp"
-        android:gravity="center_vertical"
-       >
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:padding="6dp">
 
-        <!-- Left Content -->
+        <!-- Department Icon -->
+
+        <ImageView
+            android:id="@+id/imgDepartment"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/baseline_area_chart_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#2563EB" />
+
+        <!-- Department Name -->
+
+        <TextView
+            android:id="@+id/tvQueueName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Cardiology"
+            android:textColor="#111827"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imgDepartment"
+            app:layout_constraintTop_toTopOf="@id/imgDepartment" />
+
+        <!-- Waiting Count -->
+
+        <TextView
+            android:id="@+id/tvQueueStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_status_green"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="● Open"
+            android:textColor="#15803D"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/tvQueueName"
+            app:layout_constraintEnd_toStartOf="@id/tvWaitingCount"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toEndOf="@id/tvQueueName"
+            app:layout_constraintTop_toTopOf="@id/tvQueueName"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/tvWaitingCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            android:text="18"
+            android:textColor="#2563EB"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Arrow -->
+
+
+        <!-- Doctor -->
 
         <LinearLayout
+            android:id="@+id/layoutDoctor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toStartOf="@id/tvPeopleAhead"
+            app:layout_constraintStart_toStartOf="@id/tvQueueName"
+            app:layout_constraintTop_toBottomOf="@id/tvQueueName">
 
-            <!-- Queue Name -->
-
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:text="Doctor : "
+                android:textColor="#6B7280"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-android:src="@drawable/baseline_area_chart_24"
-                    app:tint="#2563EB"/>
-
-                <TextView
-                    android:id="@+id/tvQueueName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Cardiology"
-                    android:textColor="#111827"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
-                <Space
-                    android:layout_width="4sp"
-                    android:layout_height="0dp"/>
-                <TextView
-                    android:id="@+id/tvQueueStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:background="@drawable/bg_status_green"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="● Active"
-                    android:textColor="#15803D"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-            <!-- Queue Info -->
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/tvDoctor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:text="Dr. Ramesh Kumar"
+                android:textColor="#111827"
+                android:textSize="14sp" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:background="@drawable/bg_chip_blue"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="10dp">
+        </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/outline_diversity_3_24"
-                        app:tint="#2563EB"/>
+        <!-- People Ahead Label -->
 
-                    <TextView
-                        android:id="@+id/tvPeople"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="25 Waiting"
-                        android:textColor="#2563EB"
-                        android:textSize="12sp"
-                        android:textStyle="bold"/>
-                </LinearLayout>
-<Space
-    android:layout_width="4sp"
-    android:layout_height="0dp"
-/>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:background="@drawable/bg_chip_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="10dp">
+        <TextView
+            android:id="@+id/tvPeopleAhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="People in Queue"
+            android:textColor="#6B7280"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWaitingCount" />
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/outline_avg_time_24"
-                        app:tint="#16A34A"/>
+        <!-- Room + Floor -->
 
-                    <TextView
-                        android:id="@+id/tvAvgTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="45 min"
-                        android:textColor="#16A34A"
-                        android:textSize="12sp"
-                        android:textStyle="bold"/>
-                </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layoutRoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="@id/tvQueueName"
+            app:layout_constraintTop_toBottomOf="@id/layoutDoctor">
+
+            <TextView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:text="📍"
+                app:tint="#2563EB" />
 
 
-
-
-            </LinearLayout>
-
-            <!-- Status -->
-
+            <TextView
+                android:id="@+id/tvRoomFloor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Room 203 • Floor 2"
+                android:textColor="#374151"
+                android:textSize="13sp" />
 
         </LinearLayout>
 
@@ -146,19 +159,51 @@ android:src="@drawable/baseline_area_chart_24"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnjoinqueue"
-            android:layout_width="120dp"
-            android:layout_height="48dp"
-            android:text="+Join"
+            android:layout_width="110dp"
+            android:layout_height="42dp"
+            android:backgroundTint="#2563EB"
+            android:text="Join"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:backgroundTint="#2563EB"
-            android:layout_marginTop="5sp"
-            app:cornerRadius="24dp"
-            app:icon="@drawable/outline_arrow_forward_24"
-            app:iconGravity="textEnd"
-            app:iconPadding="8dp"/>
+            app:cornerRadius="21dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/layoutRoom" />
 
-    </LinearLayout>
+        <!-- Timing -->
+
+        <LinearLayout
+            android:id="@+id/layoutTiming"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvQueueName"
+            app:layout_constraintTop_toBottomOf="@id/layoutRoom">
+
+            <TextView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:background="@drawable/outline_avg_time_24"
+                app:tint="#16A34A" />
+
+            <TextView
+                android:id="@+id/tvTiming"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="9:00 AM - 1:00 PM"
+                android:textColor="#374151"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>
+
+
+
+

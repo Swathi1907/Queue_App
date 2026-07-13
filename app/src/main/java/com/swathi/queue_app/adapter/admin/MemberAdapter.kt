@@ -88,13 +88,21 @@ binding.tvMemberName.text=member.name
                     binding.tvTokenNumber.setTextColor(Color.BLACK)
 
                     binding.tvBadge.text =
-                        if (member.status == "serving")
+                        if (member.status == "serving") {
+                            binding.tvBadge.setTextColor(
+                                ContextCompat.getColor(holder.itemView.context, R.color.white)
+                            )
                             "YOU • SERVING"
-                        else
-                            "YOU • WAITING"
 
+
+                        }
+                        else {
+                            binding.tvBadge.setTextColor(Color.WHITE)
+
+                            "YOU • WAITING"
+                        }
                     binding.tvBadge.setBackgroundResource(R.drawable.badge_blue)
-                    binding.tvBadge.setTextColor(Color.WHITE)
+
 
                 } else {
 

@@ -9,9 +9,6 @@ import com.swathi.queue_app.model.CompleteCurrentResponse
 import com.swathi.queue_app.model.MemberModel
 import com.swathi.queue_app.model.MessageResponse
 import com.swathi.queue_app.model.NextResponse
-import com.swathi.queue_app.model.NotificationCountResponse
-import com.swathi.queue_app.model.NotificationModel
-import com.swathi.queue_app.model.NotificationReadResponse
 import com.swathi.queue_app.model.QueueDetailsResponse
 import com.swathi.queue_app.model.QueueStatusResponse
 
@@ -61,7 +58,7 @@ class Queueviewmodel : ViewModel() {
     }
 
     fun myStatus(queueId: String?) {
-
+        Log.d("MYSTATUS", "Called with queueId = $queueId")
         viewModelScope.launch {
 
             try {
@@ -102,7 +99,7 @@ class Queueviewmodel : ViewModel() {
         viewModelScope.launch {
 
             try {
-
+println("called exit viewmodel")
                 val response =
                     repository.exitQueue(queueId)
 println("Exit Queue response: ${response.code()}");
@@ -238,7 +235,7 @@ println("Exit Queue response: ${response.code()}");
         MutableLiveData<QueueDetailsResponse>()
 
     fun getQueueDetails(
-        queueId: String
+        queueId: String?
     ) {
 
         viewModelScope.launch {
@@ -287,7 +284,13 @@ println("Exit Queue response: ${response.code()}");
     fun createQueue(
         queueName: String,
         queueCapacity: Int,
-        queueStatus: String
+        queueStatus: String,
+        hospitalId:String,
+        doctorName: String,
+        roomNumber:String,
+        floor:String,
+        startTime: String,
+        endTime:String
     ) {
 
         viewModelScope.launch {
@@ -298,7 +301,13 @@ println("Exit Queue response: ${response.code()}");
                     repository.createQueue(
                         queueName,
                         queueCapacity,
-                        queueStatus
+                        queueStatus,
+                        hospitalId,
+                        doctorName,
+                        roomNumber,
+                        floor,
+                        startTime,
+                        endTime
                     )
 
                 if(response.isSuccessful){
