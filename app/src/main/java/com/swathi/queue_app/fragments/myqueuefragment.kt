@@ -78,7 +78,24 @@ println("Exit button clicked");
 
             println("$queueId is null");
         }
+        viewModel.queueNotFound.observe(viewLifecycleOwner) { notFound ->
 
+            if (!notFound) return@observe
+
+            viewModel.resetQueueNotFound()
+
+            SocketManager.getSocket().off("queueUpdated")
+
+            Toast.makeText(
+                requireContext(),
+                "Your completed successfully!",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, HomeFragment())
+                .commit()
+        }
         /*viewModel.exitQueueResponse.observe(viewLifecycleOwner) {
 
             Log.d("EXIT", "Observer called")
