@@ -1,7 +1,9 @@
 package com.swathi.queue_app.repository
 
 import com.swathi.queue_app.api.RetrofitInstance
+import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.CreateQueueRequest
+import retrofit2.Response
 
 class Queuerepository {
     suspend fun getAllQueues(hospitalId: String) =
@@ -15,9 +17,11 @@ class Queuerepository {
     ) = RetrofitInstance.api.myStatus(queueId)
 
 
-    suspend fun getMyActiveQueue() =
-        RetrofitInstance.api.getMyActiveQueue()
-
+  /*  suspend fun getMyActiveQueue() =
+        RetrofitInstance.api.getMyActiveQueue() */
+  suspend fun getMyActiveQueue(): Response<List<ActiveQueueResponse>> {
+      return RetrofitInstance.api.getMyActiveQueue()
+  }
     suspend fun exitQueue(
         queueId: String
     ) = RetrofitInstance.api.exitQueue(queueId)

@@ -40,8 +40,34 @@ class MainActivity : AppCompatActivity() {
 
                 Log.d("FCM", task.result)
             }
+        homeViewModel.activeQueueResponse.observe(this) { queues ->
 
-        homeViewModel.activeQueueResponse.observe(this) { response ->
+            if (queues.isNotEmpty()) {
+
+                val activeQueue = queues.first()
+
+                val fragment = myqueuefragment().apply {
+                    arguments = Bundle().apply {
+                        putString("queueId", activeQueue.queueId)
+                    }
+                }
+
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .commit()
+
+            } else {
+
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("No Active Queue")
+                    .setMessage("You're not currently in any queue.\n\nJoin a queue from the Home screen.")
+                    .setPositiveButton("OK") { _, _ ->
+                        binding.bottomNav.selectedItemId = R.id.homeFragment
+                    }
+                    .show()
+            }
+        }
+     /*   homeViewModel.activeQueueResponse.observe(this) { response ->
 
             if (response.active) {
 
@@ -59,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     .show()
             }
-        }
+        } */
         binding.bottomNav.setOnItemSelectedListener {
 
             when (it.itemId) {

@@ -24,7 +24,8 @@ class HospitalQueueDetails : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
     private val queueViewModel: Queueviewmodel by viewModels()
 
-    private var activeQueueId: String? = null
+   // private var activeQueueId: String? = null
+   private var joinedQueueId: String? = null
 
     private lateinit var hospitalId: String
     private lateinit var hospitalName: String
@@ -69,19 +70,26 @@ class HospitalQueueDetails : Fragment() {
         binding.rvQueues.layoutManager =
             LinearLayoutManager(requireContext())
         Log.d("HOSPITAL QUEUE DETAILS","CALLING")
-        viewModel.getMyActiveQueue("HospitalQueueDetails")
-
+      //  viewModel.getMyActiveQueue("HospitalQueueDetails")
+        viewModel.getMyActiveQueue()
         viewModel.getAllQueues(hospitalId)
 
-        viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
+  /*      viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
             activeQueueId =
                 if (it.active) it.queueId
                 else null
 
             setupAdapter()
+        } */
+        viewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
+            Log.d("ACTIVE_QUEUE", queues.toString())
+            joinedQueueId = queues.firstOrNull {
+                it.hospitalId == hospitalId
+            }?.queueId
+            Log.d("JOINED_QUEUE", "joinedQueueId = $joinedQueueId")
+            setupAdapter()
         }
-
         viewModel.allqueueResponse.observe(viewLifecycleOwner) {
 
             queueList = it
@@ -117,7 +125,7 @@ class HospitalQueueDetails : Fragment() {
 
                 },
 
-                activeQueueId = activeQueueId,
+                activeQueueId =  joinedQueueId,
 
                 onViewDetails = { queue ->
 

@@ -245,18 +245,23 @@ io.emit("queueUpdated");
 
 route.get('/allQueues', async (req, res) => {
     try {
+        console.log("all queue hit")
         const { hospitalId } = req.query;
-
+console.log("hospitalId =", hospitalId);
         if (!hospitalId) {
             return res.status(400).json({
                 message: "Hospital ID is required"
             });
         }
+        const allqueues = await Queue.find().select("hospitalId queueStatus queueName");
+
+console.log(allqueues);
         const queues = await Queue.find({
             hospitalId: req.query.hospitalId,
             queueStatus: { $in: ['active', 'paused'] }
         });
-
+console.log("Queues found =", queues.length);
+console.log(queues);
 
 
         const result = await Promise.all(
@@ -942,6 +947,144 @@ try {
 route.get('/myActiveQueue', Authmiddleware, async (req, res) => {
 
     try {
+
+        const members = await QueueMember.find({
+
+            userId: req.user.userId,
+            status: { $in: ['waiting', 'serving'] }
+
+        }).populate({
+            path: "queueId",
+            populate: {
+                path: "hospitalId"
+            }
+        });
+
+        if (members.length === 0) {
+
+            return res.status(200).json([]);
+        }
+const result = [];
+
+for (const member of members) {
+
+    const queue = member.queueId;
+
+    // calculate everything for THIS queue
+const currentMember = await QueueMember.findOne({
+    queueId: queue._id,
+    status: "serving"
+});
+const lastActiveMember = await QueueMember.findOne({
+    queueId: queue._id,
+    status: { $in: ["waiting", "serving"] }
+}).sort({ tokenNumber: -1 });
+const totalPeople = await QueueMember.countDocuments({
+    queueId: queue._id,
+    status: { $in: ["completed", "waiting", "serving"] }
+});
+
+const activeCount = await QueueMember.countDocuments({
+    queueId: queue._id,
+    status: { $in: ["waiting", "serving"] }
+});
+
+const peopleAhead = await QueueMember.countDocuments({
+    queueId: queue._id,
+    tokenNumber: { $lt: member.tokenNumber },
+    status: { $in: ["waiting", "serving"] }
+});
+const servingMember = await QueueMember.findOne({
+    queueId: queue._id,
+    status: "serving"
+});
+      let queue_status;
+    /*   const user = await QueueMember.findOne({
+            queueId: req.params.queueId,
+            userId: req.user.userId,
+            status: { $in: ['waiting', 'serving'] }
+        }); */
+if (member.status === "serving") {
+
+    queue_status = "SERVING";
+
+} else if (!servingMember) {
+
+    if (queue.lastCompletedToken === 0) {
+
+        // Queue hasn't started
+        queue_status = "WAITING_TO_START";
+
+    } else if (peopleAhead === 0) {
+
+        // User is first waiting
+        queue_status = "WAITING_FOR_NEXT_CALL";
+
+    } else {
+
+        // Still people ahead
+        queue_status = "WAITING";
+    }
+
+} else {
+
+    // Queue is running
+
+    if (peopleAhead === 0) {
+
+        // User is immediately after the serving patient
+        queue_status = "NEXT";
+
+    } else {
+
+        queue_status = "WAITING";
+    }
+}
+        console.log(queue_status);
+
+        console.log(queue.queueStatus)
+        const progress = activeCount - peopleAhead;
+        console.log(peopleAhead);
+
+     result.push({
+    hospitalName: queue.hospitalId.hospital_name,
+    hospitalId: queue.hospitalId,
+
+    queueId: queue._id,
+    queueName: queue.queueName,
+
+    yourToken: member.tokenNumber,
+
+    peopleAhead,
+    activeCount,
+    currentToken: currentMember ? currentMember.tokenNumber : null,
+    totalPeople,
+    latestToken: lastActiveMember ? lastActiveMember.tokenNumber : 0,
+    lastCompletedToken: queue.lastCompletedToken,
+
+    status: member.status,
+    avgServiceTime: queue.avgServiceTime,
+
+    progress,
+    queueStarted: servingMember != null,
+    queue_status,
+    QueueStatus: queue.queueStatus
+});
+}
+       
+        res.status(200).json(result);
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+/*
+route.get('/myActiveQueue', Authmiddleware, async (req, res) => {
+
+    try {
 console.log("myactiveapi hit")
         const member = await QueueMember.findOne({
 
@@ -978,7 +1121,7 @@ console.log("myactiveapi hit")
         });
     }
 });
-
+*/
 route.post('/:queueId/toggleQueueStatus', Authmiddleware, async (req, res) => {
 
     try {

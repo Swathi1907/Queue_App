@@ -135,13 +135,37 @@ class HomeFragment : Fragment() {
         //   val  endTime:String
         //
         //}
-        queueViewModel.myStatusResponse.observe(viewLifecycleOwner) {
+        viewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
+
+            if (queues.isEmpty()) {
+
+                binding.rvLiveStatus.visibility = View.GONE
+                binding.tvLiveStatus.visibility = View.GONE
+
+            } else {
+
+                binding.rvLiveStatus.visibility = View.VISIBLE
+                binding.tvLiveStatus.visibility = View.VISIBLE
+                binding.rvLiveStatus.adapter = LiveStatusAdapter(queues) { queue ->
+
+                    val bundle = Bundle().apply {
+                        putString("queueId", queue.queueId)
+                    }
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, myqueuefragment())
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+        }
+
+      /*  queueViewModel.myStatusResponse.observe(viewLifecycleOwner) {
 
             binding.rvLiveStatus.visibility = View.VISIBLE
 
             binding.rvLiveStatus.adapter =
                 LiveStatusAdapter(listOf(it))
-        }
+        } */
        /* viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
             Log.d(
@@ -162,7 +186,34 @@ class HomeFragment : Fragment() {
             }
             }
 */
-        viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
+
+        viewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
+
+            val activeQueue = queues.firstOrNull()
+
+            if (activeQueue != null) {
+
+                Log.d(
+                    "HOME",
+                    "queueId=${activeQueue.queueId}"
+                )
+
+                activeQueueId = activeQueue.queueId
+
+                binding.rvLiveStatus.visibility = View.VISIBLE
+                binding.tvLiveStatus.visibility = View.VISIBLE
+
+                queueViewModel.myStatus(activeQueue.queueId)
+
+            } else {
+
+                activeQueueId = null
+
+                binding.rvLiveStatus.visibility = View.GONE
+                binding.tvLiveStatus.visibility = View.GONE
+            }
+        }
+      /*  viewModel.activeQueueResponse.observe(viewLifecycleOwner) {
 
             Log.d("HOME", "active=${it.active}, queueId=${it.queueId}")
 
@@ -180,7 +231,7 @@ class HomeFragment : Fragment() {
                 binding.rvLiveStatus.visibility = View.GONE
                 binding.tvLiveStatus.visibility = View.GONE
             }
-        }
+        } */
 
 
 

@@ -47,7 +47,8 @@ class myqueuefragment : Fragment() {
         savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
-        var queueId = arguments?.getString("queueId")
+        val queueId = requireArguments().getString("queueId")!!
+      //  var queueId = arguments?.getString("queueId")
 println(queueId)
         if (queueId != null) {
             observeQueueUpdates(queueId)
@@ -56,7 +57,15 @@ println(queueId)
         } else {
             Log.d("TRACE","FROM MY QUEUFRAGMENT")
             homeViewModel.getMyActiveQueue()
-            homeViewModel.activeQueueResponse.observe(viewLifecycleOwner) {
+            homeViewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
+
+              //  val activeQueue = queues.firstOrNull() ?: return@observe
+
+                observeQueueUpdates(queueId)
+                viewModel.myStatus(queueId)
+                viewModel.getUserMembers(queueId)
+            }
+         /*   homeViewModel.activeQueueResponse.observe(viewLifecycleOwner) {
                 if (it.active) {
                     val activeQueueId = it.queueId
                     observeQueueUpdates(activeQueueId)
@@ -65,7 +74,7 @@ println(queueId)
 
                     viewModel.getUserMembers(activeQueueId)
                 }
-            }
+            } */
         }
         binding.btnLeaveQueue.setOnClickListener {
 println("Exit button clicked");

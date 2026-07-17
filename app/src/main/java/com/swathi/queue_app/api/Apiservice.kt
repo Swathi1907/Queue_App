@@ -61,7 +61,7 @@ suspend fun myStatus(
 
     @GET("api/queue/myActiveQueue")
     suspend fun getMyActiveQueue():
-            Response<ActiveQueueResponse>
+            Response<List<ActiveQueueResponse>>
 
     @POST("api/queue/{queueId}/exit")
     suspend fun exitQueue(

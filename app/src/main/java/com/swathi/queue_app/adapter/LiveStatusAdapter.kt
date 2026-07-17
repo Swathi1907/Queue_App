@@ -4,11 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.swathi.queue_app.databinding.ItemLiveStatusBinding
+import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.QueueModel
 import com.swathi.queue_app.model.myStatusResponse
 
 class LiveStatusAdapter(
-    private val queueList: List<myStatusResponse>
+    private val queueList: List<ActiveQueueResponse>,
+    private val onClick: (ActiveQueueResponse) -> Unit
 ) : RecyclerView.Adapter<LiveStatusAdapter.LiveStatusViewHolder>(){
 
     inner class LiveStatusViewHolder(
@@ -44,7 +46,9 @@ class LiveStatusAdapter(
             holder.binding.progressQueue.progress = queue.progress
         }
 
-
+        holder.itemView.setOnClickListener {
+            onClick(queue)
+        }
         when (queue.queue_status) {
 
             "WAITING_TO_START" -> {

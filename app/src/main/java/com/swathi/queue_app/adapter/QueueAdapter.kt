@@ -59,7 +59,10 @@ class QueueAdapter(
           //  holder.binding.tvCurrentToken.text =
             //    "Current Token : ${queue.currentToken}"
         //}
-
+        Log.d(
+            "QUEUE_ADAPTER",
+            "queueId=${queue._id}, activeQueueId=$activeQueueId"
+        )
         holder.binding.tvQueueStatus.text =
        "${queue.queueStatus}"
         println("${queue.activeCount} in queue");
@@ -94,8 +97,40 @@ class QueueAdapter(
             }
         }
 
+        if (activeQueueId != null) {
 
-            if (activeQueueId != null) {
+            if (queue._id == activeQueueId) {
+
+                holder.binding.btnjoinqueue.text = "View"
+
+                holder.binding.btnjoinqueue.isEnabled = true
+
+                holder.binding.btnjoinqueue.setOnClickListener {
+                    onViewDetails(queue)
+                }
+
+            } else {
+
+                holder.binding.btnjoinqueue.text = "Already Joined"
+
+                holder.binding.btnjoinqueue.isEnabled = false
+                holder.binding.btnjoinqueue.alpha = 0.5f
+
+                holder.binding.btnjoinqueue.setOnClickListener(null)
+            }
+
+        } else {
+
+            holder.binding.btnjoinqueue.text = "+Join"
+
+            holder.binding.btnjoinqueue.isEnabled = true
+            holder.binding.btnjoinqueue.alpha = 1f
+
+            holder.binding.btnjoinqueue.setOnClickListener {
+                onJoinclick(queue)
+            }
+        }
+         /*   if (activeQueueId != null) {
 
                 if (queue._id == activeQueueId) {
 
@@ -135,7 +170,7 @@ class QueueAdapter(
                 }
 
 
-        }
+        } */
     }
 
     override fun getItemCount(): Int {
