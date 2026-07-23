@@ -147,6 +147,9 @@ class HomeFragment : Fragment() {
                 binding.rvLiveStatus.visibility = View.VISIBLE
                 binding.tvLiveStatus.visibility = View.VISIBLE
                 binding.rvLiveStatus.adapter = LiveStatusAdapter(queues) { queue ->
+                    openMyQueueFragment(queue.queueId)
+                }
+              /*  binding.rvLiveStatus.adapter = LiveStatusAdapter(queues) { queue ->
 
                     val bundle = Bundle().apply {
                         putString("queueId", queue.queueId)
@@ -155,7 +158,7 @@ class HomeFragment : Fragment() {
                         .replace(R.id.fragmentContainer, myqueuefragment())
                         .addToBackStack(null)
                         .commit()
-                }
+                } */
             }
         }
 

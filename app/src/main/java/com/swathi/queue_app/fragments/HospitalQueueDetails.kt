@@ -82,6 +82,23 @@ class HospitalQueueDetails : Fragment() {
 
             setupAdapter()
         } */
+
+        binding.btnHospitalDetails.setOnClickListener {
+
+            val fragment = HospDetailFrag()
+
+            fragment.arguments = Bundle().apply {
+                putString("hospitalId", hospitalId)
+                putString("hospitalName", hospitalName)
+                putString("hospitalAddress", hospitalAddress)
+            }
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
         viewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
             Log.d("ACTIVE_QUEUE", queues.toString())
             joinedQueueId = queues.firstOrNull {

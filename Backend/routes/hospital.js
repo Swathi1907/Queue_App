@@ -2,7 +2,7 @@ const express = require("express");
 const route = express.Router();
 const Queue = require('../models/Queue.models');
 const Hospital = require("../models/hospital.models");
-
+const Doctor=require('../models/doctor_model');
 // Create Hospital
 route.post("/create", async (req, res) => {
 
@@ -61,6 +61,115 @@ const hospitalId = "HOSP-" + Math.floor(100000 + Math.random() * 900000);
     }
 
 });
+
+route.get("/:hospitalId/doctors", async (req, res) => {
+
+    try {
+
+        const hospital = await Hospital.findOne({
+            hospitalId: req.params.hospitalId
+        });
+
+        if (!hospital) {
+            return res.status(404).json({
+                message: "Hospital not found"
+            });
+        }
+
+        const doctors = await Doctor.find({
+            hospitalcode: req.params.hospitalId
+        }).sort({ doctorName: 1 });
+
+        res.json({
+            hospital,
+            doctors
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+});
+
+
+
+route.post("/doctor/create", async (req, res) => {
+
+    try {
+
+        const {
+            hospitalcode,
+            doctorName,
+            specialization,
+            qualification,
+            roomNumber,
+            availableDays,
+            startTime,
+            endTime
+        } = req.body;
+
+        if (
+            !hospitalcode ||
+            !doctorName ||
+            !specialization ||
+            !availableDays ||
+            !startTime ||
+            !endTime
+        ) {
+            return res.status(400).json({
+                message: "All required fields are mandatory"
+            });
+        }
+
+        // Check whether hospital exists
+        const hospital = await Hospital.findOne({
+            hospitalId: hospitalcode
+        });
+
+        if (!hospital) {
+            return res.status(404).json({
+                message: "Hospital not found"
+            });
+        }
+
+        const doctor = new Doctor({
+
+            hospitalcode,
+            doctorName,
+            specialization,
+            qualification,
+            roomNumber,
+            availableDays,
+            startTime,
+            endTime
+
+        });
+
+        await doctor.save();
+
+        res.status(201).json({
+
+            message: "Doctor added successfully",
+            doctor
+
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+});
+
+
+
 // Verify Hospital ID
 route.post("/verify", async (req, res) => {
 

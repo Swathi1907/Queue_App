@@ -44,7 +44,15 @@ const queueMemberSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+ servingStartedAt: {
+        type: Date,
+        default: null
+    },
 
+    completedAt: {
+        type: Date,
+        default: null
+    },
     turnSent: {
         type: Boolean,
         default: false

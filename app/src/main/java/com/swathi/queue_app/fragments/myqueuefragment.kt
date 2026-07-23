@@ -211,12 +211,24 @@ println(it.QueueStatus)
 
             }
 
-            if (it.peopleAhead <= 0) {
-                binding.tvWaitTime.text = "${it.avgServiceTime}"
-            } else {
-                val waitTime = it.peopleAhead * it.avgServiceTime
-                binding.tvWaitTime.text = "$waitTime m"
+            if (it.esttime == -1) {
+                binding.tvWaitTime.text = "-"
             }
+            else
+            {
+                binding.tvWaitTime.text = "~${it.esttime} min"
+            }
+
+
+
+
+
+            /*   if (it.peopleAhead <= 0) {
+                   binding.tvWaitTime.text = "${it.avgServiceTime}"
+               } else {
+                   val waitTime = it.peopleAhead * it.avgServiceTime
+                   binding.tvWaitTime.text = "$waitTime min"
+               }   */
 
 
         }

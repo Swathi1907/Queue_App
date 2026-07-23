@@ -18,11 +18,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.swathi.queue_app.R
 import com.swathi.queue_app.adapter.ActiveQueueAdapter
 import com.swathi.queue_app.adapter.admin.MemberAdapter
 import com.swathi.queue_app.databinding.AdminDashboardBinding
+import com.swathi.queue_app.model.DoctorModel
+import com.swathi.queue_app.model.DoctorRequest
 import com.swathi.queue_app.viewmodel.HomeViewModel
 import com.swathi.queue_app.viewmodel.Queueviewmodel
 import com.swathi.queue_app.viewmodel.admin.dashboardViewModel
@@ -34,6 +37,9 @@ class DashboardFragment : Fragment() {
     private val viewmodel: Queueviewmodel by viewModels()
     private val viewModel: dashboardViewModel by viewModels()
     private val viewmmodel: HomeViewModel by viewModels()
+
+    private lateinit var doctors: List<DoctorModel>
+    private var selectedDoctor: DoctorModel? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,8 +65,15 @@ class DashboardFragment : Fragment() {
             savedInstanceState
         )
 
+        val prefs = requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
+
+        val hospitalId = prefs.getString("hospitalId", "")!!
+        viewModel.getDoctors(hospitalId)
 
 
+        viewModel.doctorResponse.observe(viewLifecycleOwner) {
+            doctors = it.doctors
+        }
         viewmodel.createQueueResponse.observe(
             viewLifecycleOwner
         ){
@@ -70,9 +83,7 @@ class DashboardFragment : Fragment() {
                 it.message,
                 Toast.LENGTH_SHORT
             ).show()
-            val prefs = requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
 
-            val hospitalId = prefs.getString("hospitalId", "")!!
             viewmmodel.getAllQueues(hospitalId)
         }
         binding.fabCreateQueue.setOnClickListener {
@@ -82,9 +93,7 @@ class DashboardFragment : Fragment() {
         binding.rvActiveQueues.layoutManager =
             LinearLayoutManager(requireContext())
 
-        val prefs = requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
 
-        val hospitalId = prefs.getString("hospitalId", "")!!
         Log.d("HOSPITAL", "hospitalId = $hospitalId")
 viewModel.getActiveQueues(hospitalId)
         viewModel.activeQueues.observe(
@@ -108,10 +117,19 @@ viewModel.getActiveQueues(hospitalId)
             binding.rvActiveQueues.adapter = adapter
 
 
+            viewModel._addDoctorResponse.observe(viewLifecycleOwner) {
 
+                Toast.makeText(
+                    requireContext(),
+                    it.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
         }
-
+        binding.AddDoctor.setOnClickListener {
+            showAddDoctorDialog()
+        }
         viewModel.dashboard(hospitalId)
 
         viewModel.dashboardResponse.observe(
@@ -131,6 +149,114 @@ viewModel.getActiveQueues(hospitalId)
                 "${it.avgWaitTime} min"
         }
     }
+
+
+
+        private val days = arrayOf(
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        )
+
+        private val checkedDays = BooleanArray(days.size)
+        private val selectedDays = mutableListOf<String>()
+
+        private fun showAddDoctorDialog() {
+
+            val dialogView = layoutInflater.inflate(
+                R.layout.dialogue_create_doctor,
+                null
+            )
+
+            val etDoctorName =
+                dialogView.findViewById<EditText>(R.id.etDoctorName)
+
+            val etSpecialization =
+                dialogView.findViewById<EditText>(R.id.etSpecialization)
+
+            val etQualification =
+                dialogView.findViewById<EditText>(R.id.etQualification)
+
+            val etRoomNumber =
+                dialogView.findViewById<EditText>(R.id.etRoomNumber)
+
+            val etAvailableDays =
+                dialogView.findViewById<TextInputEditText>(R.id.etAvailableDays)
+
+            val etStartTime =
+                dialogView.findViewById<TextInputEditText>(R.id.etStartTime)
+
+            val etEndTime =
+                dialogView.findViewById<TextInputEditText>(R.id.etEndTime)
+
+            etStartTime.setOnClickListener {
+                showTimePicker(etStartTime)
+            }
+
+            etEndTime.setOnClickListener {
+                showTimePicker(etEndTime)
+            }
+
+            etAvailableDays.setOnClickListener {
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Select Available Days")
+                    .setMultiChoiceItems(days, checkedDays) { _, which, isChecked ->
+                        checkedDays[which] = isChecked
+                    }
+                    .setPositiveButton("OK") { _, _ ->
+
+                        selectedDays.clear()
+
+                        for (i in days.indices) {
+                            if (checkedDays[i]) {
+                                selectedDays.add(days[i])
+                            }
+                        }
+
+                        etAvailableDays.setText(
+                            selectedDays.joinToString(", ")
+                        )
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+
+            val prefs =
+                requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Add Doctor")
+                .setView(dialogView)
+                .setPositiveButton("Add") { _, _ ->
+
+
+
+                    val hospitalCode =
+                        prefs.getString("hospitalId", "")!!
+
+                    viewModel.addDoctor(
+                        DoctorRequest(
+                            hospitalcode = hospitalCode,
+                            doctorName = etDoctorName.text.toString().trim(),
+                            specialization = etSpecialization.text.toString().trim(),
+                            qualification = etQualification.text.toString().trim(),
+                            roomNumber = etRoomNumber.text.toString().trim(),
+                            availableDays = selectedDays,
+                            startTime = etStartTime.text.toString().trim(),
+                            endTime = etEndTime.text.toString().trim()
+                        )
+                    )
+
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
     private fun showCreateQueueDialog() {
 
         val dialogView = layoutInflater.inflate(
@@ -141,8 +267,8 @@ viewModel.getActiveQueues(hospitalId)
         val etQueueName =
             dialogView.findViewById<EditText>(R.id.etQueueName)
 
-        val etDoctorName =
-            dialogView.findViewById<EditText>(R.id.etDoctorName)
+        val actDoctor =
+            dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.actDoctor)
 
         val etRoomNumber =
             dialogView.findViewById<EditText>(R.id.etRoomNumber)
@@ -175,14 +301,27 @@ viewModel.getActiveQueues(hospitalId)
         val prefs =
             context?.getSharedPreferences("app", Context.MODE_PRIVATE)
 
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            doctors.map { it.doctorName }
+        )
 
+        actDoctor.setAdapter(adapter)
         spStatus.adapter =
             ArrayAdapter(
                 requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 listOf("active", "paused")
             )
+        var selectedDoctor: DoctorModel? = null
 
+        actDoctor.setOnItemClickListener { _, _, position, _ ->
+
+            selectedDoctor = doctors[position]
+
+            etRoomNumber.setText(selectedDoctor!!.roomNumber)
+        }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Create Department")
             .setView(dialogView)
@@ -193,7 +332,8 @@ viewModel.getActiveQueues(hospitalId)
                 val endTime =
                     etEndTime.text.toString().trim()
                 val queueName = etQueueName.text.toString().trim()
-                val doctorName = etDoctorName.text.toString().trim()
+                val doctorName =
+                    actDoctor.text.toString().trim()
                 val roomNumber = etRoomNumber.text.toString().trim()
                 val floor = etFloor.text.toString().trim()
 

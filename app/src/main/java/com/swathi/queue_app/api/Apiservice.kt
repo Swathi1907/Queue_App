@@ -3,6 +3,8 @@ package com.swathi.queue_app.api
 import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.CompleteCurrentResponse
 import com.swathi.queue_app.model.CreateQueueRequest
+import com.swathi.queue_app.model.DoctorListResponse
+import com.swathi.queue_app.model.DoctorRequest
 import com.swathi.queue_app.model.HospitalModel
 import com.swathi.queue_app.model.Loginrequest
 import com.swathi.queue_app.model.Loginresponse
@@ -142,13 +144,25 @@ suspend fun myStatus(
     suspend fun markNotificationsRead():
             Response<NotificationReadResponse>
 
+@POST("api/hospital/doctor/create")
+suspend fun addDoctor(
+    @Body request: DoctorRequest
+):Response<MessageResponse>
+
+
+
+@GET("api/hospital/{hospitalId}/doctors")
+suspend fun getDoctors(
+    @Path("hospitalId")  hospitalId:String
+):Response<DoctorListResponse>
+
 
     @POST("api/hospital/verify")
     suspend fun verifyHospital(
         @Body body: Map<String, String>
     ): Response<VerifyHospitalResponse>
 
-    @GET("api/hospital/allHospitals")
+    @GET("api/hospital/allhospitals")
     suspend fun getAllHospitals():
             Response<List<HospitalModel>>
 }

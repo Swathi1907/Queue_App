@@ -69,6 +69,15 @@ doctorName: {
     lastCompletedToken: {
     type: Number,
     default: 0
+},
+totalServiceTime: {
+    type: Number,
+    default: 0
+},
+
+completedPatients: {
+    type: Number,
+    default: 0
 }
 }, {
     timestamps: true

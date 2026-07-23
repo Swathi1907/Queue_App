@@ -4,7 +4,7 @@ data class ActiveQueueResponse(
 
     val hospitalId: String,
     val hospitalName: String,
-
+    val branchName: String,
     val queueId: String,
     val queueName: String,
 
@@ -20,6 +20,7 @@ data class ActiveQueueResponse(
     val lastCompletedToken: Int,
 
     val status: String,
+    val esttime:Int,
     val avgServiceTime: Int,
 
     val progress: Int,

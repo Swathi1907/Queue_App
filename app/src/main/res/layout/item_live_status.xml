@@ -1,12 +1,11 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="220dp"
+    android:layout_width="260dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
-    app:cardCornerRadius="16dp"
-    android:background="#F8FAFC"
-    app:cardElevation="3dp">
+    app:cardCornerRadius="18dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,50 +14,95 @@
         android:background="@color/white"
         android:padding="16dp">
 
-        <!-- Queue Name -->
+        <!-- Hospital -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/tvHospitalName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Apollo Hospitals"
+            android:textColor="#202124"
+            android:textStyle="bold"
+            android:textSize="17sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/tvView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View →"
+            android:textColor="#2563EB"
+            android:textStyle="bold"
+            android:textSize="13sp"/>
+
+    </LinearLayout>
+        <!-- Branch -->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:text="📍"
+                app:tint="#2563EB" />
+
+            <TextView
+                android:id="@+id/tvBranchName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Jubilee Hills"
+                android:textColor="#64748B"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <!-- Department -->
 
         <TextView
             android:id="@+id/tvQueueName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:text="Cardiology"
-
-            android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#202124"
-            android:maxLines="1"
-            android:ellipsize="end"
-           />
+            android:textSize="20sp"/>
 
-        <!-- Your Token + Wait Time -->
+        <!-- Token + ETA -->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/outline_account_circle_24"
-                app:tint="#5B6EF5" />
+
             <TextView
                 android:id="@+id/tvToken"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="You are #8"
-                android:textSize="14sp"
-                android:textColor="#64748B"/>
+                android:text="👤 Token #8"
+                android:textColor="#64748B"
+                android:textSize="14sp"/>
 
             <TextView
                 android:id="@+id/tvWait"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="~10 min"
+                android:textColor="#16A34A"
                 android:textStyle="bold"
-                android:textColor="#16A34A"/>
-
+                android:textSize="14sp"/>
         </LinearLayout>
 
         <!-- Progress -->
@@ -67,23 +111,36 @@
             android:id="@+id/progressQueue"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="10dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="7dp"
             android:max="100"
-            android:layout_marginTop="15sp"
             android:progress="40"
             android:progressDrawable="@drawable/progress_gradient"/>
-        <TextView
-            android:id="@+id/tvQueueProgressStatus"
-            android:layout_width="wrap_content"
+
+        <!-- Bottom Row -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="2 people ahead of you"
-            android:textColor="#64748B"
-            android:textSize="13sp"/>
-        <!-- Button -->
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvQueueProgressStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2 people ahead"
+                android:textColor="@color/black"
+                android:textSize="13sp"/>
 
 
+
+        </LinearLayout>
 
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+
+
+

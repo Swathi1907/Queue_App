@@ -7,6 +7,8 @@ import com.swathi.queue_app.model.adminDashboardresponse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.model.ActiveQueueResponse
+import com.swathi.queue_app.model.DoctorListResponse
+import com.swathi.queue_app.model.DoctorRequest
 import com.swathi.queue_app.model.MessageResponse
 import com.swathi.queue_app.model.adminactivequeues
 
@@ -15,12 +17,15 @@ import com.swathi.queue_app.model.myStatusResponse
 
 import com.swathi.queue_app.repository.Queuerepository
 import com.swathi.queue_app.repository.admin.Dashboardrepository
+import com.swathi.queue_app.repository.admin.hosp_repo
 import kotlinx.coroutines.launch
 
 class dashboardViewModel: ViewModel() {
     val dashboardResponse =
         MutableLiveData<adminDashboardresponse>()
+
 val repository= Dashboardrepository()
+    val repo= hosp_repo()
 
     fun dashboard(hospitalId: String) {
 
@@ -51,6 +56,28 @@ val repository= Dashboardrepository()
             if (response.isSuccessful) {
                 _activeQueues.value = response.body()
             }
+        }
+    }
+
+    private val _doctorResponse = MutableLiveData<DoctorListResponse>()
+    val doctorResponse: LiveData<DoctorListResponse> = _doctorResponse
+
+    fun getDoctors(hospitalId: String) = viewModelScope.launch {
+        val response = repo.getDoctors(hospitalId)
+
+        if (response.isSuccessful) {
+            _doctorResponse.postValue(response.body())
+        }
+    }
+
+    val _addDoctorResponse =
+        MutableLiveData<MessageResponse>()
+    fun addDoctor(request: DoctorRequest) = viewModelScope.launch {
+
+        val response = repo.addDoctor(request)
+
+        if (response.isSuccessful) {
+            _addDoctorResponse.postValue(response.body())
         }
     }
 }

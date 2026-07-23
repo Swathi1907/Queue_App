@@ -1,8 +1,6 @@
 package com.swathi.queue_app.model
-
-import android.R
-
 data class myStatusResponse (
+    val esttime: Int,
     val queueName: String,
     val yourToken: Int,
     val latestToken: Int,

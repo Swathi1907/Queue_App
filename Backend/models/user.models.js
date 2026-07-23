@@ -6,7 +6,6 @@ type:String,
 required:true,
 unique:true,
 },
-
    fcmToken: {
         type: String,
         default: null

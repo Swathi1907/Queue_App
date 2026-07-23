@@ -4,7 +4,7 @@ const app=express(); // express appliaction
 
 require("./firebase");
 app.use(express.json());
-const PORT = 3000;
+const PORT = 3010;
 const mongoose=require('mongoose');
 MONGO_URI=process.env.MONGO_URI;
 mongoose.connect(MONGO_URI).then(()=>{

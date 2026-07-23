@@ -9,7 +9,7 @@ import okhttp3.OkHttpClient
 object RetrofitInstance {
 
 
-    private const val BASE_URL = "http://192.168.29.181:3000"
+    private const val BASE_URL = "http://192.168.29.181:3010"
     private val client = OkHttpClient.Builder()
         .addInterceptor { chain ->
 
