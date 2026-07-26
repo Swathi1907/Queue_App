@@ -67,11 +67,22 @@ class LiveStatusAdapter(
         }
         when (queue.queue_status) {
 
-            "WAITING_TO_START" -> {
+           /* "WAITING_TO_START" -> {
                 holder.binding.tvQueueProgressStatus.text =
                     "⏳ Queue hasn't started yet"
-            }
+            } */
+            "WAITING_TO_START" -> {
 
+                holder.binding.progressQueue.progress = 0
+
+                if (queue.peopleAhead == 0) {
+                    holder.binding.tvQueueProgressStatus.text =
+                        "⏳ Queue hasn't started yet • You're first in line"
+                } else {
+                    holder.binding.tvQueueProgressStatus.text =
+                        "⏳ Queue hasn't started yet • ${queue.peopleAhead} active people ahead"
+                }
+            }
             "WAITING_FOR_NEXT_CALL" -> {
                 holder.binding.tvQueueProgressStatus.text =
                     "🟡 You're next. Waiting for the receptionist to call you."

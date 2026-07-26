@@ -10,6 +10,7 @@ import com.swathi.queue_app.fragments.HomeFragment
 import com.swathi.queue_app.fragments.myqueuefragment
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
+import com.swathi.queue_app.fragments.NotificationBottomSheet
 import com.swathi.queue_app.fragments.ProfileFragment
 import com.swathi.queue_app.viewmodel.HomeViewModel
 class MainActivity : AppCompatActivity() {
@@ -17,11 +18,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        homeViewModel.getNotificationCount()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
                 Log.d("FCM", task.result)
             }
-        homeViewModel.activeQueueResponse.observe(this) { queues ->
+     /*   homeViewModel.activeQueueResponse.observe(this) { queues ->
 
             if (queues.isNotEmpty()) {
 
@@ -66,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     .show()
             }
-        }
+        } */
      /*   homeViewModel.activeQueueResponse.observe(this) { response ->
 
             if (response.active) {
@@ -86,6 +88,20 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         } */
+        homeViewModel.notificationCount.observe(this) { response ->
+
+            val badge = binding.bottomNav.getOrCreateBadge(R.id.notificationFragment)
+
+            if (response.count == 0) {
+                badge.isVisible = false
+            } else {
+                badge.isVisible = true
+                badge.number = response.count
+            }
+        }
+        homeViewModel.readNotificationResponse.observe(this) {
+            homeViewModel.getNotificationCount()
+        }
         binding.bottomNav.setOnItemSelectedListener {
 
             when (it.itemId) {
@@ -97,12 +113,22 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                     true
                 }
+                R.id.notificationFragment -> {
 
-                R.id.myQueueFragment -> {
+                    NotificationBottomSheet()
+                        .show(supportFragmentManager, "NotificationBottomSheet")
+
+                    homeViewModel.markNotificationsRead()
+                    // Reset selection to Home (or the previously selected tab)
+                //    binding.bottomNav.selectedItemId = R.id.homeFragment
+
+                    true
+                }
+          /*      R.id.myQueueFragment -> {
 
                     homeViewModel.getMyActiveQueue()
                     true
-                }
+                } */
 
                 R.id.profileFragment -> {
 
@@ -118,4 +144,8 @@ class MainActivity : AppCompatActivity() {
 
             true
         }
+    override fun onResume() {
+        super.onResume()
+        homeViewModel.getNotificationCount()
+    }
     }

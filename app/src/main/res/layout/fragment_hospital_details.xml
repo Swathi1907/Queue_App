@@ -89,7 +89,7 @@
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-
+android:src="@drawable/baseline_location_on_24"
                             app:tint="#2563EB"/>
 
                         <TextView
@@ -112,8 +112,8 @@
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-
-                            app:tint="#10B981"/>
+android:src="@drawable/baseline_local_phone_24"
+                            app:tint="#1054B9"/>
 
                         <TextView
                             android:id="@+id/tvPhone"

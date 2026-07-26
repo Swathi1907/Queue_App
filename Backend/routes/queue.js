@@ -1140,7 +1140,7 @@ let avgServiceTime = 5;
 
 if (queue.completedPatients > 0) {
     avgServiceTime =
-        queue.totalServiceTime / queue.completedPatients;
+      Math.ceil ( queue.totalServiceTime / queue.completedPatients);
 }
 
 const waitingAhead = await QueueMember.countDocuments({

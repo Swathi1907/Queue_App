@@ -2,11 +2,14 @@ package com.swathi.queue_app.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +27,7 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
+    private lateinit var hospitalAdapter: HospitalAdapter
     private val viewModel: HomeViewModel by viewModels()
     private val queueViewModel: Queueviewmodel by viewModels()
 
@@ -65,7 +68,7 @@ class HomeFragment : Fragment() {
                 false
             )
 
-        binding.imgNotification.setOnClickListener {
+     /*   binding.imgNotification.setOnClickListener {
 
             NotificationBottomSheet()
                 .show(parentFragmentManager, "NotificationBottomSheet")
@@ -85,6 +88,8 @@ class HomeFragment : Fragment() {
                     if (it.count > 99) "99+" else it.count.toString()
             }
         }
+*/
+
 
         binding.rvhospitals.layoutManager =
             LinearLayoutManager(requireContext())
@@ -98,6 +103,35 @@ class HomeFragment : Fragment() {
 
             setupHospitalAdapter(hospitals)
         }
+        binding.etsearch.doOnTextChanged { text, _, _, _ ->
+
+            if (::hospitalAdapter.isInitialized) {
+                hospitalAdapter.filter.filter(text.toString())
+            }
+
+            binding.layoutLiveStatus.visibility =
+                if (text.isNullOrBlank()) View.VISIBLE else View.GONE
+        }
+       /* binding.etsearch.addTextChangedListener(object : TextWatcher {
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {}
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                hospitalAdapter.filter.filter(s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        }) */
         SocketManager.getSocket().off("queueUpdated")
         SocketManager.getSocket().on("queueUpdated") {
 
@@ -244,14 +278,20 @@ class HomeFragment : Fragment() {
         hospitals: List<HospitalModel>
     ) {
 
-        binding.rvhospitals.adapter =
+        hospitalAdapter = HospitalAdapter(hospitals) { hospital ->
+            openHospitalQueuesFragment(hospital)
+        }
+
+        binding.rvhospitals.adapter = hospitalAdapter
+      /*  binding.rvhospitals.adapter =
             HospitalAdapter(hospitals) { hospital ->
 
                 openHospitalQueuesFragment(
                     hospital
                 )
-            }
+            } */
     }
+
     private fun openHospitalQueuesFragment(
         hospital: HospitalModel
     ) {

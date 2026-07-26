@@ -17,6 +17,14 @@ const hospitalSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+ phoneNumber: {
+        type: String,
+        required: true
+    },
+       hospitalImage: {
+        type: String,   // Firebase Storage download URL
+        default: ""
+    },
 
     city: {
         type: String,

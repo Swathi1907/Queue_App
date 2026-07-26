@@ -97,6 +97,9 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
 
 
         }
+        binding.tvsignup.setOnClickListener {
+            startActivity(Intent(this, SignupActivity::class.java))
+        }
         viewModel.verifyHospitalResponse.observe(this) {
 
             val prefs =

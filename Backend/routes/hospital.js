@@ -4,7 +4,74 @@ const Queue = require('../models/Queue.models');
 const Hospital = require("../models/hospital.models");
 const Doctor=require('../models/doctor_model');
 // Create Hospital
+
+
 route.post("/create", async (req, res) => {
+
+    try {
+
+        const {
+            hospitalName,
+            phoneNumber,
+            hospitalImage,
+            address,
+            city
+        } = req.body;
+
+        if (!hospitalName || !phoneNumber || !address || !city) {
+            return res.status(400).json({
+                message: "All required fields are missing"
+            });
+        }
+
+        const existingHospital = await Hospital.findOne({
+            hospitalName,
+            address
+        });
+
+        if (existingHospital) {
+            return res.status(400).json({
+                message: "Hospital already exists"
+            });
+        }
+let hospitalId;
+let exists = true;
+
+while (exists) {
+    hospitalId = "HOSP-" + Math.floor(100000 + Math.random() * 900000);
+    exists = await Hospital.exists({ hospitalId });
+}
+       // const hospitalId =
+         //   "HOSP-" + Math.floor(100000 + Math.random() * 900000);
+
+        const hospital = new Hospital({
+
+            hospitalName,
+            hospitalId,
+            phoneNumber,
+            hospitalImage,
+            address,
+            city
+
+        });
+
+        await hospital.save();
+
+        res.status(201).json({
+            message: "Hospital created successfully",
+            hospital
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+});
+/*route.post("/create", async (req, res) => {
 
     try {
 
@@ -61,7 +128,7 @@ const hospitalId = "HOSP-" + Math.floor(100000 + Math.random() * 900000);
     }
 
 });
-
+*/
 route.get("/:hospitalId/doctors", async (req, res) => {
 
     try {

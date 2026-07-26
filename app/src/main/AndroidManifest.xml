@@ -28,11 +28,11 @@
             android:name=".MainActivity"
             android:exported="false"/>
         <activity
-            android:name=".loginactivity"
+            android:name=".SignupActivity"
 
             android:exported="false"/>
         <activity
-            android:name=".SignupActivity"
+            android:name=".loginactivity"
 
             android:exported="true">
             <intent-filter>

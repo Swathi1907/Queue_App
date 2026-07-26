@@ -152,7 +152,20 @@ android:layout_marginTop="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/btnHospitalDetails"
         app:layout_constraintEnd_toEndOf="parent"/>
-    <com.google.android.material.button.MaterialButton
+    <TextView
+        android:id="@+id/btnHospitalDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="View Hospital Details"
+        android:textColor="#2563EB"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:drawableEnd="@drawable/outline_arrow_forward_24"
+        android:drawablePadding="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+   <!-- <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHospitalDetails"
         android:layout_width="0dp"
         android:layout_height="56dp"
@@ -161,12 +174,12 @@ android:layout_marginTop="30sp"
         android:textAllCaps="false"
         android:textStyle="bold"
         android:textColor="@android:color/white"
-        app:backgroundTint="@color/light_blue"
+        app:backgroundTint="@android:color/holo_blue_dark"
         app:cornerRadius="16dp"
 
         app:iconTint="@android:color/white"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"/> -->
 </androidx.constraintlayout.widget.ConstraintLayout>
