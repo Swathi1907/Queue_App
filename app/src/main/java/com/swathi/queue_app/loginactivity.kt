@@ -65,7 +65,9 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
                     it.jwt_token
                 )
                 .putString("role", it.role)
+                .putString("username", it.name)
                 .apply()
+
             println("JWT_TOKEN: ${it.jwt_token}")
             println("OBSERVER CALLED")
             println(it.name)

@@ -22,7 +22,7 @@ const hospitalSchema = new mongoose.Schema({
         required: true
     },
        hospitalImage: {
-        type: String,   // Firebase Storage download URL
+        type: String,   // Mongodb Storage download URL
         default: ""
     },
 

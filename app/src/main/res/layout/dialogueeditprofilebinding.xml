@@ -43,13 +43,15 @@
                     android:src="@drawable/queue_name_logo"/>
             </com.google.android.material.card.MaterialCardView>
 
-            <ImageButton
+         <!--   <ImageButton
                 android:id="@+id/btnChangePhoto"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_gravity="bottom|end"
+                android:background="@drawable/circle_primary"
                 android:padding="8dp"
-                android:tint="@android:color/white"/>
+                android:src="@drawable/outline_photo_camera_24"
+                android:tint="@android:color/white"/> -->
         </FrameLayout>
 
         <TextView

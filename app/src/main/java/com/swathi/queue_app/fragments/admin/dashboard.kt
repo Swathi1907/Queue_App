@@ -135,6 +135,7 @@ viewModel.getActiveQueues(hospitalId)
         viewModel.dashboardResponse.observe(
             viewLifecycleOwner
         ) {
+            binding.intro.text=it.hospitalname
 
             binding.tvActiveQueues.text =
                 it.activeQueues.toString()

@@ -112,6 +112,13 @@ class HomeFragment : Fragment() {
             binding.layoutLiveStatus.visibility =
                 if (text.isNullOrBlank()) View.VISIBLE else View.GONE
         }
+
+        val prefs = requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
+
+        val userName = prefs.getString("username", "User")
+
+        binding.tvWelcome.text = "Welcome, $userName"
+
        /* binding.etsearch.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(

@@ -73,6 +73,26 @@ router.post("/saveFcmToken", Authmiddleware, async (req, res) => {
     }
 
 });
+
+router.put("/profile", Authmiddleware, async (req, res) => {
+    try {
+
+        const { name} = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.userId,
+            {
+                name,
+            },
+            { new: true }
+        );
+
+        res.json(user);
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 router.get(
     '/profile',
     Authmiddleware,

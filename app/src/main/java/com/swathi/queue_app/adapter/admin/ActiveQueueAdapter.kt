@@ -40,6 +40,7 @@ class ActiveQueueAdapter(
         val queue = queueList[position]
         println("status${queue.status}")
         holder.binding.tvStatus.text = queue.status
+
         holder.binding.tvQueueName.text = queue.queueName
         holder.binding.tvWaiting.text = "${queue.waitingCount} Waiting"
 

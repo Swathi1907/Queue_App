@@ -85,8 +85,28 @@ class QueuesFragment : Fragment() {
         val hospitalId = prefs.getString("hospitalId", "")!!
 
         viewModel.getAllQueues(hospitalId)
+        viewModel.allqueueResponse.observe(viewLifecycleOwner) { queues ->
 
-        viewModel.allqueueResponse.observe(
+            if (queues.isEmpty()) {
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("No Queues")
+                    .setMessage("There are no queues available.")
+                    .setCancelable(false)
+                    .setPositiveButton("OK") { _, _ ->
+                        parentFragmentManager.popBackStack()
+                    }
+                    .show()
+
+            } else {
+
+                binding.rvadminqueues.adapter =
+                    AdminQueueAdapter(queues) { queue ->
+                        openQueueDetailsFragment(queue._id)
+                    }
+            }
+        }
+       /* viewModel.allqueueResponse.observe(
             viewLifecycleOwner
         ) { queues ->
 
@@ -103,7 +123,7 @@ class QueuesFragment : Fragment() {
 
                 }
 
-        }
+        }*/
     }
     private fun openQueueDetailsFragment(
         queueId: String

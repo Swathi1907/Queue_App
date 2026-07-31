@@ -9,6 +9,7 @@ import com.swathi.queue_app.model.CompleteCurrentResponse
 import com.swathi.queue_app.model.MemberModel
 import com.swathi.queue_app.model.MessageResponse
 import com.swathi.queue_app.model.NextResponse
+import com.swathi.queue_app.model.ProfileResponse
 import com.swathi.queue_app.model.QueueDetailsResponse
 import com.swathi.queue_app.model.QueueStatusResponse
 
@@ -120,6 +121,19 @@ println("Exit Queue response: ${response.code()}");
             } catch (e: Exception){
 
                 println(e.message)
+            }
+        }
+    }
+
+
+    val _updatedprofile = MutableLiveData<ProfileResponse>()
+    fun updateProfile(name:String){
+        viewModelScope.launch{
+            val response =repository.updateProfile(name);
+            if(response.isSuccessful){
+             response.body()?.let{
+                 _updatedprofile.value=it
+             }
             }
         }
     }

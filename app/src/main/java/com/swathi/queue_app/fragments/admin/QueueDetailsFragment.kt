@@ -53,7 +53,7 @@ class QueueDetailsFragment : Fragment() {
         viewModel.queueDetailsResponse.observe(
             viewLifecycleOwner
         ){ details ->
-
+binding.tvAvgtime.text=details.avgServiceTime.toString()
             binding.tvQueueName.text =
                 details.queueName
 

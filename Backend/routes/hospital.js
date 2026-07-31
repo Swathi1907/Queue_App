@@ -235,7 +235,48 @@ route.post("/doctor/create", async (req, res) => {
 
 });
 
+route.put("/doctor/:doctorId/update",async(req,res)=>{
+    try{
+const {
+    doctorName,
+specialization,
+qualification,
+roomNumber,
+availableDays,
+startTime,
+endTime
+    }=req.body;
 
+    const doctor=await Doctor.findByIdAndUpdate(
+req.params.doctorId,
+       { doctorName,
+specialization,
+qualification,
+roomNumber,
+availableDays,
+startTime,
+endTime,
+    },
+    {new:true},
+    );
+    
+      if (!doctor) {
+            return res.status(404).json({
+                message: "Doctor not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "Doctor updated successfully",
+            doctor
+        });
+    }
+    catch(err){
+return res.result(500).json({
+    message:err.message
+})
+    }
+})
 
 // Verify Hospital ID
 route.post("/verify", async (req, res) => {

@@ -195,7 +195,7 @@ app:cardBackgroundColor="@color/white"
                     android:layout_height="80dp"
                     android:layout_gravity="center"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/logo"/>
+                    android:src="@drawable/queue_name_logo"/>
 
             </com.google.android.material.card.MaterialCardView>
             <!-- Floating Signup Button -->

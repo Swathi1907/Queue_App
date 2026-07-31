@@ -110,9 +110,15 @@ class HospitalQueueDetails : Fragment() {
         viewModel.allqueueResponse.observe(viewLifecycleOwner) {
 
             queueList = it
+if(it.size==1){
+    binding.tvDepartmentCount.text =
+        "${it.size} Department"
+}
+            else{
+    binding.tvDepartmentCount.text =
+        "${it.size} Departments"
 
-            binding.tvDepartmentCount.text =
-                "${it.size} Departments"
+}
 
             setupAdapter()
         }

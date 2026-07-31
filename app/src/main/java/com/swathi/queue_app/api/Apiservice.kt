@@ -14,6 +14,7 @@ import com.swathi.queue_app.model.NextResponse
 import com.swathi.queue_app.model.NotificationCountResponse
 import com.swathi.queue_app.model.NotificationModel
 import com.swathi.queue_app.model.NotificationReadResponse
+import com.swathi.queue_app.model.ProfileRequest
 import com.swathi.queue_app.model.ProfileResponse
 import com.swathi.queue_app.model.QueueDetailsResponse
 import com.swathi.queue_app.model.QueueModel
@@ -126,6 +127,11 @@ suspend fun myStatus(
         @Path("queueId") queueId: String
     ): Response<CompleteCurrentResponse>
 
+    @PUT("api/auth/profile")
+    suspend fun updateProfile(
+        @Body body: ProfileRequest
+    ):
+            Response<ProfileResponse>
     @POST("api/auth/saveFcmToken")
     suspend fun saveFcmToken(
         @Body body: Map<String, String>

@@ -744,7 +744,9 @@ console.log("Before:", {
 
 queue.totalServiceTime += duration;
 queue.completedPatients += 1;
-
+queue.avgServiceTime = Math.ceil(
+    queue.totalServiceTime / queue.completedPatients
+);
 console.log("After:", {
     total: queue.totalServiceTime,
     completed: queue.completedPatients
@@ -842,7 +844,23 @@ console.log("Duration:", duration);
     }
 });
 
+route.delete("/reset", async (req, res) => {
+    try {
 
+        await Queue.deleteMany({});
+        await QueueMember.deleteMany({});
+        await Notification.deleteMany({});
+
+        res.json({
+            message: "All queue data deleted successfully"
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
 route.post('/:queueId/next', Authmiddleware, async (req, res) => {
 
     try {
@@ -1156,12 +1174,10 @@ if (servingMember && servingMember.servingStartedAt) {
     const elapsed =
         (Date.now() - servingMember.servingStartedAt.getTime()) / (1000 * 60);
 
-    remaining =  avgServiceTime - elapsed;
+  remaining = Math.max(0, avgServiceTime - elapsed);
     
 }
-  if (remaining <= 0) {
-        remaining = avgServiceTime;
-    }
+  
 let eta = null;
 
 if (member.status === "serving") {
@@ -1258,9 +1274,8 @@ if (member.status === "serving") {
         const progress = activeCount - peopleAhead;
         console.log(peopleAhead);
         console.log(queue.hospitalId)
-        const hospital = await Hospital.findOne({
-            hospitalId:queue.hospitalId
-});
+        const hospital = queue.hospitalId;
+
 console.log(eta)
 console.log(hospital.hospitalName)
 console.log({

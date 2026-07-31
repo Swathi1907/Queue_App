@@ -6,13 +6,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.swathi.queue_app.SocketManager
+import com.swathi.queue_app.databinding.DialogueeditprofilebindingBinding
 import com.swathi.queue_app.databinding.ProfileBinding
 import com.swathi.queue_app.loginactivity
 import com.swathi.queue_app.viewmodel.AuthViewModel
+import com.swathi.queue_app.viewmodel.Queueviewmodel
 import kotlin.getValue
 
 class ProfileFragment : Fragment() {
@@ -20,6 +23,7 @@ class ProfileFragment : Fragment() {
     private var _binding: ProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AuthViewModel by viewModels()
+    private val QueueviewModel: Queueviewmodel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -87,11 +91,63 @@ class ProfileFragment : Fragment() {
                 .setNegativeButton("Cancel", null)
                 .show()
 
-        }}
+        }
+        binding.edit.setOnClickListener {
+            showEditProfileDialog()
+        }
+        QueueviewModel._updatedprofile.observe(viewLifecycleOwner) { user ->
 
+            binding.tvName.text = user.name
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+           /* Glide.with(requireContext())
+                .load(user.profileImage)
+                .into(binding.imgProfile) */
+
+            Toast.makeText(
+                requireContext(),
+                "Profile Updated",
+                Toast.LENGTH_SHORT
+            ).show()
+
+        }
     }
-}
+
+    private fun showEditProfileDialog() {
+
+        val dialogBinding = DialogueeditprofilebindingBinding.inflate(layoutInflater)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setCancelable(false)
+            .create()
+        dialog.show()
+        dialogBinding.etName.setText(binding.tvName.text)
+        dialogBinding.etEmail.setText(binding.tvEmail.text)
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        //    dialogBinding.btnChangePhoto.setOnClickListener {
+        // Open gallery
+        //  }
+        dialogBinding.btnSave.setOnClickListener {
+
+            val name = dialogBinding.etName.text.toString().trim()
+            if (name.isEmpty()) {
+                dialogBinding.etName.error = "Enter your name"
+                return@setOnClickListener
+            }
+            QueueviewModel.updateProfile(
+                name,
+                // URL received from ImageKit
+            )
+dialog.dismiss()
+        }
+
+    }
+        override fun onDestroyView() {
+            super.onDestroyView()
+            _binding = null
+        }
+    }

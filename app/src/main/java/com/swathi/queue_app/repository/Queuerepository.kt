@@ -3,6 +3,7 @@ package com.swathi.queue_app.repository
 import com.swathi.queue_app.api.RetrofitInstance
 import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.CreateQueueRequest
+import com.swathi.queue_app.model.ProfileRequest
 import retrofit2.Response
 
 class Queuerepository {
@@ -16,7 +17,12 @@ class Queuerepository {
         queueId: String?
     ) = RetrofitInstance.api.myStatus(queueId)
 
+    suspend fun updateProfile(
+        name: String,
 
+    ) = RetrofitInstance.api.updateProfile(
+        ProfileRequest(name)
+    )
   /*  suspend fun getMyActiveQueue() =
         RetrofitInstance.api.getMyActiveQueue() */
   suspend fun getMyActiveQueue(): Response<List<ActiveQueueResponse>> {

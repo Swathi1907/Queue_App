@@ -12,6 +12,8 @@ import com.swathi.queue_app.viewmodel.HomeViewModel
 import kotlin.getValue
 import com.swathi.queue_app.viewmodel.admin.dashboardViewModel
 import com.swathi.queue_app.adapter.DoctorAdapter
+import com.bumptech.glide.Glide
+import com.swathi.queue_app.R
 
 class HospDetailFrag : Fragment() {
 
@@ -55,7 +57,11 @@ class HospDetailFrag : Fragment() {
 
             binding.tvHospitalName.text = response.hospital.hospitalName
             binding.tvAddress.text = response.hospital.address
-
+            Glide.with(requireContext())
+                .load(response.hospital.hospitalImage)
+                .placeholder(R.drawable.img)
+                .error(R.drawable.img)
+                .into(binding.imgHospital)
             binding.rvDoctors.adapter =
                 DoctorAdapter(response.doctors)
         }
