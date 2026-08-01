@@ -8,8 +8,9 @@ const sendNotification = require("../utils/sendNotification");
 const User = require("../models/user.models");
 const { getIO } = require("../socket");
 const Hospital = require("../models/hospital.models");
-
-
+const predicted = require('../services/predictTime')
+const QueueHistory= require('../models/history_model')
+const { calculateETA } = require("../services/etaService");
 route.post('/:queueId/join', Authmiddleware, async (req, res) => {
     try {
         const queue = await Queue.findById(req.params.queueId);
@@ -42,17 +43,7 @@ if (inQueue) {
         message: "You are already in another queue of this hospital."
     });
 }
-       /* const in_queue = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            userId: req.user.userId,
-            status: { $in: ['serving', 'waiting'] }
-        });
-        console.log("MY STATUS QUEUE ID =", req.params.queueId)
-        if (in_queue) {
-            return res.status(400).json({
-                message: "You are already in the queue",
-            })
-        }*/
+    
         const curr_serving = await QueueMember.findOne({
             queueId: req.params.queueId,
             status: 'serving'
@@ -197,53 +188,6 @@ route.post('/create', Authmiddleware, async (req, res) => {
     }
 });
 
-/*route.post('/create', Authmiddleware, async (req, res) => {
-    try {
-
-const existing = await Queue.findOne({
-    queueName: req.body.queueName,
-    hospitalId: req.body.hospitalId,
-    queueStatus: { $in: ["active", "paused"] }
-});
-
-if (existing) {
-    return res.status(400).json({
-        message: "Queue already exists"
-    });
-}
-      const queue = new Queue({
-
-    queueName: req.body.queueName,
-    queueCapacity: req.body.queueCapacity,
-    queueStatus: req.body.queueStatus,
-    hospitalId: req.body.hospitalId
-
-});
-        await queue.save();
-        const io = getIO();
-io.emit("queueUpdated");
-        console.log(queue);
-        res.status(201).json({
-            message: "Queue created successfully",
-            queue
-        });
-
-    } 
-    catch (err) {
-
-    if (err.code === 11000) {
-
-        return res.status(400).json({
-            message: "Queue already exists"
-        });
-    }
-
-    res.status(500).json({
-        message: err.message
-    });
-}
-    
-}); */
 
 
 route.get('/allQueues', async (req, res) => {
@@ -334,15 +278,13 @@ console.log(queues);
         });
     }
 });
-
-route.get('/:queueId/myStatus', Authmiddleware, async (req, res) => {
-
+route.get("/:queueId/myStatus", Authmiddleware, async (req, res) => {
     try {
 
         const user = await QueueMember.findOne({
             queueId: req.params.queueId,
             userId: req.user.userId,
-            status: { $in: ['waiting', 'serving'] }
+            status: { $in: ["waiting", "serving"] }
         });
 
         if (!user) {
@@ -359,181 +301,44 @@ route.get('/:queueId/myStatus', Authmiddleware, async (req, res) => {
             });
         }
 
-        // Current serving member
-        const currentMember = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            status: "serving"
-        });
+        const etaData = await calculateETA(queue, user);
 
-        // Last active token (waiting or serving)
-        const lastActiveMember = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            status: { $in: ["waiting", "serving"] }
-        }).sort({ tokenNumber: -1 });
-        const totalPeople = await QueueMember.countDocuments({
-            queueId: queue._id,
-            status: { $in: ['completed', 'waiting', 'serving'] }
-        });
-        const activeCount = await QueueMember.countDocuments({
-            queueId: queue._id,
-            status: { $in: ["waiting", "serving"] }
-        });
-        const peopleAhead = await QueueMember.countDocuments({
-            queueId: req.params.queueId,
-            tokenNumber: { $lt: user.tokenNumber },
-            status: { $in: ["waiting", "serving"] }
-        });
-        let queue_status;
-        const servingMember = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            status: "serving"
-        });
-   /*     if (!servingMember) {
-            if (queue.lastCompletedToken == null || queue.lastCompletedToken === 0) {
-                queue_status = "WAITING_TO_START";
-            } else {
-                queue_status = "WAITING_FOR_NEXT_CALL";
-            }
-        } else if (user.status === "serving") {
-            queue_status = "SERVING";
-        } else if (peopleAhead === 1) {
-            queue_status = "NEXT";
-        } else {
-            queue_status = "WAITING";
-        } */
-      
-if (user.status === "serving") {
-
-    queue_status = "SERVING";
-
-} else if (!servingMember) {
-
-    if (queue.lastCompletedToken === 0) {
-
-        // Queue hasn't started
-        queue_status = "WAITING_TO_START";
-
-    } else if (peopleAhead === 0) {
-
-        // User is first waiting
-        queue_status = "WAITING_FOR_NEXT_CALL";
-
-    } else {
-
-        // Still people ahead
-        queue_status = "WAITING";
-    }
-
-} else {
-
-    // Queue is running
-
-    if (peopleAhead === 0) {
-
-        // User is immediately after the serving patient
-        queue_status = "NEXT";
-
-    } else {
-
-        queue_status = "WAITING";
-    }
-}
-        console.log(queue_status);
-
-
- 
-
-
-let avgServiceTime = 5;
-
-if (queue.completedPatients > 0) {
-    avgServiceTime =
-        queue.totalServiceTime / queue.completedPatients;
-}
-
-const waitingAhead = await QueueMember.countDocuments({
-    queueId: queue._id,
-    tokenNumber: { $lt: user.tokenNumber },
-    status: "waiting"
-});
-
-let remaining = 0;
-
-if (servingMember && servingMember.servingStartedAt) {
-
-    const elapsed =
-        (Date.now() - servingMember.servingStartedAt.getTime()) / (1000 * 60);
-
-    remaining =  avgServiceTime - elapsed;
-    
-}
-  if (remaining <= 0) {
-        remaining = avgServiceTime;
-    }
-let eta = null;
-
-if (user.status === "serving") {
-
-    eta = 0;
-
-} else if (!servingMember) {
-
-    if (queue.lastCompletedToken === 0) {
-
-        eta = -1;
-
-    } else if (waitingAhead === 0) {
-
-        eta = 0;
-
-    } else {
-
-        eta = waitingAhead * avgServiceTime;
-    }
-
-} else {
-
-    eta = remaining + (waitingAhead * avgServiceTime);
-}
-
-if (eta != null) {
-    eta = Math.round(eta);
-}
-
-
-
-
-
-const completedCount = await QueueMember.countDocuments({
-    queueId: queue._id,
-    status: "completed"
-});
-
-
-        console.log(queue.queueStatus)
-        const progress = completedCount + (servingMember ? 1 : 0);
-     //   const progress = activeCount - peopleAhead;
-        console.log(peopleAhead);
         res.status(200).json({
-            esttime: eta,
+
+            esttime: etaData.eta,
+
             queueName: queue.queueName,
+
             yourToken: user.tokenNumber,
-            peopleAhead,
-            activeCount,
-            currentToken: currentMember
-                ? currentMember.tokenNumber
+
+            peopleAhead: etaData.peopleAhead,
+
+            activeCount: etaData.activeCount,
+
+            currentToken: etaData.currentMember
+                ? etaData.currentMember.tokenNumber
                 : null,
-            totalPeople,
-            latestToken: lastActiveMember
-                ? lastActiveMember.tokenNumber
+
+            totalPeople: etaData.totalPeople,
+
+            latestToken: etaData.lastActiveMember
+                ? etaData.lastActiveMember.tokenNumber
                 : 0,
+
             lastCompletedToken: queue.lastCompletedToken,
+
             status: user.status,
-            avgServiceTime: avgServiceTime,
+
+            avgServiceTime: Math.round(etaData.avgServiceTime),
+
             userId: req.user.userId,
-            progress,
-            "queueStarted": servingMember != null,
-            queue_status,
+
+            progress: etaData.progress,
+
+            queueStarted: etaData.servingMember != null,
+
+            queue_status: etaData.queue_status,
+
             QueueStatus: queue.queueStatus
         });
 
@@ -544,7 +349,6 @@ const completedCount = await QueueMember.countDocuments({
         });
     }
 });
-
 
 
 
@@ -731,7 +535,30 @@ currentMember.completedAt = new Date();
 const duration =
     (currentMember.completedAt - currentMember.servingStartedAt) / (1000 * 60);
         await currentMember.save();
+const peopleAhead = await QueueMember.countDocuments({
+    queueId: req.params.queueId,
+    tokenNumber: { $lt: currentMember.tokenNumber },
+    status: { $in: ["waiting", "serving"] }
+});
+await QueueHistory.create({
 
+    queueId: queue._id,
+
+    hospitalId: queue.hospitalId,
+
+    doctorName: queue.doctorName,
+
+    department: queue.queueName,
+
+    tokenNumber: currentMember.tokenNumber,
+
+    peopleAhead,
+
+    serviceTime: Math.round(duration),
+
+    completedAt: currentMember.completedAt
+
+});
 await Notification.deleteMany({
     userId: currentMember.userId,
     queueId: currentMember.queueId
@@ -1061,258 +888,67 @@ route.get('/myActiveQueue', Authmiddleware, async (req, res) => {
 
     try {
 console.log("myactiveapi hit")
-        const members = await QueueMember.find({
-
-            userId: req.user.userId,
-            status: { $in: ['waiting', 'serving'] }
-
-        }).populate({
-            path: "queueId",
-            populate: {
-                path: "hospitalId"
-            }
-        });
-
+      const members = await QueueMember.find({
+    userId: req.user.userId,
+    status: { $in: ['waiting', 'serving'] }
+}).populate("queueId");
         if (members.length === 0) {
 
             return res.status(200).json([]);
         }
 const result = [];
-
 for (const member of members) {
 
     const queue = member.queueId;
 
-    // calculate everything for THIS queue
-const currentMember = await QueueMember.findOne({
-    queueId: queue._id,
-    status: "serving"
-});
-const lastActiveMember = await QueueMember.findOne({
-    queueId: queue._id,
-    status: { $in: ["waiting", "serving"] }
-}).sort({ tokenNumber: -1 });
-const totalPeople = await QueueMember.countDocuments({
-    queueId: queue._id,
-    status: { $in: ["completed", "waiting", "serving"] }
-});
+    const hospital = await Hospital.findOne({
+        hospitalId: queue.hospitalId
+    });
 
-const activeCount = await QueueMember.countDocuments({
-    queueId: queue._id,
-    status: { $in: ["waiting", "serving"] }
-});
+    const etaData = await calculateETA(queue, member);
 
-const peopleAhead = await QueueMember.countDocuments({
-    queueId: queue._id,
-    tokenNumber: { $lt: member.tokenNumber },
-    status: { $in: ["waiting", "serving"] }
-});
-const servingMember = await QueueMember.findOne({
-    queueId: queue._id,
-    status: "serving"
-});
-
-      let queue_status;
-    /*   const user = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            userId: req.user.userId,
-            status: { $in: ['waiting', 'serving'] }
-        }); */
-if (member.status === "serving") {
-
-    queue_status = "SERVING";
-
-} else if (!servingMember) {
-
-    if (queue.lastCompletedToken === 0) {
-
-        // Queue hasn't started
-        queue_status = "WAITING_TO_START";
-
-    } else if (peopleAhead === 0) {
-
-        // User is first waiting
-        queue_status = "WAITING_FOR_NEXT_CALL";
-
-    } else {
-
-        // Still people ahead
-        queue_status = "WAITING";
-    }
-
-} else {
-
-    // Queue is running
-
-    if (peopleAhead === 0) {
-
-        // User is immediately after the serving patient
-        queue_status = "NEXT";
-
-    } else {
-
-        queue_status = "WAITING";
-    }
-}
-let avgServiceTime = 5;
-
-if (queue.completedPatients > 0) {
-    avgServiceTime =
-      Math.ceil ( queue.totalServiceTime / queue.completedPatients);
-}
-
-const waitingAhead = await QueueMember.countDocuments({
-    queueId: queue._id,
-    tokenNumber: { $lt: member.tokenNumber },
-    status: "waiting"
-});
-
-let remaining = 0;
-
-if (servingMember && servingMember.servingStartedAt) {
-
-    const elapsed =
-        (Date.now() - servingMember.servingStartedAt.getTime()) / (1000 * 60);
-
-  remaining = Math.max(0, avgServiceTime - elapsed);
-    
-}
-  
-let eta = null;
-
-if (member.status === "serving") {
-
-    eta = 0;
-
-} else if (!servingMember) {
-
-    if (queue.lastCompletedToken === 0) {
-
-        eta = -1;
-
-    } else if (waitingAhead === 0) {
-
-        eta = 0;
-
-    } else {
-
-        eta = waitingAhead * avgServiceTime;
-    }
-
-} else {
-
-    eta = remaining + (waitingAhead * avgServiceTime);
-}
-
-if (eta != null) {
-    eta = Math.round(eta);
-}
-
-/*
-if (servingMember && servingMember.servingStartedAt) {
-    const elapsed =
-        (Date.now() - servingMember.servingStartedAt.getTime()) / (1000 * 60);
-
-    remaining = Math.max(0, queue.avgServiceTime - elapsed);
-}
-*/
-/*
-let avgServiceTime = 5; // default
-
-if (queue.completedPatients > 0) {
-    avgServiceTime =
-        queue.totalServiceTime / queue.completedPatients;
-}
-const eta =0;
-
-remaining = Math.max(0, avgServiceTime - elapsed);
-
-eta = remaining + (waitingAhead * avgServiceTime);
-
-
-const waitingAhead = await QueueMember.countDocuments({
-    queueId: queue._id,
-    tokenNumber: { $lt: member.tokenNumber },
-    status: "waiting"
-});
-
-let eta = null;
-
-if (member.status === "serving") {
-
-    // Your turn is already in progress
-    eta = 0;
-
-} else if (!servingMember) {
-
-    if (queue.lastCompletedToken === 0) {
-
-        // Queue has never started
-        eta = null;
-
-    } else if (waitingAhead === 0) {
-
-        // You're next to be called
-        eta = 0;
-
-    } else {
-
-        // Queue is between patients
-        eta = waitingAhead * queue.avgServiceTime;
-        eta=Math.round(eta);
-    }
-
-} else {
-
-    // Someone is currently serving
-    eta = remaining + (waitingAhead * queue.avgServiceTime);
- eta=Math.round(eta);
-} */
-        console.log(queue_status);
-
-        console.log(queue.queueStatus)
-        const progress = activeCount - peopleAhead;
-        console.log(peopleAhead);
-        console.log(queue.hospitalId)
-        const hospital = queue.hospitalId;
-
-console.log(eta)
-console.log(hospital.hospitalName)
-console.log({
-    avgServiceTime,
-    waitingAhead,
-    remaining,
-    totalServiceTime: queue.totalServiceTime,
-    completedPatients: queue.completedPatients
-});
-     result.push({
+  result.push({
     hospitalName: hospital.hospitalName,
     hospitalId: queue.hospitalId,
- 
-                branchName: hospital.city,
+
+    branchName: hospital.city,
+
     queueId: queue._id,
     queueName: queue.queueName,
 
     yourToken: member.tokenNumber,
 
-    peopleAhead,
-    activeCount,
-    currentToken: currentMember ? currentMember.tokenNumber : null,
-    totalPeople,
-    latestToken: lastActiveMember ? lastActiveMember.tokenNumber : 0,
+    peopleAhead: etaData.peopleAhead,
+    activeCount: etaData.activeCount,
+
+    currentToken: etaData.currentMember
+        ? etaData.currentMember.tokenNumber
+        : null,
+
+    totalPeople: etaData.totalPeople,
+
+    latestToken: etaData.lastActiveMember
+        ? etaData.lastActiveMember.tokenNumber
+        : 0,
+
     lastCompletedToken: queue.lastCompletedToken,
 
     status: member.status,
-    avgServiceTime: Math.round(avgServiceTime),
-esttime: eta,
-  
-    progress,
-    queueStarted: servingMember != null,
-    queue_status,
+
+    avgServiceTime: Math.round(etaData.avgServiceTime),
+
+    esttime: etaData.eta,
+
+    progress: etaData.progress,
+
+    queueStarted: etaData.servingMember != null,
+
+    queue_status: etaData.queue_status,
+
     QueueStatus: queue.queueStatus
 });
 }
-       
+       console.log("FINAL RESULT =", JSON.stringify(result, null, 2));
         res.status(200).json(result);
 
     } catch (err) {
@@ -1322,47 +958,7 @@ esttime: eta,
         });
     }
 });
-/*
-route.get('/myActiveQueue', Authmiddleware, async (req, res) => {
 
-    try {
-console.log("myactiveapi hit")
-        const member = await QueueMember.findOne({
-
-            userId: req.user.userId,
-            status: { $in: ['waiting', 'serving'] }
-        })
-            .sort({ createdAt: -1 });
-        console.log("Searching active queue for", req.user.userId);
-
-        const examplemember = await QueueMember.findOne({
-            userId: req.user.userId,
-            status: { $in: ["waiting", "serving"] }
-        }).sort({ createdAt: -1 });
-
-        console.log("Found member:", examplemember);
-        if (!member) {
-
-            return res.status(200).json({
-                active: false,
-                queueId: null,
-                queueName: null
-            });
-        }
-        return res.status(200).json({
-            active: true,
-            queueId: member.queueId,
-            queueName: member.queueName
-        });
-
-    } catch (err) {
-
-        return res.status(500).json({
-            message: err.message
-        });
-    }
-});
-*/
 route.post('/:queueId/toggleQueueStatus', Authmiddleware, async (req, res) => {
 
     try {
@@ -1519,5 +1115,36 @@ route.get('/:queueId/details', Authmiddleware, async (req, res) => {
         });
     }
 });
+route.get('/:queueId/predicttime',Authmiddleware,async(req,res)=>{
+    const queue = await Queue.findById(req.params.queueId);
+    if (!queue) {
+    return res.status(404).json({
+        message: "Queue not found"
+    });
+}
+     const user = await QueueMember.findOne({
+            queueId: req.params.queueId,
+            userId: req.user.userId,
+            status: { $in: ['waiting', 'serving'] }
+        });
 
+        if (!user) {
+            return res.status(404).json({
+                message: "You are not in this queue"
+            });
+        }
+     const peopleAhead = await QueueMember.countDocuments({
+            queueId: req.params.queueId,
+            tokenNumber: { $lt: user.tokenNumber },
+            status: { $in: ["waiting", "serving"] }
+        });
+const predictedServiceTime = await predicted(req.params.queueId);
+const eta =
+peopleAhead * predictedServiceTime;
+res.json({
+    peopleAhead,
+    predictedServiceTime,
+    estimatedWaitTime: eta
+});
+})
 module.exports = route;

@@ -44,7 +44,9 @@ const notificationRoutes = require("./routes/notifications");
 const testNotification = require("./routes/testNotifications");
 const socket = require("./socket");
 const hospitalRoutes = require("./routes/hospital");
+const aiRoutes = require("./routes/ai");
 
+app.use("/api/ai", aiRoutes);
 app.use("/api/hospital", hospitalRoutes);
 socket.init(io);
 app.use("/testNotification", testNotification);

@@ -48,7 +48,7 @@ console.log("7", queues);
 
 const avgWaitTime =
     queues.length > 0
-        ? queues.reduce((sum, q) => sum + (q.avgServiceTime || 0), 0) / queues.length
+        ? Math.round(queues.reduce((sum, q) => sum + (q.avgServiceTime || 0), 0) / queues.length)
         : 0;
 
 console.log("8", avgWaitTime);

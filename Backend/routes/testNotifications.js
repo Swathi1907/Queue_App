@@ -5,7 +5,7 @@ const { getMessaging } = require("firebase-admin/messaging");
 
 router.post("/", async (req, res) => {
     try {
-        console.log("🔥 ROUTE HIT");
+        console.log("ROUTE HIT");
         console.log(req.body);
 
         const { token } = req.body;
