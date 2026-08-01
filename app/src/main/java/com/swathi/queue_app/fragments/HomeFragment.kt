@@ -37,8 +37,8 @@ class HomeFragment : Fragment() {
 
         viewModel.getAllHospitals()
         Log.d("TRACE", "Called from onResume")
-        viewModel.getMyActiveQueue("HomeFragment onResume")
-        Log.d("HOME", "onResume called")
+      //  viewModel.getMyActiveQueue("HomeFragment onResume")
+        //Log.d("HOME", "onResume called")
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -177,7 +177,12 @@ class HomeFragment : Fragment() {
         //
         //}
         viewModel.activeQueueResponse.observe(viewLifecycleOwner) { queues ->
-
+            queues.forEach {
+                Log.d(
+                    "HOME_API",
+                    "${it.queueName} ETA=${it.esttime}"
+                )
+            }
             if (queues.isEmpty()) {
 
                 binding.rvLiveStatus.visibility = View.GONE
@@ -246,7 +251,7 @@ class HomeFragment : Fragment() {
 
                 binding.rvLiveStatus.visibility = View.VISIBLE
                 binding.tvLiveStatus.visibility = View.VISIBLE
-
+                Log.d("MYSTATUS", "Calling myStatus ")
                 queueViewModel.myStatus(activeQueue.queueId)
 
             } else {

@@ -334,7 +334,7 @@ viewModel.getActiveQueues(hospitalId)
                     etEndTime.text.toString().trim()
                 val queueName = etQueueName.text.toString().trim()
                 val doctorName =
-                    actDoctor.text.toString().trim()
+                    selectedDoctor?.doctorName ?: ""
                 val roomNumber = etRoomNumber.text.toString().trim()
                 val floor = etFloor.text.toString().trim()
 

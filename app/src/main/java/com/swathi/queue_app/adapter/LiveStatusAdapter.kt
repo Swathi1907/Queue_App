@@ -49,7 +49,7 @@ class LiveStatusAdapter(
         } */
 
 
-
+        Log.d("ActiveQueueList", queueList.toString())
 
         if (!queue.queueStarted && queue.lastCompletedToken == 0) {
             // Queue has never started
@@ -115,7 +115,10 @@ class LiveStatusAdapter(
         holder.binding.tvBranchName.text = queue.branchName
 
 
-
+        Log.d(
+            "LIVE_STATUS",
+            "Queue=${queue.queueName}, ETA=${queue.esttime}"
+        )
 
         if (queue.esttime == -1) {
             holder.binding.tvWait.text = ""

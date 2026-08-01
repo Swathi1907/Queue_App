@@ -189,6 +189,10 @@ println(it.QueueStatus)
                  //   ContextCompat.getColor(requireContext(), R.color.yellow)
                 //)
             //}
+            Log.d(
+                "STATUS_API",
+                "ETA=${it.esttime}"
+            )
 
             if (it.status == "serving") {
 

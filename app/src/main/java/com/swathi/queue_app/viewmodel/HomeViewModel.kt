@@ -96,11 +96,19 @@ println("Error: ${e.message}")
         Log.d("TRACE", "getMyActiveQueue called from $caller")
 
         viewModelScope.launch {
-           val response = Queuerepository.getMyActiveQueue()
-           // val response: retrofit2.Response<List<ActiveQueueResponse>> =
-             //   Queuerepository.getMyActiveQueue()
+
+            val response = Queuerepository.getMyActiveQueue()
+
+            Log.d("ACTIVE_QUEUE", "Code = ${response.code()}")
+            Log.d("ACTIVE_QUEUE", "Success = ${response.isSuccessful}")
+            Log.d("ACTIVE_QUEUE", "Body = ${response.body()}")
+
             if (response.isSuccessful) {
+
                 response.body()?.let {
+
+                    Log.d("ACTIVE_QUEUE", "Updating LiveData = $it")
+
                     activeQueueResponse.value = it
                 }
             }
