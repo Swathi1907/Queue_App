@@ -18,10 +18,15 @@ const activeQueues = await Queue.countDocuments({
     queueStatus: "active"
 });
 console.log("2", activeQueues);
-
+const pausedQueues = await Queue.countDocuments({
+    hospitalId,
+    queueStatus: "paused"
+});
+console.log("HospitalId received:", hospitalId);
 const hospital = await Hospital.findOne({
     hospitalId
 });
+console.log("Hospital found:", hospital);
 console.log("3", hospital);
 
 const queueIds = await Queue.find({ hospitalId }).select("_id");
@@ -46,21 +51,25 @@ console.log("6", servedToday);
 const queues = await Queue.find({ hospitalId });
 console.log("7", queues);
 
-const avgWaitTime =
-    queues.length > 0
-        ? Math.round(queues.reduce((sum, q) => sum + (q.avgServiceTime || 0), 0) / queues.length)
-        : 0;
 
-console.log("8", avgWaitTime);
+
+
 
 console.log("Sending response");
-
 res.json({
-   hospitalname: hospital.hospitalName,
+    hospital: {
+        hospitalId: hospital.hospitalId,
+        hospitalName: hospital.hospitalName,
+        hospitalType: hospital.hospitalType,
+        address: hospital.address,
+        phone: hospital.phone,
+        timings: hospital.timings,
+        hospitalImage: hospital.hospitalImage
+    },
     activeQueues,
     peopleWaiting,
     servedToday,
-    avgWaitTime
+    pausedQueues
 });
 /*const hospitalId = req.query.hospitalId;
         const activeQueues =

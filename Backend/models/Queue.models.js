@@ -10,6 +10,11 @@ latestToken: {
     type: Number,
     default: 0
 },
+doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doctor",
+    required: true
+},
     queueName: {
         type: String,
         required: true,

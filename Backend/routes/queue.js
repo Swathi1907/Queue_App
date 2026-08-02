@@ -8,7 +8,8 @@ const sendNotification = require("../utils/sendNotification");
 const User = require("../models/user.models");
 const { getIO } = require("../socket");
 const Hospital = require("../models/hospital.models");
-const predicted = require('../services/predictTime')
+const { generateNotification } = require("../services/notifications");
+
 const QueueHistory= require('../models/history_model')
 const { calculateETA } = require("../services/etaService");
 route.post('/:queueId/join', Authmiddleware, async (req, res) => {
@@ -135,17 +136,31 @@ if (inQueue) {
 route.post('/create', Authmiddleware, async (req, res) => {
     try {
         console.log("create hit");
-        const existing = await Queue.findOne({
-            queueName: req.body.queueName,
-            hospitalId: req.body.hospitalId,
-            queueStatus: { $in: ["active", "paused"] }
-        });
+        console.log(req.body);
+        console.log("doctorId =", req.body.doctorId);
+console.log("hospitalId =", req.body.hospitalId);
+       const existing = await Queue.findOne({
+    doctorId: req.body.doctorId,
+    hospitalId: req.body.hospitalId,
+    queueStatus: { $in: ["active", "paused"] }
+});
 
-        if (existing) {
-            return res.status(400).json({
-                message: "Queue already exists"
-            });
-        }
+if (existing) {
+    return res.status(400).json({
+        message: "This doctor already has an active queue."
+    });
+}
+const existingQueue = await Queue.findOne({
+    queueName: req.body.queueName,
+    hospitalId: req.body.hospitalId,
+    queueStatus: { $in: ["active", "paused"] }
+});
+
+if (existingQueue) {
+    return res.status(400).json({
+        message: "Queue already exists."
+    });
+}
         console.log(req.body.startTime)
         const queue = new Queue({
 
@@ -154,7 +169,7 @@ route.post('/create', Authmiddleware, async (req, res) => {
             queueStatus: req.body.queueStatus,
 
             hospitalId: req.body.hospitalId,
-
+  doctorId: req.body.doctorId,
             doctorName: req.body.doctorName,
             roomNumber: req.body.roomNumber,
             floor: req.body.floor,
@@ -467,30 +482,31 @@ route.get("/admin/activequeues", Authmiddleware, async (req, res) => {
             queueStatus: { $in: ["active", "paused"] }
         });
 
-        const result = await Promise.all(
-            queues.map(async (queue) => {
+       const result = await Promise.all(
+    queues.map(async (queue) => {
 
-                const waitingCount = await QueueMember.countDocuments({
-                    queueId: queue._id,
-                    status: "waiting"
-                });
+        const waitingCount = await QueueMember.countDocuments({
+            queueId: queue._id,
+            status: "waiting"
+        });
 
-                const servingMember = await QueueMember.findOne({
-                    queueId: queue._id,
-                    status: "serving"
-                });
+        const servingMember = await QueueMember.findOne({
+            queueId: queue._id,
+            status: "serving"
+        });
 
-                return {
-                    queueId: queue._id,
-                    queueName: queue.queueName,
-                    status: queue.queueStatus,
-                    waitingCount,
-                    servingToken: servingMember
-                        ? servingMember.tokenNumber
-                        : null
-                };
-            })
-        );
+        return {
+            queueId: queue._id,
+            queueName: queue.queueName,
+            doctorName: queue.doctorName,
+            status: queue.queueStatus,
+            waitingCount,
+            servingToken: servingMember
+                ? servingMember.tokenNumber
+                : null
+        };
+    })
+);
 
         res.json(result);
 
@@ -593,23 +609,30 @@ console.log("After:", {
 
             if (!member.readyOneSent) {
                 console.log("BEFORE CREATE");
-                await Notification.create({
-                    userId: member.userId,
-                    queueId: req.params.queueId,
-                    title: "Almost Your Turn!",
-                    message: "You are next. Please be ready.",
-                    type: "READY_1"
-                });
-                console.log("After CREATE");
-                const user = await User.findById(member.userId);
-                console.log("FCM Token:", user?.fcmToken);
-                if (user?.fcmToken) {
-                    await sendNotification(
-                        user.fcmToken,
-                        "Almost Your Turn!",
-                        "You are next. Please be ready."
-                    );
-                }
+               const aiNotification = await generateNotification({
+    type: "READY_1",
+    queueName: queue.queueName,
+    peopleAhead: 0,
+    avgServiceTime: queue.avgServiceTime
+});
+
+await Notification.create({
+    userId: member.userId,
+    queueId: req.params.queueId,
+    title: aiNotification.title,
+    message: aiNotification.message,
+    type: "READY_1"
+});
+
+const user = await User.findById(member.userId);
+
+if (user?.fcmToken) {
+    await sendNotification(
+        user.fcmToken,
+        aiNotification.title,
+        aiNotification.message
+    );
+}
 
                 member.readyOneSent = true;
                 await member.save();
@@ -623,23 +646,30 @@ console.log("After:", {
 
             if (!member.readyTwoSent) {
 
-                await Notification.create({
-                    userId: member.userId,
-                    queueId: req.params.queueId,
-                    title: "Get Ready!",
-                    message: "Only 1 person is ahead of you.",
-                    type: "READY_2"
-                });
+            const aiNotification = await generateNotification({
+    type: "READY_2",
+    queueName: queue.queueName,
+    peopleAhead: 1,
+    avgServiceTime: queue.avgServiceTime
+});
 
-                const user = await User.findById(member.userId);
+await Notification.create({
+    userId: member.userId,
+    queueId: req.params.queueId,
+    title: aiNotification.title,
+    message: aiNotification.message,
+    type: "READY_2"
+});
 
-                if (user?.fcmToken) {
-                    await sendNotification(
-                        user.fcmToken,
-                        "Get Ready!",
-                        "Only 1 person is ahead of you."
-                    );
-                }
+const user = await User.findById(member.userId);
+
+if (user?.fcmToken) {
+    await sendNotification(
+        user.fcmToken,
+        aiNotification.title,
+        aiNotification.message
+    );
+}
 
                 member.readyTwoSent = true;
                 await member.save();
@@ -699,11 +729,17 @@ route.post('/:queueId/next', Authmiddleware, async (req, res) => {
             status: 'serving'
 
         }).sort({ tokenNumber: 1 });
+        
         if (curr_serving) {
             return res.status(200).json({
                 message: "complete the current member",
             })
         }
+        if (queue.queueStatus === "paused") {
+    return res.status(400).json({
+        message: "Queue is paused. Resume the queue before calling the next patient."
+    });
+}
         const nextToken = await QueueMember.findOne({
 
             queueId: req.params.queueId,
@@ -736,44 +772,49 @@ nextToken.servingStartedAt = new Date();
 
             console.log("ENTERED TURN BLOCK");
 
-            await Notification.create({
+           const aiNotification = await generateNotification({
+    type: "TURN",
+    queueName: queue.queueName,
+    token: nextToken.tokenNumber
+});
 
-                userId: nextToken.userId,
+await Notification.create({
 
-                queueId: req.params.queueId,
+    userId: nextToken.userId,
 
-                title: "It's Your Turn!",
+    queueId: req.params.queueId,
 
-                message: `Please proceed to ${queue.queueName}.`,
+    title: aiNotification.title,
 
-                type: "TURN"
+    message: aiNotification.message,
 
-            });
+    type: "TURN"
 
-            console.log("NOTIFICATION CREATED");
+});
 
-            nextToken.turnSent = true;
-            await nextToken.save();
+console.log("NOTIFICATION CREATED");
 
-            console.log("TURN FLAG UPDATED");
+nextToken.turnSent = true;
+await nextToken.save();
 
-            const user = await User.findById(nextToken.userId);
+console.log("TURN FLAG UPDATED");
 
-            console.log("USER =", user);
-            console.log("FCM Token:", user?.fcmToken);
-            if (user?.fcmToken) {
+const user = await User.findById(nextToken.userId);
 
-                console.log("SENDING FCM");
+if (user?.fcmToken) {
 
-                await sendNotification(
-                    user.fcmToken,
-                    "It's Your Turn!",
-                    `Please proceed to ${queue.queueName}.`
-                );
+    await sendNotification(
+        user.fcmToken,
+        aiNotification.title,
+        aiNotification.message
+    );
+
+    console.log("FCM SENT");
+}
 
                 console.log("FCM SENT");
             }
-        }
+        
 
         console.log("Emitting queueUpdated");
         const io = getIO();
@@ -995,15 +1036,16 @@ route.post('/:queueId/toggleQueueStatus', Authmiddleware, async (req, res) => {
 
             if (!user?.fcmToken) continue;
 
-            await sendNotification(
-                user.fcmToken,
-                queue.queueStatus === "paused"
-                    ? "Queue Paused"
-                    : "Queue Resumed",
-                queue.queueStatus === "paused"
-                    ? `${queue.queueName} has been paused.`
-                    : `${queue.queueName} has resumed.`
-            );
+          const aiNotification = await generateNotification({
+    type: queue.queueStatus === "paused" ? "QUEUE_PAUSED" : "QUEUE_RESUMED",
+    queueName: queue.queueName
+});
+
+await sendNotification(
+    user.fcmToken,
+    aiNotification.title,
+    aiNotification.message
+);
         }
         const io = getIO();
         io.emit("queueUpdated");
@@ -1013,7 +1055,7 @@ route.post('/:queueId/toggleQueueStatus', Authmiddleware, async (req, res) => {
         });
 
     } catch (err) {
-
+console.log(err.message)
         return res.status(500).json({
             message: err.message
         });
@@ -1028,12 +1070,39 @@ route.post('/:queueId/close', Authmiddleware, async (req, res) => {
         );
 
         if (!queue) {
-
             return res.status(404).json({
                 message: "Queue not found"
             });
         }
+const members= await QueueMember.find({
+    queueId: req.params.queueId,
+    status:{$in:['waiting','serving']},
+})
+const aiNotification = await generateNotification({
+    type: "QUEUE_CLOSED",
+    queueName: queue.queueName
+});
 
+for (const member of members) {
+
+    const user = await User.findById(member.userId);
+
+    if (!user?.fcmToken) continue;
+
+    await Notification.create({
+        userId: member.userId,
+        queueId: req.params.queueId,
+        title: aiNotification.title,
+        message: aiNotification.message,
+        type: "QUEUE_CLOSED"
+    });
+
+    await sendNotification(
+        user.fcmToken,
+        aiNotification.title,
+        aiNotification.message
+    );
+}
         queue.queueStatus = 'closed';
 
         await queue.save();
@@ -1115,36 +1184,4 @@ route.get('/:queueId/details', Authmiddleware, async (req, res) => {
         });
     }
 });
-route.get('/:queueId/predicttime',Authmiddleware,async(req,res)=>{
-    const queue = await Queue.findById(req.params.queueId);
-    if (!queue) {
-    return res.status(404).json({
-        message: "Queue not found"
-    });
-}
-     const user = await QueueMember.findOne({
-            queueId: req.params.queueId,
-            userId: req.user.userId,
-            status: { $in: ['waiting', 'serving'] }
-        });
-
-        if (!user) {
-            return res.status(404).json({
-                message: "You are not in this queue"
-            });
-        }
-     const peopleAhead = await QueueMember.countDocuments({
-            queueId: req.params.queueId,
-            tokenNumber: { $lt: user.tokenNumber },
-            status: { $in: ["waiting", "serving"] }
-        });
-const predictedServiceTime = await predicted(req.params.queueId);
-const eta =
-peopleAhead * predictedServiceTime;
-res.json({
-    peopleAhead,
-    predictedServiceTime,
-    estimatedWaitTime: eta
-});
-})
 module.exports = route;

@@ -3,6 +3,8 @@ const route = express.Router();
 const Queue = require('../models/Queue.models');
 const Hospital = require("../models/hospital.models");
 const Doctor=require('../models/doctor_model');
+const Authmiddleware=require('../middleware/authmiddleware')
+const { getIO } = require("../socket");
 // Create Hospital
 
 
@@ -56,7 +58,8 @@ while (exists) {
         });
 
         await hospital.save();
-
+         const io = getIO();
+io.emit("queueUpdated");
         res.status(201).json({
             message: "Hospital created successfully",
             hospital
@@ -176,81 +179,61 @@ route.post("/doctor/create", async (req, res) => {
     }
 
 });
+route.put("/doctor/:doctorId/update", Authmiddleware, async (req, res) => {
 
-route.put("/doctor/:doctorId/update",async(req,res)=>{
-    try{
-const {
-    doctorName,
-specialization,
-qualification,
-roomNumber,
-availableDays,
-startTime,
-endTime
-    }=req.body;
+    try {
 
-    const doctor=await Doctor.findByIdAndUpdate(
-req.params.doctorId,
-       { doctorName,
-specialization,
-qualification,
-roomNumber,
-availableDays,
-startTime,
-endTime,
-    },
-    {new:true},
-    );
-    
-      if (!doctor) {
+        const {
+            doctorName,
+            specialization,
+            qualification,
+            roomNumber,
+            availableDays,
+            startTime,
+            endTime
+        } = req.body;
+
+        const doctor = await Doctor.findById(req.params.doctorId);
+
+        if (!doctor) {
             return res.status(404).json({
                 message: "Doctor not found"
             });
         }
 
-        res.status(200).json({
-            message: "Doctor updated successfully",
-            doctor
+        const activeQueue = await Queue.findOne({
+            doctorName: doctor.doctorName,
+            queueStatus: "active"
         });
-    }
-    catch(err){
-return res.result(500).json({
-    message:err.message
-})
-    }
-})
 
-// Verify Hospital ID
-route.post("/verify", async (req, res) => {
-
-    try {
-
-        const { hospitalId } = req.body;
-
-        const hospital = await Hospital.findOne({ hospitalId });
-
-        if (!hospital) {
-            return res.status(404).json({
-                valid: false,
-                message: "Invalid Hospital ID"
+        if (activeQueue) {
+            return res.status(400).json({
+                message: "Cannot update doctor while an active queue exists."
             });
         }
 
-        res.status(200).json({
-            valid: true,
-            hospitalId: hospital.hospitalId,
-            hospitalName: hospital.hospitalName
+        doctor.doctorName = doctorName;
+        doctor.specialization = specialization;
+        doctor.qualification = qualification;
+        doctor.roomNumber = roomNumber;
+        doctor.availableDays = availableDays;
+        doctor.startTime = startTime;
+        doctor.endTime = endTime;
+
+        await doctor.save();
+
+        return res.status(200).json({
+            message: "Doctor updated successfully"
         });
 
     } catch (err) {
 
-        res.status(500).json({
+        return res.status(500).json({
             message: err.message
         });
+
     }
-
 });
-
 
 // Get All Hospitals
 
@@ -287,4 +270,34 @@ console.log("Hospitals:", hospitals);
     }
 
 });
+route.post("/verify", async (req, res) => {
+
+    try {
+
+        const { hospitalId } = req.body;
+
+        const hospital = await Hospital.findOne({ hospitalId });
+
+        if (!hospital) {
+            return res.status(404).json({
+                valid: false,
+                message: "Invalid Hospital ID"
+            });
+        }
+
+        res.status(200).json({
+            valid: true,
+            hospitalId: hospital.hospitalId,
+            hospitalName: hospital.hospitalName
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+    }
+
+});
+
 module.exports = route;

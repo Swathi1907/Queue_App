@@ -2,88 +2,61 @@ const { askAI } = require("./aiServices");
 
 async function detectIntent(question) {
 
-    const prompt = `
+  const prompt = `
 You are an intent classifier for a hospital queue assistant.
 
-Return ONLY valid JSON.
+Your job is to classify the user's question into EXACTLY ONE of these intents:
 
-Format:
+- MY_QUEUE: Questions about the user's own queue, token, wait time, ETA, status, or turn.
+- QUEUE_COMPARISON: Questions comparing departments or queues, busiest queue, shortest wait, etc.
+- DOCTOR: Questions about doctors, availability, specialization, or assigned doctor.
+- HOSPITAL: Questions about hospital information like address, phone number, timings.
+- GENERAL: Greetings or anything unrelated to the above.
+
+Return ONLY valid JSON in this format:
 
 {
-  "intent": "QUEUE | DOCTOR | HOSPITAL | GENERAL",
+  "intent": "<INTENT>",
   "filters": {}
 }
 
 Examples:
 
-Question:
-When is my turn?
-
+Question: "When is my turn?"
 Response:
-{
-  "intent": "QUEUE",
-  "filters": {}
-}
+{"intent":"MY_QUEUE","filters":{}}
 
-Question:
-Who is treating me?
-
+Question: "What is my status?"
 Response:
-{
-  "intent": "DOCTOR",
-  "filters": {
-    "assignedDoctor": true
-  }
-}
+{"intent":"MY_QUEUE","filters":{}}
 
-Question:
-Is any heart doctor available?
-
+Question: "Can I leave for 10 minutes?"
 Response:
-{
-  "intent": "DOCTOR",
-  "filters": {
-    "specialization": "heart"
-  }
-}
+{"intent":"MY_QUEUE","filters":{}}
 
-Question:
-Is Dr Ravi available today?
-
+Question: "Which department is busy?"
 Response:
-{
-  "intent": "DOCTOR",
-  "filters": {
-    "doctorName": "Ravi"
-  }
-}
+{"intent":"QUEUE_COMPARISON","filters":{}}
 
-Question:
-Show all doctors
-
+Question: "Which queue has the shortest wait?"
 Response:
-{
-  "intent": "DOCTOR",
-  "filters": {}
-}
+{"intent":"QUEUE_COMPARISON","filters":{}}
 
-Question:
-What is the hospital address?
-
+Question: "Show all doctors."
 Response:
-{
-  "intent": "HOSPITAL",
-  "filters": {}
-}
+{"intent":"DOCTOR","filters":{}}
 
-Question:
-Hello
-
+Question: "Is Dr Ravi available today?"
 Response:
-{
-  "intent": "GENERAL",
-  "filters": {}
-}
+{"intent":"DOCTOR","filters":{"doctorName":"Ravi"}}
+
+Question: "What is the hospital address?"
+Response:
+{"intent":"HOSPITAL","filters":{}}
+
+Question: "Hello"
+Response:
+{"intent":"GENERAL","filters":{}}
 
 Question:
 ${question}

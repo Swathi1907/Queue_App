@@ -31,10 +31,10 @@ const NotificationSchema = new mongoose.Schema(
                 "READY_2",
                 "READY_1",
                 "TURN",
-                "PAUSE",
+                "QUEUE_PAUSE",
                 "EXIT",
-                "RESUME",
-                "CLOSE"
+                "QUEUE_RESUME",
+                "QUEUE_CLOSED"
             ],
             required: true
         },
