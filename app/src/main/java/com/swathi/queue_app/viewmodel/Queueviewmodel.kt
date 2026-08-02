@@ -18,7 +18,7 @@ import com.swathi.queue_app.model.myStatusResponse
 
 import com.swathi.queue_app.repository.Queuerepository
 import kotlinx.coroutines.launch
-
+import org.json.JSONObject
 
 
 class Queueviewmodel : ViewModel() {
@@ -139,7 +139,7 @@ println("Exit Queue response: ${response.code()}");
     }
     val completeCurrentResponse =
         MutableLiveData<CompleteCurrentResponse>()
-
+val errcompletecurrent=MutableLiveData<String>()
     fun completeCurrent(
         queueId: String
     ) {
@@ -155,6 +155,13 @@ println("Exit Queue response: ${response.code()}");
 
                     completeCurrentResponse.value = it
                 }
+            }
+            else{
+                val error =
+                    JSONObject(response.errorBody()!!.string())
+                        .getString("message")
+
+                errcompletecurrent.postValue(error)
             }
         }
     }
@@ -193,7 +200,7 @@ println("Exit Queue response: ${response.code()}");
 
             val response =
                 repository.toggleQueueStatus(queueId)
-
+println(response.code())
             if(response.isSuccessful){
 
                 response.body()?.let {
@@ -293,9 +300,10 @@ println("Exit Queue response: ${response.code()}");
         }
     }
 
-
+    val createQueueError = MutableLiveData<String>()
 
     fun createQueue(
+        doctorId:String,
         queueName: String,
         queueCapacity: Int,
         queueStatus: String,
@@ -313,6 +321,7 @@ println("Exit Queue response: ${response.code()}");
 
                 val response =
                     repository.createQueue(
+                        doctorId,
                         queueName,
                         queueCapacity,
                         queueStatus,
@@ -336,6 +345,11 @@ println("Exit Queue response: ${response.code()}");
                     println(
                         response.errorBody()?.string()
                     )
+                    val error =
+                        JSONObject(response.errorBody()!!.string())
+                            .getString("message")
+
+                    createQueueError.postValue(error)
                 }
 
             } catch (e: Exception){

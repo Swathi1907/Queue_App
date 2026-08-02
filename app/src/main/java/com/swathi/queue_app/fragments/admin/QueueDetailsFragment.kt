@@ -65,12 +65,15 @@ binding.tvAvgtime.text=details.avgServiceTime.toString()
 
             binding.tvStatus.text =
                 details.queueStatus
+            val isPaused = details.queueStatus == "paused"
 
             binding.btnPauseQueue.text =
-                if(details.queueStatus == "paused")
-                    "Resume"
-                else
-                    "Pause"
+                if (isPaused) "Resume" else "Pause"
+
+            binding.tvStatus.text = details.queueStatus
+
+            binding.cardNext.isEnabled = !isPaused
+            binding.cardNext.alpha = if (isPaused) 0.5f else 1f
         }
         Toast.makeText(
             requireContext(),
@@ -83,31 +86,34 @@ binding.tvAvgtime.text=details.avgServiceTime.toString()
             val items = QueueItemMapper.map(members)
             binding.tvViewMembers.adapter = MemberAdapter(items)
         }
+
+
         binding.tvView.setOnClickListener {
 
             expanded = !expanded
 
-            binding.tvView.setOnClickListener {
+            if (expanded) {
 
-                expanded = !expanded
+                binding.cardMember.visibility = View.VISIBLE
+                binding.tvView.text = "Hide Members ▲"
 
-                if (expanded) {
-
-                    binding.cardMember.visibility = View.VISIBLE
-                    binding.tvView.text = "Hide Members ▲"
-
-                    queueId?.let {
-                        viewModel.getAllMembers(it)
-                    }
-
-                } else {
-
-                    binding.cardMember.visibility = View.GONE
-                    binding.tvView.text = "View Members ▼"
+                queueId?.let {
+                    viewModel.getAllMembers(it)
                 }
+
+            } else {
+
+                binding.cardMember.visibility = View.GONE
+                binding.tvView.text = "View Members ▼"
             }
         }
-
+        viewModel.errcompletecurrent.observe(viewLifecycleOwner) {
+            Toast.makeText(
+                requireContext(),
+                it,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         binding.cardNext.setOnClickListener {
 
             queueId?.let {
@@ -115,15 +121,20 @@ binding.tvAvgtime.text=details.avgServiceTime.toString()
                 viewModel.nextToken(it)
             }
         }
-        viewModel.nextTokenResponse.observe(
-            viewLifecycleOwner
-        ){
+        viewModel.nextTokenResponse.observe(viewLifecycleOwner) {
 
             Toast.makeText(
                 requireContext(),
                 it.message,
                 Toast.LENGTH_SHORT
             ).show()
+
+            queueId?.let {
+                viewModel.getQueueDetails(it)
+                if (expanded) {
+                    viewModel.getAllMembers(it)
+                }
+            }
         }
         binding.cardComplete.setOnClickListener {
 
@@ -133,18 +144,23 @@ binding.tvAvgtime.text=details.avgServiceTime.toString()
             }
         }
 
-        viewModel.completeCurrentResponse.observe(
-            viewLifecycleOwner
-        ) {
+        viewModel.completeCurrentResponse.observe(viewLifecycleOwner) {
 
             Toast.makeText(
                 requireContext(),
                 it.message,
                 Toast.LENGTH_SHORT
             ).show()
+
+            queueId?.let {
+                viewModel.getQueueDetails(it)
+                if (expanded) {
+                    viewModel.getAllMembers(it)
+                }
+            }
         }
         binding.cardPause.setOnClickListener {
-
+println("pause clicked")
             queueId?.let {
 
                 viewModel.toggleQueueStatus(it)
@@ -160,12 +176,15 @@ binding.tvAvgtime.text=details.avgServiceTime.toString()
                 Toast.LENGTH_SHORT
             ).show()
 
+            val isPaused = it.queueStatus == "paused"
+
             binding.btnPauseQueue.text =
-                if(it.queueStatus == "paused")
-                    "Resume"
-                else
-                    "Pause"
-            binding.tvStatus.text=it.queueStatus
+                if (isPaused) "Resume" else "Pause"
+
+            binding.tvStatus.text = it.queueStatus
+
+            binding.cardNext.isEnabled = !isPaused
+            binding.cardNext.alpha = if (isPaused) 0.5f else 1f
         }
         binding.cardClose.setOnClickListener {
 

@@ -4,6 +4,11 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
-
+    <!-- themes.xml -->
+    <style name="CustomDialogTheme" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="backgroundTint">@android:color/white</item>
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorSurfaceContainerHigh">@android:color/white</item>
+    </style>
     <style name="Theme.Queue_App" parent="Base.Theme.Queue_App" />
 </resources>

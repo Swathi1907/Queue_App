@@ -1,7 +1,6 @@
 package com.swathi.queue_app.fragments.admin
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,19 +12,20 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.swathi.queue_app.R
 import com.swathi.queue_app.adapter.ActiveQueueAdapter
-import com.swathi.queue_app.adapter.admin.MemberAdapter
 import com.swathi.queue_app.databinding.AdminDashboardBinding
+import com.swathi.queue_app.fragments.HospDetailFrag
 import com.swathi.queue_app.model.DoctorModel
 import com.swathi.queue_app.model.DoctorRequest
+import com.swathi.queue_app.model.adminDashboardresponse
 import com.swathi.queue_app.viewmodel.HomeViewModel
 import com.swathi.queue_app.viewmodel.Queueviewmodel
 import com.swathi.queue_app.viewmodel.admin.dashboardViewModel
@@ -38,7 +38,8 @@ class DashboardFragment : Fragment() {
     private val viewModel: dashboardViewModel by viewModels()
     private val viewmmodel: HomeViewModel by viewModels()
 
-    private lateinit var doctors: List<DoctorModel>
+    private var doctors: List<DoctorModel> = emptyList()
+    private var dashboardData: adminDashboardresponse? = null
     private var selectedDoctor: DoctorModel? = null
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,9 +85,19 @@ class DashboardFragment : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
 
-            viewmmodel.getAllQueues(hospitalId)
+            //viewmmodel.getAllQueues(hospitalId)
+            viewModel.getActiveQueues(hospitalId)
+            viewModel.dashboard(hospitalId)
+        }
+        viewmodel.createQueueError.observe(viewLifecycleOwner) {
+            Toast.makeText(
+                requireContext(),
+                it,
+                Toast.LENGTH_SHORT
+            ).show()
         }
         binding.fabCreateQueue.setOnClickListener {
+
 
             showCreateQueueDialog()
         }
@@ -127,28 +138,46 @@ viewModel.getActiveQueues(hospitalId)
             }
 
         }
+
         binding.AddDoctor.setOnClickListener {
             showAddDoctorDialog()
         }
         viewModel.dashboard(hospitalId)
 
-        viewModel.dashboardResponse.observe(
-            viewLifecycleOwner
-        ) {
-            binding.intro.text=it.hospitalname
+        binding.hospdetails.setOnClickListener {
 
-            binding.tvActiveQueues.text =
-                it.activeQueues.toString()
+            val data = dashboardData ?: return@setOnClickListener
 
-            binding.tvWaitingUsers.text =
-                it.peopleWaiting.toString()
+            val fragment = HospDetailFrag()
 
-            binding.tvServedToday.text =
-                it.servedToday.toString()
+            fragment.arguments = Bundle().apply {
+                putBoolean("isAdmin", true)
+                putString("hospitalId", data.hospital.hospitalId)
+                putString("hospitalName", data.hospital.hospitalName)
+                putString("hospitalAddress", data.hospital.address)
+                putString("hospitalPhone", data.hospital.phone)
+                putString("hospitalTimings", data.hospital.timings)
+                putString("hospitalImage", data.hospital.hospitalImage)
+                putString("hospitalType", data.hospital.hospitalType)
+            }
 
-            binding.tvAvgWaitTime.text =
-                "${it.avgWaitTime} min"
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.adminFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
+            viewModel.dashboardResponse.observe(viewLifecycleOwner) {
+
+                dashboardData = it
+
+                binding.intro.text = it.hospital.hospitalName
+
+                binding.tvActiveQueues.text = it.activeQueues.toString()
+                binding.tvWaitingUsers.text = it.peopleWaiting.toString()
+                binding.tvServedToday.text = it.servedToday.toString()
+                binding.pausedQueues.text = it.pausedQueues.toString()
+            }
+
     }
 
 
@@ -229,13 +258,51 @@ viewModel.getActiveQueues(hospitalId)
 
             val prefs =
                 requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)
+            val titleView = layoutInflater.inflate(
+                R.layout.add_doctor_title,
+                null
+            )
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(titleView)
+                .setView(dialogView)
+                .create()
 
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Add Doctor")
+            dialog.show()
+            val btnAdd = dialogView.findViewById<MaterialButton>(R.id.btnAdd)
+            val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            btnAdd.setOnClickListener {
+
+                val hospitalCode =
+                    prefs.getString("hospitalId", "")!!
+
+                viewModel.addDoctor(
+                    DoctorRequest(
+                        hospitalcode = hospitalCode,
+                        doctorName = etDoctorName.text.toString().trim(),
+                        specialization = etSpecialization.text.toString().trim(),
+                        qualification = etQualification.text.toString().trim(),
+                        roomNumber = etRoomNumber.text.toString().trim(),
+                        availableDays = selectedDays,
+                        startTime = etStartTime.text.toString().trim(),
+                        endTime = etEndTime.text.toString().trim()
+                    )
+                )
+
+                dialog.dismiss()
+            }
+                    /*      val titleView = layoutInflater.inflate(
+                R.layout.add_doctor_title,
+                null
+            )
+            val dialog =MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(titleView)
                 .setView(dialogView)
                 .setPositiveButton("Add") { _, _ ->
-
-
 
                     val hospitalCode =
                         prefs.getString("hospitalId", "")!!
@@ -252,10 +319,37 @@ viewModel.getActiveQueues(hospitalId)
                             endTime = etEndTime.text.toString().trim()
                         )
                     )
-
                 }
                 .setNegativeButton("Cancel", null)
-                .show()
+                .show() */
+         /*   val titleView = layoutInflater.inflate(
+                R.layout.add_doctor_title,
+                null
+            )
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setCustomTitle(titleView)
+                .setView(dialogView)
+                .setPositiveButton("Add") { _, _ ->
+                    val hospitalCode =
+                        prefs.getString("hospitalId", "")!!
+                    viewModel.addDoctor(
+                        DoctorRequest(
+                            hospitalcode = hospitalCode,
+                            doctorName = etDoctorName.text.toString().trim(),
+                            specialization = etSpecialization.text.toString().trim(),
+                            qualification = etQualification.text.toString().trim(),
+                            roomNumber = etRoomNumber.text.toString().trim(),
+                            availableDays = selectedDays,
+                            startTime = etStartTime.text.toString().trim(),
+                            endTime = etEndTime.text.toString().trim()
+                        )
+                    )
+
+                }
+
+                .setNegativeButton("Cancel", null)
+                .show() */
         }
 
     private fun showCreateQueueDialog() {
@@ -264,6 +358,7 @@ viewModel.getActiveQueues(hospitalId)
             R.layout.dialogue_create_queue,
             null
         )
+
 
         val etQueueName =
             dialogView.findViewById<EditText>(R.id.etQueueName)
@@ -323,10 +418,24 @@ viewModel.getActiveQueues(hospitalId)
 
             etRoomNumber.setText(selectedDoctor!!.roomNumber)
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Create Department")
+        val titleView = layoutInflater.inflate(
+            R.layout.create_dialogue_title,
+            null
+        )
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setCustomTitle(titleView)
             .setView(dialogView)
-            .setPositiveButton("Create") { _, _ ->
+            .create()
+
+        dialog.show()
+        val btncreate = dialogView.findViewById<MaterialButton>(R.id.btnCreate)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+      btncreate.setOnClickListener {
                 val startTime =
                     etStartTime.text.toString().trim()
 
@@ -348,6 +457,7 @@ viewModel.getActiveQueues(hospitalId)
                     spStatus.selectedItem.toString()
 
                 viewmodel.createQueue(
+                    doctorId = selectedDoctor?.id ?: "",
                     queueName = queueName,
                     queueCapacity = queueCapacity,
                     queueStatus = status,
@@ -358,9 +468,9 @@ viewModel.getActiveQueues(hospitalId)
                     startTime = startTime,
                     endTime = endTime
                 )
+          dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+
     }
 
 

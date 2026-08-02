@@ -1,6 +1,7 @@
 package com.swathi.queue_app.model
 
 data class adminactivequeues(
+    val doctorName:String,
     val queueId: String,
     val queueName: String,
 

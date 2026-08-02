@@ -1,5 +1,6 @@
 package com.swathi.queue_app.viewmodel.admin
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.swathi.queue_app.model.adminDashboardresponse
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.model.ActiveQueueResponse
 import com.swathi.queue_app.model.DoctorListResponse
 import com.swathi.queue_app.model.DoctorRequest
+import com.swathi.queue_app.model.EditRequest
 import com.swathi.queue_app.model.MessageResponse
 import com.swathi.queue_app.model.adminactivequeues
 
@@ -80,4 +82,18 @@ val repository= Dashboardrepository()
             _addDoctorResponse.postValue(response.body())
         }
     }
+
+    val updateDoctorResponse= MutableLiveData<MessageResponse>()
+    fun updateDoctor(request: EditRequest,doctorId:String)=viewModelScope.launch{
+        Log.d("VIEWMODEL", "updateDoctor called")
+        val response = repo.updateDoctor(doctorId,request)
+
+        Log.d("VIEWMODEL", "Code = ${response.code()}")
+        Log.d("VIEWMODEL", "Body = ${response.body()}")
+        Log.d("VIEWMODEL", "Error = ${response.errorBody()?.string()}")
+        if (response.isSuccessful) {
+            updateDoctorResponse.postValue(response.body())
+        }
+    }
+
 }

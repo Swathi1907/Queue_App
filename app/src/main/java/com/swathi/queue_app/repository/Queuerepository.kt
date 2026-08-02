@@ -52,6 +52,7 @@ class Queuerepository {
     ) = RetrofitInstance.api
         .getQueueDetails(queueId)
     suspend fun createQueue(
+        doctorId:String,
         queueName: String,
         queueCapacity: Int,
         queueStatus: String,
@@ -62,7 +63,7 @@ class Queuerepository {
         startTime: String,
         endTime:String
     ) = RetrofitInstance.api.createQueue(
-        CreateQueueRequest(queueName, queueCapacity ,queueStatus, hospitalId  ,doctorName, roomNumber,
+        CreateQueueRequest(doctorId,queueName, queueCapacity ,queueStatus, hospitalId  ,doctorName, roomNumber,
             floor,
             startTime,
             endTime)

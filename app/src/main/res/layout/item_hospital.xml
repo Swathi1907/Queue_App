@@ -26,7 +26,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             app:tint="#2563EB"
-            android:background="@drawable/baseline_area_chart_24"
+            android:background="@drawable/baseline_local_hospital_24"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

@@ -5,6 +5,7 @@ import com.swathi.queue_app.model.CompleteCurrentResponse
 import com.swathi.queue_app.model.CreateQueueRequest
 import com.swathi.queue_app.model.DoctorListResponse
 import com.swathi.queue_app.model.DoctorRequest
+import com.swathi.queue_app.model.EditRequest
 import com.swathi.queue_app.model.HospitalModel
 import com.swathi.queue_app.model.Loginrequest
 import com.swathi.queue_app.model.Loginresponse
@@ -60,6 +61,15 @@ interface Apiservice{
 suspend fun myStatus(
     @Path("queueId") queueId: String?
 ) :Response<myStatusResponse>
+
+
+
+    @PUT("api/hospital/doctor/{doctorId}/update")
+    suspend fun updateDoctor(
+        @Path("doctorId") doctorId: String,
+        @Body request: EditRequest
+    ): Response<MessageResponse>
+
 
 
     @GET("api/queue/myActiveQueue")

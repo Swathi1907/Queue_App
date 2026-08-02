@@ -60,15 +60,7 @@ class ProfileFragment : Fragment() {
             binding.tvEmail.text = it.email
             binding.tvRole.text = it.role
         }
-        binding.cardSettings.setOnClickListener {
 
-            // Open Settings Fragment later
-        }
-
-        binding.cardAbout.setOnClickListener {
-
-            // Open About Dialog later
-        }
 
         binding.btnlogout.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())

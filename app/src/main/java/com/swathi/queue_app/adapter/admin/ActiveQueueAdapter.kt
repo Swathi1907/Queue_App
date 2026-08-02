@@ -43,7 +43,7 @@ class ActiveQueueAdapter(
 
         holder.binding.tvQueueName.text = queue.queueName
         holder.binding.tvWaiting.text = "${queue.waitingCount} Waiting"
-
+holder.binding.tvDoctorName.text=queue.doctorName
         holder.binding.tvServing.text =
             queue.servingToken?.let {
                 "Serving #$it"

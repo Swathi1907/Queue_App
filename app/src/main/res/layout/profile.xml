@@ -40,7 +40,7 @@ app:cardBackgroundColor="@color/white"
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="447dp"
                     android:paddingStart="24dp"
                     android:paddingTop="60dp"
                     android:paddingEnd="24dp"
@@ -50,191 +50,213 @@ app:cardBackgroundColor="@color/white"
 
 
                     <!-- Title -->
-                    <TextView
-                        android:id="@+id/tvName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Swaha"
-                        android:textSize="24sp"
 
-                        android:textColor="#1F2937"
-                        android:layout_marginTop="18dp"
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="50dp"
+                        android:id="@+id/layoutName"
+                        android:orientation="horizontal"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                    <TextView
+                        <TextView
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:text="Name"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/tvName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Swaha"
+                            android:textSize="18sp"/>
+                    </LinearLayout>
+
+                 <!--   <TextView
+                        android:id="@+id/tvName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Swaha"
+                        android:textSize="20sp"
+                        app:layout_constraintTop_toBottomOf="@id/txtNameLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/> -->
+                    <LinearLayout
+                        android:id="@+id/layoutRole"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/layoutName">
+
+                        <TextView
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:text="Role"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/tvRole"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="User"
+                            android:textSize="18sp"/>
+                    </LinearLayout>
+
+
+
+                   <!-- <TextView
                         android:id="@+id/tvRole"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User"
-                        android:textSize="18sp"
                         android:textColor="#0E2FC3"
-                        app:layout_constraintTop_toBottomOf="@id/tvName"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintTop_toBottomOf="@id/tvName" /> -->
+                    <LinearLayout
+                        android:id="@+id/layoutEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/layoutRole">
 
-                    <TextView
+                        <TextView
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:text="Email"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/tvEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Email@gmail.com"
+                            android:textSize="18sp"/>
+                    </LinearLayout>
+                <!--   <TextView
                         android:id="@+id/tvEmail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="swaha@gmail.com"
-                        android:textSize="20sp"
-                        android:textColor="#090909"
-                        android:textStyle="bold"
                         android:layout_marginTop="18dp"
-                        app:layout_constraintTop_toBottomOf="@id/tvRole"
+                        android:text="swaha@gmail.com"
+                        android:textColor="#090909"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintTop_toBottomOf="@id/tvRole" /> -->
 
                     <View
                         android:id="@+id/divider"
                         android:layout_width="0dp"
-                        android:layout_height="2dp"
-                        android:layout_marginTop="22dp"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="38dp"
                         android:background="#B2B2BC"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvEmail" />
-
-                    <LinearLayout
-                        android:id="@+id/cardSettings"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="8dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintTop_toBottomOf="@id/divider"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:src="@drawable/outline_display_settings_24"
-                            android:tint="#090909"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="16dp"
-                            android:text="Settings"
-
-                            android:textSize="22sp"/>
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
-
-                    </LinearLayout>
+                        app:layout_constraintTop_toBottomOf="@id/layoutEmail" />
 
 
-
-
-                    <LinearLayout
-                        android:id="@+id/cardAbout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="8dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:layout_marginTop="20dp"
-                        app:layout_constraintTop_toBottomOf="@id/cardSettings"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-
-                            android:tint="#7C4DFF"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="16dp"
-                            android:text="About Phone"
-
-                            android:textSize="22sp"/>
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
-
-                    </LinearLayout>
                     <LinearLayout
                         android:id="@+id/edit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="8dp"
+                        android:layout_marginTop="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
-                        android:layout_marginTop="20dp"
-                        app:layout_constraintTop_toBottomOf="@id/cardAbout"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/divider">
 
                         <ImageView
                             android:layout_width="28dp"
                             android:layout_height="28dp"
+android:src="@drawable/baseline_edit_24"
 
-                            android:tint="#7C4DFF"/>
+                            android:tint="#0C0C0D" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="16dp"
+                            android:layout_weight="1"
                             android:text="Edit profile"
-                            android:textSize="22sp"/>
+                            android:textSize="22sp" />
 
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
+                            android:src="@drawable/outline_chevron_forward_24" />
 
                     </LinearLayout>
+
                     <View
                         android:id="@+id/divider1"
                         android:layout_width="0dp"
-                        android:layout_height="2dp"
-                        android:background="#B2B2BC"
+                        android:layout_height="1dp"
                         android:layout_marginTop="22dp"
-                        app:layout_constraintTop_toBottomOf="@id/edit"
+                        android:background="#B2B2BC"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintTop_toBottomOf="@id/edit" />
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="24dp"
                         android:layout_marginTop="25dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/divider1"
-                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginHorizontal="24dp">
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/divider1">
 
                         <!-- Left Line -->
                         <View
                             android:layout_width="0dp"
                             android:layout_height="1dp"
                             android:layout_weight="1"
-                            android:background="#D1D5DB"/>
+                            android:background="#D1D5DB" />
 
                         <!-- Signup Text -->
                         <TextView
@@ -244,20 +266,20 @@ app:cardBackgroundColor="@color/white"
                             android:layout_marginHorizontal="12dp"
                             android:text="Log out"
                             android:textColor="@color/red_dark"
-                            android:textStyle="bold"
-                            android:textSize="20sp"/>
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
+                            android:src="@drawable/outline_chevron_forward_24" />
 
                         <!-- Right Line -->
                         <View
                             android:layout_width="0dp"
                             android:layout_height="1dp"
                             android:layout_weight="1"
-                            android:background="#D1D5DB"/>
+                            android:background="#D1D5DB" />
 
                     </LinearLayout>
 
