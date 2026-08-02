@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Notification = require("../models/notifications_model");
-const Authmiddleware = require("../middleware/Authmiddleware");
+const Authmiddleware = require("../middleware/authmiddleware");
 
 
 // Get Today's Notifications
