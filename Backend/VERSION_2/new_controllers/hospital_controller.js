@@ -65,13 +65,14 @@ const createHospital = async (req, res) => {
 
 const getHospitalDepartments = async (req, res) => {
   try {
+    console.log("get hit")
     const { hospitalId } = req.params; // Or req.query, depending on your route design
 
     const hospital = await HospitalV2.findOne({ code: hospitalId });
     if (!hospital) {
       return res.status(404).json({ success: false, message: 'Hospital not found with that code.' });
     }
-
+console.log(hospital.departments)
     return res.status(200).json({
       success: true,
       data: {
@@ -82,6 +83,7 @@ const getHospitalDepartments = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message)
     return res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -220,9 +222,6 @@ const verifyHospitalId = async (req, res) => {
   }
 };
 
-
-
-
 const getDoctorsByDepartment = async (req, res) => {
   try {
     const { hospitalId, departmentName } = req.params;
@@ -234,15 +233,15 @@ const getDoctorsByDepartment = async (req, res) => {
       });
     }
 
-    // Decode URI component in case the department name has spaces (e.g., "General Medicine")
     const decodedDepartment = decodeURIComponent(departmentName);
 
+    // Using an explicit inclusion/exclusion object to prevent projection collisions
     const doctors = await UserV2.find({
       role: 'DOCTOR',
       hospitalId: hospitalId,
-      department: decodedDepartment, // Matches against the array of strings in UserV2
+      department: decodedDepartment,
       isActive: true,
-    }).select('-password');
+    }).select({ password: 0 }); // Exclude only the password, leaving all other fields (including doctorCode) included by default
 
     return res.status(200).json({
       success: true,
@@ -258,7 +257,74 @@ const getDoctorsByDepartment = async (req, res) => {
   }
 };
 
-module.exports = { getDoctorsByDepartment };
+
+// Get all active hospitals
+const getAllHospitals = async (req, res) => {
+    try {
+        const hospitals = await HospitalV2.find({ isActive: true });
+        
+        // Optional: Format the response to fit your UI display requirements
+        const formattedHospitals = hospitals.map(hospital => ({
+            _id: hospital._id,
+            name: hospital.name,
+            code: hospital.code,
+            address: `${hospital.address.street || ''}, ${hospital.address.city}, ${hospital.address.state}`.trim(),
+            distance: "1.2 km away", // You can calculate dynamically or mock for now
+            rating: 4.8,             // Add fields if stored or map default UI placeholders
+            reviewsCount: 124,
+            waitTime: "Short wait time",
+            imageUrl: ""             // Add image URL field to schema if needed
+        }));
+
+        res.status(200).json({
+            success: true,
+            count: formattedHospitals.length,
+            data: formattedHospitals
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
+/*const getDoctorsByDepartment = async (req, res) => {
+  try {
+    const { hospitalId, departmentName } = req.params;
+
+    if (!hospitalId || !departmentName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Hospital ID and Department name are required.',
+      });
+    }
+
+    // Decode URI component in case the department name has spaces (e.g., "General Medicine")
+    const decodedDepartment = decodeURIComponent(departmentName);
+
+   const doctors = await UserV2.find({
+      role: 'DOCTOR',
+      hospitalId: hospitalId,
+      department: decodedDepartment,
+      isActive: true,
+    }).select({ password: 0, doctorCode: 1 });
+
+    return res.status(200).json({
+      success: true,
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    console.error('Error fetching doctors by department name:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error while fetching doctors.',
+    });
+  }
+};
+*/
+
 // Step 2: Verify Doctor Code within validated hospital context
 const verifyDoctorCode = async (req, res) => {
   try {
@@ -280,7 +346,7 @@ console.log(req.body);
       hospitalId: hospitalId, 
       doctorCode: doctorCode.toUpperCase() 
     }).select('-password');
-
+console.log(doctor)
     if (!doctor) {
       return res.status(404).json({
         success: false,
@@ -300,7 +366,7 @@ console.log(req.body);
 );
     // Generate JWT or return final authorization payload here if needed
     // const jwt_token = generateAuthToken(doctor);
-
+console.log("success")
     return res.status(200).json({
       success: true,
       message: 'Doctor code verified successfully!',
@@ -421,6 +487,7 @@ module.exports = {
  addDepartmentsToHospital,
 getDoctorsByDepartment,
 verifyHospitalId,
-verifyDoctorCode
+verifyDoctorCode,
+getAllHospitals
 };
 

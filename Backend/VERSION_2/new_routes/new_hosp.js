@@ -6,7 +6,8 @@ const {
   verifyHospitalId, 
   getHospitalDepartments ,
   getDoctorsByDepartment,
-  verifyDoctorCode
+  verifyDoctorCode,
+  getAllHospitals
 } = require('../new_controllers/hospital_controller');
 
 const { authmiddleware, authorize } = require('../new_middleware/authmiddleware');
@@ -46,5 +47,5 @@ router.get('/:hospitalId/getDepartments', getHospitalDepartments);
 
 // Add departments to a hospital
 router.put('/:hospitalId/addDepartments', addDepartmentsToHospital);
-
+router.get('/getAllHospitals',getAllHospitals);
 module.exports = router;

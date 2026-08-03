@@ -46,10 +46,17 @@ console.log(jwt_token)
       message: 'Patient account registered successfully',
       data: {
         _id: user._id,
-        email: user.email,
         name: user.name,
+        email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
+        hospitalId: user.hospitalId,
+        department: user.department,
+        doctorCode: user.doctorCode,
+        qualification: user.qualification,
+        rating: user.rating,
+        isAvailable: user.isAvailable,
+        isActive: user.isActive,
         jwt_token,
       },
     });
@@ -145,10 +152,24 @@ const loginUser = async (req, res) => {
 
     const jwt_token = generateToken(user._id, user.role);
 console.log(jwt_token)
-    return res.status(200).json({
+   return res.status(200).json({
       success: true,
       message: 'Login successful',
-      data: { email: user.email, name: user.name, role: user.role, jwt_token },
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        hospitalId: user.hospitalId,
+        department: user.department,
+        doctorCode: user.doctorCode,
+        qualification: user.qualification,
+        rating: user.rating,
+        isAvailable: user.isAvailable,
+        isActive: user.isActive,
+        jwt_token,
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
