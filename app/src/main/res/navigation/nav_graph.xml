@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/nav_graph">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/selectDepartmentFragment">
+
+    <fragment
+        android:id="@+id/selectDepartmentFragment"
+        android:name="com.swathi.queue_app.v2.fragments.SelectDepartmentFragment"
+        tools:layout="@layout/fragment_select_department">
+        <action
+            android:id="@+id/action_selectDepartmentFragment_to_selectDoctorFragment"
+            app:destination="@id/selectDoctorFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectDoctorFragment"
+        android:name="com.swathi.queue_app.v2.fragments.SelectDoctorFragment"
+        tools:layout="@layout/fragment_doctor_list">
+        <argument
+            android:name="departmentName"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_selectDoctorFragment_to_verifyDoctorCodeFragment"
+            app:destination="@id/verifyDoctorCodeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verifyDoctorCodeFragment"
+        android:name="com.swathi.queue_app.v2.fragments.VerifyDoctorCodeFragment"
+        tools:layout="@layout/fragment_verify_doctor_code">
+        <argument
+            android:name="doctorId"
+            app:argType="string" />
+    </fragment> -->
 
 </navigation>

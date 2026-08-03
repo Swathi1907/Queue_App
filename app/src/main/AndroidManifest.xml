@@ -21,18 +21,23 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <activity
+      <!--  <activity
             android:name=".AdminActivity"
             android:exported="false"/>
         <activity
             android:name=".MainActivity"
+            android:exported="false"/> -->
+        <activity android:name=".v2.ui.main.CompounderMainActivity"
             android:exported="false"/>
         <activity
-            android:name=".SignupActivity"
+            android:name=".v2.Activities.MainActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".v2.ui.auth.SignupActivity"
 
             android:exported="false"/>
         <activity
-            android:name=".loginactivity"
+            android:name=".v2.ui.auth.LoginActivity"
 
             android:exported="true">
             <intent-filter>

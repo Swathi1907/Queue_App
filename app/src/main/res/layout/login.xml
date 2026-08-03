@@ -132,13 +132,53 @@ app:cardBackgroundColor="@color/white"
                             android:layout_height="wrap_content" />
 
                     </com.google.android.material.textfield.TextInputLayout>
+                    <!-- Hospital ID (Conditional for Doctor / Compounder) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/hospitalIdLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:hint="Hospital ID"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+                        > <!-- Make sure you have a hospital icon or use any suitable drawable -->
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etHospitalId"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <!-- New Doctor ID Input (Hidden by default) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilDoctorCode"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/hospitalIdLayout"
+                        android:visibility="gone"
+                        android:hint="Doctor Code (e.g., DOC-HOSP-001)">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDoctorCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapCharacters" />
+                    </com.google.android.material.textfield.TextInputLayout>
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+                        app:layout_constraintTop_toBottomOf="@id/tilDoctorCode"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginHorizontal="24dp">

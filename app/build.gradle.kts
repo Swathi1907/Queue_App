@@ -65,16 +65,16 @@ dependencies {
 // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7") // or your current navigation version
 // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
-
+    implementation("com.razorpay:checkout:1.6.41")
 // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("com.airbnb.android:lottie:6.6.7")
 // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("androidx.fragment:fragment-ktx:1.8.8")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -84,6 +84,7 @@ dependencies {
 
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.androidx.navigation.fragment)
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

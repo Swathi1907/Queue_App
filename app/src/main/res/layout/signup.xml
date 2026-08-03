@@ -23,13 +23,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- White Card --><!-- White Card -->
+            <!-- White Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSignup"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="190dp"
-app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/white"
                 android:layout_marginHorizontal="12dp"
                 app:cardCornerRadius="30dp"
                 app:cardElevation="12dp"
@@ -43,10 +43,7 @@ app:cardBackgroundColor="@color/white"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:paddingTop="60dp"
-                    android:paddingBottom="50dp">
-
-                    <!-- Logo -->
-
+                    android:paddingBottom="40dp">
 
                     <!-- Title -->
                     <TextView
@@ -59,7 +56,6 @@ app:cardBackgroundColor="@color/white"
                         android:textSize="30sp"
                         android:textColor="#1E293B"
                         app:layout_constraintTop_toTopOf="parent"
-
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -89,24 +85,43 @@ app:cardBackgroundColor="@color/white"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
-
-                    <!-- Username -->
+                    <!-- Name Field -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/nameLayout"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="28dp"
-                        android:hint="Username"
-
+                        android:hint="Full Name"
                         app:layout_constraintTop_toBottomOf="@id/tvTagline"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <com.google.android.material.textfield.TextInputEditText
-                          android:id="@+id/etname"
+                            android:id="@+id/etName"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:inputType="textPersonName"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Phone Number Field -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/phoneLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:hint="Phone Number"
+                        app:layout_constraintTop_toBottomOf="@id/nameLayout"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPhone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -119,14 +134,15 @@ app:cardBackgroundColor="@color/white"
                         android:layout_marginTop="16dp"
                         android:hint="Email"
                         app:startIconDrawable="@drawable/ic_email"
-                        app:layout_constraintTop_toBottomOf="@id/nameLayout"
+                        app:layout_constraintTop_toBottomOf="@id/phoneLayout"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <com.google.android.material.textfield.TextInputEditText
-                          android:id="@+id/etEmail"
+                            android:id="@+id/etEmail"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,21 +155,23 @@ app:cardBackgroundColor="@color/white"
                         android:layout_marginTop="16dp"
                         android:hint="Password"
                         app:endIconMode="password_toggle"
-
                         app:layout_constraintTop_toBottomOf="@id/emailLayout"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <com.google.android.material.textfield.TextInputEditText
-                       android:id="@+id/etPassword"
+                            android:id="@+id/etPassword"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Signup Action Button Container -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="24dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         app:layout_constraintTop_toBottomOf="@id/passwordLayout"
@@ -182,7 +200,8 @@ app:cardBackgroundColor="@color/white"
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
+                            android:src="@drawable/outline_chevron_forward_24"
+                            app:tint="@color/green"/>
 
                         <!-- Right Line -->
                         <View
@@ -196,6 +215,8 @@ app:cardBackgroundColor="@color/white"
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Floating Logo Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/logoCard"
                 android:layout_width="100dp"
@@ -215,10 +236,8 @@ app:cardBackgroundColor="@color/white"
                     android:src="@drawable/queue_name_logo"/>
 
             </com.google.android.material.card.MaterialCardView>
-            <!-- Floating Signup Button -->
 
-            <!-- Login Text -->
-
+            <!-- Login Text Link -->
             <TextView
                 android:id="@+id/tvlogin"
                 android:layout_width="wrap_content"
@@ -232,14 +251,8 @@ app:cardBackgroundColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cardSignup" />
 
-            <!-- Floating Logo -->
-
-            <!-- Floating Signup Button -->
-
-            <!-- Login Text -->
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
-    <!-- Background -->
+
 </FrameLayout>

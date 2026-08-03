@@ -6,12 +6,11 @@ import io.socket.client.Socket
 
 object SocketManager {
 
-    private const val SERVER_URL = "http://192.168.29.181:3000"
+    private const val SERVER_URL = "https://queue-app-etce.onrender.com"
 
     private val socket: Socket = IO.socket(SERVER_URL)
 
     init {
-
         socket.on(Socket.EVENT_CONNECT) {
             Log.d("SOCKET", "Connected: ${socket.id()}")
         }

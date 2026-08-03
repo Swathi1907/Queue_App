@@ -1,4 +1,42 @@
-package com.swathi.queue_app.v2.Adapter
+package com.swathi.queue_app.v2.adapter
 
-class DepartmentAdapter {
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.swathi.queue_app.R
+
+class DepartmentAdapter(
+    private var departments: List<String>,
+    private val onDepartmentClick: (String) -> Unit
+) : RecyclerView.Adapter<DepartmentAdapter.DepartmentViewHolder>() {
+
+    inner class DepartmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvDepartmentName: TextView = itemView.findViewById(R.id.tvDepartmentName)
+
+        fun bind(department: String) {
+            tvDepartmentName.text = department
+            itemView.setOnClickListener {
+                onDepartmentClick(department)
+            }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DepartmentViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_department, parent, false)
+        return DepartmentViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: DepartmentViewHolder, position: Int) {
+        holder.bind(departments[position])
+    }
+
+    override fun getItemCount(): Int = departments.size
+
+    fun updateData(newDepartments: List<String>) {
+        departments = newDepartments
+        notifyDataSetChanged()
+    }
 }

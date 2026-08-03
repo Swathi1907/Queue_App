@@ -25,7 +25,7 @@ class SignupActivity : AppCompatActivity() {
                 "Signup Clicked",
                 Toast.LENGTH_SHORT
             ).show()
-            val name = binding.etname.text.toString()
+            val name = binding.etName.text.toString()
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
 if(name.isEmpty()||email.isEmpty()||password.isEmpty()){

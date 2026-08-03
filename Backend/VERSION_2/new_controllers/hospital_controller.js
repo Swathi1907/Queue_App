@@ -2,7 +2,7 @@ const HospitalV2 = require('../new_models/new_hosp_model');
 const UserV2= require('../new_models/peron_model')
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-
+const QueueV2 = require('../new_models/new_queuev2'); // Your new_queueV2 model
 // Inside your verifyDoctorCode controller:
 
 const generateHospitalCode = (name) => {
@@ -65,6 +65,70 @@ const createHospital = async (req, res) => {
 
 const getHospitalDepartments = async (req, res) => {
   try {
+    console.log("get hit");
+    const { hospitalId } = req.params;
+
+    // 1. Find the hospital by code
+    const hospital = await HospitalV2.findOne({ code: hospitalId });
+    if (!hospital) {
+      return res.status(404).json({ success: false, message: 'Hospital not found with that code.' });
+    }
+
+    const departmentsList = hospital.departments || [];
+
+    // 2. For each department, aggregate the waiting tokens across all doctor queues for this hospital
+    const departmentsWithCounts = await Promise.all(
+      departmentsList.map(async (deptName) => {
+        const result = await QueueV2.aggregate([
+          {
+            $match: {
+              hospitalId: hospitalId,
+              department: deptName,
+              isActive: true
+            }
+          },
+          { $unwind: "$tokens" },
+          {
+            $match: {
+              "tokens.status": "WAITING"
+            }
+          },
+          {
+            $count: "waitingCount"
+          }
+        ]);
+
+        // If no matching documents/tokens are found, count is 0
+        const waitingCount = result.length > 0 ? result[0].waitingCount : 0;
+
+        return {
+          name: deptName,
+          waitingCount: waitingCount
+        };
+      })
+    );
+
+    // 3. Return the formatted data matching your Android expectations
+    return res.status(200).json({
+      success: true,
+      data: {
+        hospitalCode: hospital.code,
+        hospitalName: hospital.name,
+        departments: departmentsWithCounts
+      }
+    });
+
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = { getHospitalDepartments };
+/*
+
+const getHospitalDepartments = async (req, res) => {
+  try {
     console.log("get hit")
     const { hospitalId } = req.params; // Or req.query, depending on your route design
 
@@ -86,7 +150,7 @@ console.log(hospital.departments)
     console.log(error.message)
     return res.status(500).json({ success: false, error: error.message });
   }
-};
+}; */
 const addDepartmentsToHospital = async (req, res) => {
   try {
     const { hospitalId } = req.params;
