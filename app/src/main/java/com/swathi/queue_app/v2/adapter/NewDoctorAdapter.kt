@@ -8,14 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.swathi.queue_app.R
 import com.swathi.queue_app.v2.models.Doctor
 
-class DoctorAdapter(
+class NewDoctorAdapter(
     private var doctors: List<Doctor>,
     private val onDoctorClick: (Doctor) -> Unit
-) : RecyclerView.Adapter<DoctorAdapter.DoctorViewHolder>() {
+) : RecyclerView.Adapter<NewDoctorAdapter.DoctorViewHolder>() {
 
     inner class DoctorViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvDoctorName: TextView = itemView.findViewById(R.id.tvDoctorName)
-
 
         fun bind(doctor: Doctor) {
             tvDoctorName.text = doctor.name

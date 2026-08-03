@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.swathi.queue_app.databinding.FragmentHospitalDetailsBinding
-import com.swathi.queue_app.viewmodel.HomeViewModel
 import kotlin.getValue
 import com.swathi.queue_app.viewmodel.admin.dashboardViewModel
 import com.swathi.queue_app.adapter.DoctorAdapter

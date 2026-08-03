@@ -6,17 +6,21 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.swathi.queue_app.R
+import com.swathi.queue_app.v2.models.DepartmentItem
 
 class DepartmentAdapter(
-    private var departments: List<String>,
-    private val onDepartmentClick: (String) -> Unit
+    private var departments: List<DepartmentItem>,
+    private val onDepartmentClick: (DepartmentItem) -> Unit
 ) : RecyclerView.Adapter<DepartmentAdapter.DepartmentViewHolder>() {
 
     inner class DepartmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvDepartmentName: TextView = itemView.findViewById(R.id.tvDepartmentName)
+        //val tvWaitingCount: TextView = itemView.findViewById(R.id.tvWaitingCount)
 
-        fun bind(department: String) {
-            tvDepartmentName.text = department
+        fun bind(department: DepartmentItem) {
+            tvDepartmentName.text = department.name
+         //   tvWaitingCount.text = "${department.waitingCount} waiting"
+
             itemView.setOnClickListener {
                 onDepartmentClick(department)
             }
@@ -35,7 +39,7 @@ class DepartmentAdapter(
 
     override fun getItemCount(): Int = departments.size
 
-    fun updateData(newDepartments: List<String>) {
+    fun updateData(newDepartments: List<DepartmentItem>) {
         departments = newDepartments
         notifyDataSetChanged()
     }

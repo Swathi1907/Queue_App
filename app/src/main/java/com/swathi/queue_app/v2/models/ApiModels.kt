@@ -100,12 +100,12 @@ data class QueueData(
     val tokens: List<Any>,
     val isActive: Boolean
 )
-data class DepartmentData(
+/*data class DepartmentData(
     val hospitalCode: String,
     val hospitalName: String,
     val departments: List<String>
-)
-/*
+)*/
+
 data class DepartmentData(
     val hospitalCode: String,
     val hospitalName: String,
@@ -115,7 +115,7 @@ data class DepartmentData(
 data class DepartmentItem(
     val name: String,
     val waitingCount: Int
-) */
+)
 data class VerifyDoctorCodeRequest(
     val email: String,
     val password: String,

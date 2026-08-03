@@ -12,8 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.swathi.queue_app.R
-import com.swathi.queue_app.v2.adapter.DoctorAdapter
-
+import com.swathi.queue_app.v2.adapter.NewDoctorAdapter
 
 import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
@@ -23,7 +22,7 @@ class SelectDoctorFragment : Fragment(R.layout.fragment_doctor_list) {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
-    private lateinit var adapter: DoctorAdapter
+    private lateinit var adapter: NewDoctorAdapter
     private lateinit var tokenManager: TokenManager
 
     private val viewModel: HospitalViewModel by viewModels()
@@ -42,10 +41,7 @@ class SelectDoctorFragment : Fragment(R.layout.fragment_doctor_list) {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = DoctorAdapter(emptyList()) { selectedDoctor ->
-            // Pass the selected doctor details forward to verification or next flow
-
-            // Example: navigate to Doctor ID Verification fragment
+        adapter = NewDoctorAdapter(emptyList()) { selectedDoctor ->
             val fragment = VerifyDoctorCodeFragment().apply {
                 arguments = Bundle().apply {
                     putString("doctorId", selectedDoctor.doctorCode)
@@ -80,11 +76,16 @@ class SelectDoctorFragment : Fragment(R.layout.fragment_doctor_list) {
                         }
                         is HospitalViewModel.Resource.Success -> {
                             progressBar.visibility = View.GONE
-                            adapter.updateData(resource.data)
+                            resource.data?.let { doctorList ->
+                                adapter.updateData(doctorList)
+                            }
                         }
                         is HospitalViewModel.Resource.Error -> {
                             progressBar.visibility = View.GONE
                             Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show()
+                        }
+                        null -> {
+                            progressBar.visibility = View.GONE
                         }
                     }
                 }
