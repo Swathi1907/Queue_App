@@ -8,7 +8,11 @@ const queueSchema = new mongoose.Schema({
   tokens: [
     {
       tokenNumber: { type: Number, required: true },
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserV2', required: true }, // Linked to your user model
       patientName: { type: String, required: true },
+      orderId: { type: String, required: true },     // Razorpay Order ID for tracking/refunds
+      paymentId: { type: String, required: true },   // Razorpay Payment ID after successful verification
+      amountPaid: { type: Number, required: true },  // Consultation fee stored securely
       status: { 
         type: String, 
         enum: ['WAITING', 'IN_CONSULTATION', 'COMPLETED', 'CANCELLED'], 

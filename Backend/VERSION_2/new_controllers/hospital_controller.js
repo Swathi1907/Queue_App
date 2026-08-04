@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const QueueV2 = require('../new_models/new_queuev2'); // Your new_queueV2 model
 // Inside your verifyDoctorCode controller:
-
+const mongoose = require('mongoose')
 const generateHospitalCode = (name) => {
   const prefix = name
     .split(' ')
@@ -17,6 +17,51 @@ const generateHospitalCode = (name) => {
   const randomDigits = crypto.randomInt(1000, 9999);
   return `${prefix}-${randomDigits}`;
 };
+
+// @desc    Get single hospital details by ID
+// @route   GET /api/v2/hospital/:id
+// @access  Public
+const getHospitalById = async (req, res) => {
+    try {
+      console.log("by id hit")
+      console.log(req.params.hospitalId)
+        const hospital = await HospitalV2.findById(req.params.hospitalId);
+
+        if (!hospital) {
+         console.log("not found")
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital not found or inactive'
+            });
+        }
+
+        // Format the response to match your Android app's HospitalDetailItem model
+        const formattedHospital = {
+            _id: hospital._id,
+            name: hospital.name,
+            code: hospital.code,
+            address: `${hospital.address.street || ''}, ${hospital.address.city}, ${hospital.address.state}`.trim(),
+            distance: "1.2 km away", // Can be calculated dynamically or mocked
+            rating: 4.8,
+            reviewsCount: 124,
+            waitTime: "Short wait time",
+            imageUrl: hospital.imageUrl || ""
+        };
+
+        res.status(200).json({
+            success: true,
+            data: formattedHospital
+        });
+    } catch (error) {
+      
+        res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
+
 
 const createHospital = async (req, res) => {
   try {
@@ -67,10 +112,16 @@ const getHospitalDepartments = async (req, res) => {
   try {
     console.log("get hit");
     const { hospitalId } = req.params;
-
+let query;
+    if (mongoose.Types.ObjectId.isValid(hospitalId)) {
+      query = { _id: hospitalId };
+    } else {
+      query = { code: hospitalId };
+    }
     // 1. Find the hospital by code
-    const hospital = await HospitalV2.findOne({ code: hospitalId });
+    const hospital = await HospitalV2.findOne(query);
     if (!hospital) {
+      
       return res.status(404).json({ success: false, message: 'Hospital not found with that code.' });
     }
 
@@ -124,7 +175,7 @@ const getHospitalDepartments = async (req, res) => {
   }
 };
 
-module.exports = { getHospitalDepartments };
+
 /*
 
 const getHospitalDepartments = async (req, res) => {
@@ -320,7 +371,77 @@ const getDoctorsByDepartment = async (req, res) => {
     });
   }
 };
+// Ensure your Doctor model path is correct
 
+/*
+const getUserSideDoctorsByDepartment = async (req, res) => {
+    try {
+        const { hospitalId, departmentName } = req.params;
+        console.log(`Fetching doctors for hospital: ${hospitalId}, department: ${departmentName}`);
+
+        // Resolve hospital query (supporting both ObjectId and custom string code)
+        let hospitalQuery;
+        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
+            hospitalQuery = { _id: hospitalId };
+        } else {
+            hospitalQuery = { code: hospitalId };
+        }
+
+        const hospital = await HospitalV2.findOne(hospitalQuery);
+        if (!hospital) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital not found'
+            });
+        }
+console.log("hosp found")
+console.log(hospital._id)
+        // Query UserV2 collection for users with role 'DOCTOR' belonging to this hospital 
+        // and whose department array contains the matching department name (case-insensitive)
+     console.log("Querying with:", {
+    hospitalId: hospital._id.toString(),
+    role: 'DOCTOR',
+    department: departmentName
+});
+
+const doctors = await UserV2.find({
+            $or: [
+                { hospitalId: hospital._id.toString() },
+                { hospitalId: hospital.code }
+            ],
+            role: 'DOCTOR',
+            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
+        });
+console.log("Raw doctors found in DB:", doctors);
+        console.log("docotors found")
+        // Format the response data to match your Android app's UserDoctorItem expectations
+        const formattedDoctors = doctors.map(doc => ({
+            _id: doc._id,
+            name: doc.name,
+            specialty: doc.qualification || departmentName, // Falls back to qualification or department name
+            imageUrl: doc.imageUrl || "",
+            peopleAhead: doc.peopleAhead || 0,
+            estimatedWaitTime: doc.estimatedWaitTime || "15 mins"
+        }));
+console.log(formattedDoctors)
+        return res.status(200).json({
+
+            success: true,
+            count: formattedDoctors.length,
+            data: formattedDoctors
+        });
+
+    } catch (error) {
+        console.error("Error fetching doctors by department:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
+
+*/
 
 // Get all active hospitals
 const getAllHospitals = async (req, res) => {
@@ -552,6 +673,8 @@ module.exports = {
 getDoctorsByDepartment,
 verifyHospitalId,
 verifyDoctorCode,
-getAllHospitals
+getAllHospitals,
+getHospitalById,
+getUserSideDoctorsByDepartment
 };
 

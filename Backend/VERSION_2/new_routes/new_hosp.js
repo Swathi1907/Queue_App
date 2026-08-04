@@ -4,10 +4,12 @@ const {
   createHospital, 
   addDepartmentsToHospital, 
   verifyHospitalId, 
-  getHospitalDepartments ,
+  getHospitalDepartments,
   getDoctorsByDepartment,
   verifyDoctorCode,
-  getAllHospitals
+  getAllHospitals,
+  getHospitalById,
+  getUserSideDoctorsByDepartment
 } = require('../new_controllers/hospital_controller');
 
 const { authmiddleware, authorize } = require('../new_middleware/authmiddleware');
@@ -20,8 +22,7 @@ const { authmiddleware, authorize } = require('../new_middleware/authmiddleware'
 router.post('/Create', authmiddleware, authorize('SUPER_ADMIN'), createHospital);
 
 // Verify hospital existence by ID/Code
-// 1. Standalone Hospital Verification route (used by Compounders / Staff step 1)
-router.post('/verifyHospitalId',authmiddleware, verifyHospitalId, (req, res) => {
+router.post('/verifyHospitalId', authmiddleware, verifyHospitalId, (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'Hospital verified successfully!',
@@ -29,23 +30,35 @@ router.post('/verifyHospitalId',authmiddleware, verifyHospitalId, (req, res) => 
   });
 });
 
-// 2. Standalone Doctor Code verification route (isolated controller for step 2)
-router.post('/verifyDoctorCode', authmiddleware,verifyDoctorCode, (req, res) => {
+// Standalone Doctor Code verification route
+router.post('/verifyDoctorCode', authmiddleware, verifyDoctorCode, (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'Doctor verified successfully!',
-    data: req.authData, // Contains final generated JWT and doctor details
+    data: req.authData,
   });
 });
+
+// Static GET routes (Must stay above dynamic :hospitalId routes)
+router.get('/getAllHospitals', getAllHospitals);
+
 // -------------------------------------------------------------
 // 2. DYNAMIC / PARAMETERIZED ROUTES (Place at the bottom)
 // -------------------------------------------------------------
-// GET /api/v2/hospitals/:hospitalId/departments/:departmentName/doctors
-router.get('/:hospitalId/departments/:departmentName/doctors', getDoctorsByDepartment);
+
 // Get department list for a hospital
 router.get('/:hospitalId/getDepartments', getHospitalDepartments);
 
 // Add departments to a hospital
 router.put('/:hospitalId/addDepartments', addDepartmentsToHospital);
-router.get('/getAllHospitals',getAllHospitals);
+
+// Get specific hospital details by ID or code
+router.get('/:hospitalId/getHospital', getHospitalById);
+
+// Get doctors by department (Admin/General view)
+router.get('/:hospitalId/departments/:departmentName/doctors', getDoctorsByDepartment);
+
+// Get user-side doctors by department
+router.get('/:hospitalId/departments/:departmentName/Usersidedoctors', getUserSideDoctorsByDepartment);
+
 module.exports = router;
