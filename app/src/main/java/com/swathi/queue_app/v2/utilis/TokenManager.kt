@@ -17,6 +17,7 @@ class TokenManager(context: Context) {
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+
     fun saveCredentials(email: String, password: String) {
         sharedPreferences.edit()
             .putString("user_email", email)
@@ -27,21 +28,44 @@ class TokenManager(context: Context) {
     fun getEmail(): String? = sharedPreferences.getString("user_email", null)
 
     fun getPassword(): String? = sharedPreferences.getString("user_password", null)
+
     fun saveAuthData(token: String, role: String) {
         sharedPreferences.edit()
             .putString("jwt_token", token)
             .putString("user_role", role)
             .apply()
     }
+
+    // Added method to save user profile info (ID and Name)
+    fun saveUserProfile(userId: String, name: String) {
+        sharedPreferences.edit()
+            .putString("user_id", userId)
+            .putString("user_name", name)
+
+            .apply()
+    }
+    fun savecontact(contact: String){
+        sharedPreferences.edit()
+            .putString("contact",contact)
+            .apply()
+    }
+    fun getContact(): String?=sharedPreferences.getString("contact","6281556414")
+    fun getUserId(): String? = sharedPreferences.getString("user_id", "6a701cfff46deb1aab284c0c")
+
+    fun getUserName(): String? = sharedPreferences.getString("user_name", null)
+
     fun saveHospitalId(hospitalId: String) {
         sharedPreferences.edit()
             .putString("hospital_id", hospitalId)
             .apply()
     }
+
     fun getToken(): String? = sharedPreferences.getString("jwt_token", null)
 
     fun getRole(): String? = sharedPreferences.getString("user_role", null)
-    fun getHospitalId(): String?=sharedPreferences.getString("hospital_id", null)
+
+    fun getHospitalId(): String? = sharedPreferences.getString("hospital_id", null)
+
     fun clear() {
         sharedPreferences.edit().clear().apply()
     }

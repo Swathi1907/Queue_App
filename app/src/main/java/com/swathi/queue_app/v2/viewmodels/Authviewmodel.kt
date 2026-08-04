@@ -3,6 +3,7 @@ package com.swathi.queue_app.v2.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.swathi.queue_app.v2.models.AuthResponse
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
@@ -18,11 +19,12 @@ class AuthViewModel : ViewModel() {
 
     private val authRepository = AuthRepository()
 
-    private val _loginState = MutableStateFlow<Resource<Any>?>(null)
-    val loginState: StateFlow<Resource<Any>?> get() = _loginState
+    private val _loginState = MutableStateFlow<Resource<AuthResponse>?>(null)
+    val loginState: StateFlow<Resource<AuthResponse>?> get() = _loginState
 
-    private val _signupState = MutableStateFlow<Resource<Any>?>(null)
-    val signupState: StateFlow<Resource<Any>?> get() = _signupState
+    // In AuthViewModel.kt
+    private val _signupState = MutableStateFlow<Resource<AuthResponse>?>(null)
+    val signupState: StateFlow<Resource<AuthResponse>?> get() = _signupState
 
     private val _verificationState = MutableStateFlow<Resource<VerifyHospitalResponse>?>(null)
     val verificationState: StateFlow<Resource<VerifyHospitalResponse>?> get() = _verificationState
@@ -40,8 +42,13 @@ class AuthViewModel : ViewModel() {
                 Log.d("AuthViewModel", "${response.body()}")
 Log.d("Authviewmodel","stopping")
                 if (response.isSuccessful) {
-                    Log.d("authviemodel","success")
-                    _loginState.value = Resource.Success(response.body() ?: "Login Successful")
+                    Log.d("authviemodel", "success")
+                    val body = response.body()
+                    if (body != null) {
+                        _loginState.value = Resource.Success(body)
+                    } else {
+                        _loginState.value = Resource.Error("Login response body is null")
+                    }
                 } else {
                     _loginState.value =
                         Resource.Error(response.errorBody()?.string() ?: "Login failed")
@@ -57,8 +64,17 @@ Log.d("Authviewmodel","stopping")
             _signupState.value = Resource.Loading
             try {
                 val response = authRepository.signup(request)
+                Log.d("signup","${response.code()}")
+                Log.d("signup","${response.body()}")
                 if (response.isSuccessful) {
-                    _signupState.value = Resource.Success(response.body() ?: "Signup Successful")
+                    val body = response.body()
+                    if (body != null) {
+                        // Explicitly pass the AuthResponse type
+                        _signupState.value = Resource.Success(body)
+                        Log.d("authview", "${_signupState.value}")
+                    } else {
+                        _signupState.value = Resource.Error("Response body is null")
+                    }
                 } else {
                     _signupState.value =
                         Resource.Error(response.errorBody()?.string() ?: "Signup failed")
@@ -67,6 +83,7 @@ Log.d("Authviewmodel","stopping")
                 _signupState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
             }
         }
+
     }
 
     // Step 1: Verify Hospital / Initial Login

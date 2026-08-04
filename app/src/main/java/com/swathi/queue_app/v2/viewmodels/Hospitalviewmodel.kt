@@ -9,8 +9,11 @@ import com.swathi.queue_app.v2.models.DepartmentData
 import com.swathi.queue_app.v2.models.Doctor
 import com.swathi.queue_app.v2.models.Hospital
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.OrderCreateRequest
+import com.swathi.queue_app.v2.models.PaymentVerifyRequest
 import com.swathi.queue_app.v2.models.UserDoctorItem
 import com.swathi.queue_app.v2.models.UserDoctorResponse
+import com.swathi.queue_app.v2.network.RetrofitInstance
 import com.swathi.queue_app.v2.repo.HospitalRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +33,10 @@ class HospitalViewModel : ViewModel() {
     private val _userDoctorsState = MutableStateFlow<Resource<List<UserDoctorItem>>>(Resource.Idle)
     val userDoctorsState: StateFlow<Resource<List<UserDoctorItem>>> = _userDoctorsState.asStateFlow()
 
+
+    private val _paymentVerificationState = MutableStateFlow<Resource<Int>>(Resource.Idle)
+    val paymentVerificationState: StateFlow<Resource<Int>> = _paymentVerificationState.asStateFlow()
+
     fun fetchUserDoctors(hospitalId: String, department: String) {
         viewModelScope.launch {
             _userDoctorsState.value = Resource.Loading
@@ -47,6 +54,40 @@ class HospitalViewModel : ViewModel() {
             }
         }
     }
+
+
+    suspend fun createRazorpayOrder(amountInINR: Int, doctorCode: String): String? {
+        return try {
+            val request = OrderCreateRequest(amount = amountInINR, doctorCode = doctorCode)
+            val response = RetrofitInstance.api.createRazorpayOrder(request)
+            if (response.isSuccessful) {
+                response.body()?.orderId
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+    fun verifyPayment(request: PaymentVerifyRequest) {
+        viewModelScope.launch {
+            _paymentVerificationState.value = Resource.Loading
+            try {
+                val response = repository.verifyPayment(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val tokenNumber = response.body()?.tokenNumber ?: 0
+                    _paymentVerificationState.value = Resource.Success(tokenNumber)
+                } else {
+                    val errorMsg = response.body()?.message ?: "Payment verification failed"
+                    _paymentVerificationState.value = Resource.Error(errorMsg)
+                }
+            } catch (e: Exception) {
+                _paymentVerificationState.value = Resource.Error(e.localizedMessage ?: "Network error")
+            }
+        }
+    }
+
     fun fetchDepartments(hospitalId: String) {
         viewModelScope.launch {
             _departmentState.value = Resource.Loading

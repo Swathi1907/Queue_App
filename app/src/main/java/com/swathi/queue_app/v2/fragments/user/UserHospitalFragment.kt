@@ -1,6 +1,7 @@
 package com.swathi.queue_app.v2.fragments.user
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -34,8 +35,8 @@ class UserHospitalFragment : Fragment(R.layout.user_hospital_page) {
         super.onViewCreated(view, savedInstanceState)
 
         // Retrieve hospitalId from arguments
-        hospitalId = arguments?.getString("hospitalId") ?: ""
-
+        hospitalId = arguments?.getString("HOSPITAL_CODE") ?: ""
+Log.d("userhospfrag","${hospitalId} received")
         // Bind Views
         toolbar = view.findViewById(R.id.toolbar)
         tvHospitalName = view.findViewById(R.id.tvHospitalName)
@@ -52,10 +53,10 @@ class UserHospitalFragment : Fragment(R.layout.user_hospital_page) {
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         departmentAdapter = UserDepartmentAdapter(emptyList()) { selectedDepartmentItem ->
             val bundle = Bundle().apply {
-                putString("hospitalId", hospitalId)
-                putString("departmentName", selectedDepartmentItem.name)
+                putString("HOSPITAL_CODE", hospitalId)
+                putString("DEPARTMENT_NAME", selectedDepartmentItem.name)
             }
-
+Log.d("userhospfrag","sending ${hospitalId}")
             val doctorFragment = DepartmentDoctorFragment().apply {
                 arguments = bundle
             }

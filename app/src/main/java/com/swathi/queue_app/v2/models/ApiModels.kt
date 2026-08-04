@@ -65,16 +65,19 @@ data class UserData(
 
 // --- Payment Models ---
 
-data class PaymentVerifyRequest(
-    val razorpay_order_id: String,
-    val razorpay_payment_id: String,
-    val razorpay_signature: String
+data class OrderCreateRequest(
+    val amount: Int,
+    val doctorCode: String
 )
 
-data class PaymentVerifyResponse(
+data class OrderCreateResponse(
     val success: Boolean,
-    val message: String
+    val orderId: String?,
+    val amount: Int?,
+    val currency: String?,
+    val message: String?
 )
+
 data class DepartmentResponseWrapper(
     val success: Boolean,
     val data: DepartmentData?
@@ -84,7 +87,23 @@ data class CreateQueueRequest(
     val department: String,
     val doctorCode: String
 )
+data class PaymentVerifyRequest(
+    val razorpay_order_id: String,
+    val razorpay_payment_id: String,
+    val razorpay_signature: String,
+    val doctorCode: String,
+    val hospitalId: String,
+    val department: String,
+    val userId: String,
+    val patientName: String,
+    val amount: Int
+)
 
+data class PaymentVerifyResponse(
+    val success: Boolean,
+    val message: String,
+    val tokenNumber: Int?
+)
 data class QueueResponseWrapper(
     val success: Boolean,
     val message: String,

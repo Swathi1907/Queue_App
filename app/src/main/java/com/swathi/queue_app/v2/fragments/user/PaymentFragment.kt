@@ -7,10 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
 import com.swathi.queue_app.databinding.FragmentPaymentBinding
+import com.swathi.queue_app.v2.models.PaymentVerifyRequest
+import com.swathi.queue_app.v2.utilis.TokenManager
+import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class PaymentFragment : Fragment(), PaymentResultWithDataListener {
@@ -18,19 +25,23 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     private var _binding: FragmentPaymentBinding? = null
     private val binding get() = _binding!!
 
-    // Dynamic variables passed from the previous doctor list screen
+    private val viewModel: HospitalViewModel by viewModels()
+    private lateinit var tokenManager: TokenManager
+
     private var doctorCode: String = ""
-    private var consultationFeeINR: Int = 500 // Default fallback
+    private var consultationFeeINR: Int = 500
     private var departmentName: String = ""
+    private var hospitalId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        tokenManager = TokenManager(requireContext())
 
-        // Retrieve arguments passed from the doctor adapter/intent
         arguments?.let {
             doctorCode = it.getString("DOCTOR_CODE", "")
-            consultationFeeINR = it.getInt("CONSULTATION_FEE_INR", 500)
+            consultationFeeINR = it.getInt("CONSULTATION_FEE_INR", 100)
             departmentName = it.getString("DEPARTMENT_NAME", "")
+            hospitalId = it.getString("HOSPITAL_CODE", "")
         }
     }
 
@@ -45,28 +56,51 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Preload Razorpay checkout for faster rendering
         Checkout.preload(requireContext().applicationContext)
-
-        // Optional: Display the dynamic fee in your UI if you have a text view for it
-        // binding.tvFee.text = "₹ $consultationFeeINR"
+        binding.tvFeeAmount.text = "₹ $consultationFeeINR"
 
         binding.btnPayNow.setOnClickListener {
-            // Use the dynamic consultation fee retrieved from arguments
             initiateRazorpayOrder(consultationFeeINR)
         }
+
+        observePaymentState()
     }
 
     private fun initiateRazorpayOrder(amountInINR: Int) {
-        // TODO: Make your Retrofit backend call here to generate the order ID on your server:
-        // POST /api/v2/payment/create-order with { amount: amountInINR, doctorCode: doctorCode }
+        val userEmail = tokenManager.getEmail() ?: "user@example.com"
+        val userContact = tokenManager.getContact() ?: "9876543210"
 
-        val serverGeneratedOrderId = "order_MOCK_123456" // Replace with actual backend response
+        // Disable button safely to prevent multiple clicks
+        _binding?.btnPayNow?.isEnabled = false
 
-        startRazorpayPayment(serverGeneratedOrderId, amountInINR)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Fetch real order ID dynamically from your backend via ViewModel
+                val serverGeneratedOrderId = viewModel.createRazorpayOrder(amountInINR, doctorCode)
+
+                // Safely update UI components once coroutine finishes
+                _binding?.let { safeBinding ->
+                    safeBinding.btnPayNow.isEnabled = true
+
+                    if (!serverGeneratedOrderId.isNullOrEmpty()) {
+                        startRazorpayPayment(serverGeneratedOrderId, amountInINR, userEmail, userContact)
+                    } else {
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Failed to generate payment order", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _binding?.btnPayNow?.isEnabled = true
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+                e.printStackTrace()
+            }
+        }
     }
 
-    private fun startRazorpayPayment(orderId: String, amountInINR: Int) {
+    private fun startRazorpayPayment(orderId: String, amountInINR: Int, email: String, contact: String) {
         val checkout = Checkout()
         checkout.setKeyID("rzp_test_TL8wCC2G31Lu5O")
 
@@ -77,36 +111,90 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                 put("image", "https://yourserver.com/logo.png")
                 put("order_id", orderId)
                 put("currency", "INR")
-                put("amount", amountInINR * 100) // Convert INR to paise
-                put("prefill.email", "user@example.com")
-                put("prefill.contact", "9876543210")
+                put("amount", amountInINR * 100)
+                put("prefill.email", email)
+                put("prefill.contact", contact)
                 put("theme.color", "#0B3C5D")
             }
 
             checkout.open(requireActivity(), options)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error in payment: ${e.message}", Toast.LENGTH_SHORT).show()
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Error in payment: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             e.printStackTrace()
         }
     }
 
     override fun onPaymentSuccess(razorpayPaymentId: String?, paymentData: PaymentData?) {
-        val orderId = paymentData?.orderId
-        val signature = paymentData?.signature
+        val orderId = paymentData?.orderId ?: ""
+        val signature = paymentData?.signature ?: ""
+        val paymentId = razorpayPaymentId ?: paymentData?.paymentId ?: ""
 
-        Log.d("RazorpaySuccess", "Payment ID: $razorpayPaymentId, Order ID: $orderId, Signature: $signature")
+        if (orderId.isEmpty() || signature.isEmpty() || paymentId.isEmpty()) {
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Payment data missing from Razorpay callback", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
 
-        // TODO: Send orderId, razorpayPaymentId, signature, and doctorCode to your backend verify route:
-        // POST /api/v2/payment/verify
+        Log.d("RazorpaySuccess", "Payment ID: $paymentId, Order ID: $orderId, Signature: $signature")
 
-        Toast.makeText(requireContext(), "Payment Successful! ID: $razorpayPaymentId", Toast.LENGTH_LONG).show()
+        val userId = tokenManager.getUserId() ?: ""
+        Log.d("payfrag", userId)
+        val patientName = tokenManager.getUserName() ?: "Patient"
+
+        val verifyRequest = PaymentVerifyRequest(
+            razorpay_order_id = orderId,
+            razorpay_payment_id = paymentId,
+            razorpay_signature = signature,
+            doctorCode = doctorCode,
+            hospitalId = hospitalId,
+            department = departmentName,
+            userId = userId,
+            patientName = patientName,
+            amount = consultationFeeINR
+        )
+        Log.d("payfrag", "verify called")
+        viewModel.verifyPayment(verifyRequest)
     }
 
+    private fun observePaymentState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.paymentVerificationState.collectLatest { resource ->
+                if (!isAdded) return@collectLatest
 
+                when (resource) {
+                    is HospitalViewModel.Resource.Loading -> {
+                        // Show progress bar if needed
+                    }
+                    is HospitalViewModel.Resource.Success -> {
+                        val tokenNumber = resource.data
+                        Toast.makeText(
+                            requireContext(),
+                            "Queue Confirmed! Token Number: $tokenNumber",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is HospitalViewModel.Resource.Error -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Verification Failed: ${resource.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d("payfrag", "${resource.message}")
+                    }
+                    is HospitalViewModel.Resource.Idle -> {}
+                }
+            }
+        }
+    }
 
     override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
         Log.e("RazorpayError", "Error Code: $code, Response: $response")
-        Toast.makeText(requireContext(), "Payment Failed: $response", Toast.LENGTH_LONG).show()
+        if (isAdded) {
+            Toast.makeText(requireContext(), "Payment Failed: $response", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onDestroyView() {

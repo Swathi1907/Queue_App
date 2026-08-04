@@ -2,6 +2,8 @@ package com.swathi.queue_app.v2.repo
 
 import com.swathi.queue_app.v2.models.Hospital
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.PaymentVerifyRequest
+import com.swathi.queue_app.v2.models.PaymentVerifyResponse
 import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.network.RetrofitInstance
 import retrofit2.Response
@@ -32,7 +34,11 @@ class HospitalRepository {
             Result.failure(e)
         }
     }
-
+    suspend fun verifyPayment(request: PaymentVerifyRequest): Response<PaymentVerifyResponse> {
+        return RetrofitInstance.api.verifyPayment(request).also{
+            println("verify pay called through hosp repo")
+        }
+    }
     suspend fun getUserDoctors(hospitalId: String, department: String): Response<UserDoctorResponse>? {
         return try {
             RetrofitInstance.api.getUserDoctors(hospitalId, department).also {

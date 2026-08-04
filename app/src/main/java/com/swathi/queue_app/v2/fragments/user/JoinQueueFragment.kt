@@ -18,8 +18,10 @@ class JoinQueueFragment : Fragment() {
     // Doctor details received from the previous doctor list screen
     private var doctorCode: String = ""
     private var consultationFeeINR: Int = 500
+    private var hospitalId: String=""
     private var doctorName: String = "Dr. Emilia Emelson"
     private var specialty: String = "General Practice"
+    private var departmentName: String = " "
     private var waitTimeText: String = "🕒 Current Wait: ~45 mins"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +30,8 @@ class JoinQueueFragment : Fragment() {
             doctorCode = it.getString("DOCTOR_CODE", "")
             consultationFeeINR = it.getInt("CONSULTATION_FEE_INR", 500)
             doctorName = it.getString("DOCTOR_NAME", "Dr. Emilia Emelson")
-            specialty = it.getString("SPECIALTY", "General Practice")
+            hospitalId= it.getString("HOSPITAL_CODE","")
+            departmentName=it.getString("DEPARTMENT_NAME","")
             waitTimeText = it.getString("WAIT_TIME", "🕒 Current Wait: ~45 mins")
         }
     }
@@ -50,7 +53,7 @@ class JoinQueueFragment : Fragment() {
         binding.tvWaitTime.text = waitTimeText
 
         // Handle button click to pass data over to the Payment Fragment
-        binding.btnConfirmJoin.setOnClickListener {
+
             // Handle button click to pass data over to the Payment Fragment
             binding.btnConfirmJoin.setOnClickListener {
                 val symptoms = binding.etSymptoms.text.toString().trim()
@@ -61,6 +64,8 @@ class JoinQueueFragment : Fragment() {
                     putInt("CONSULTATION_FEE_INR", consultationFeeINR)
                     putString("DOCTOR_NAME", doctorName)
                     putString("SPECIALTY", specialty)
+                    putString("DEPARTMENT_NAME",departmentName)
+                    putString("HOSPITAL_CODE",hospitalId)
                     putString("SYMPTOMS", symptoms)
                 }
 
@@ -77,7 +82,7 @@ class JoinQueueFragment : Fragment() {
 
 
     }
-        }
+
     }
 
     override fun onDestroyView() {

@@ -45,9 +45,9 @@ class HomeFragment : Fragment() {
         hospitalAdapter = HospitalAdapter(emptyList()) { hospital ->
         // 1. Create a bundle to pass the hospital ID directly
         val bundle = Bundle().apply {
-            putString("hospitalId", hospital._id)
+            putString("HOSPITAL_CODE", hospital._id)
         }
-Log.d("homeuser","${hospital._id}")
+Log.d("homeuser","${hospital._id} sending")
         // 2. Instantiate UserHospitalFragment and attach arguments
         val hospitalFragment = UserHospitalFragment().apply {
             arguments = bundle

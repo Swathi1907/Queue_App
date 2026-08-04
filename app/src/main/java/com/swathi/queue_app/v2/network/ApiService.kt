@@ -8,6 +8,10 @@ import com.swathi.queue_app.v2.models.DoctorResponse
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
 import com.swathi.queue_app.v2.models.HospitalResponse
 import com.swathi.queue_app.v2.models.LoginRequest
+import com.swathi.queue_app.v2.models.OrderCreateRequest
+import com.swathi.queue_app.v2.models.OrderCreateResponse
+import com.swathi.queue_app.v2.models.PaymentVerifyRequest
+import com.swathi.queue_app.v2.models.PaymentVerifyResponse
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.UserDoctorResponse
@@ -43,7 +47,10 @@ interface ApiService {
     suspend fun createDepartmentQueue(
         @Body request: CreateQueueRequest
     ): Response<QueueResponseWrapper>
-
+    @POST("api/v2/payment/create-order")
+    suspend fun createRazorpayOrder(
+        @Body request: OrderCreateRequest
+    ): Response<OrderCreateResponse>
     @GET("api/v2/hospital/getAllHospitals") // Update with your exact route path if needed
     suspend fun getAllHospitals(): Response<HospitalResponse>
     @GET("api/v2/hospital/{hospitalId}/getHospital") // Match your exact Express route path
@@ -55,7 +62,10 @@ interface ApiService {
         @Path("hospitalId") hospitalId: String
     ): Response<DepartmentResponseWrapper>
 
-
+    @POST("api/v2/payment/verify")
+    suspend fun verifyPayment(
+        @Body request: PaymentVerifyRequest
+    ): Response<PaymentVerifyResponse>
     @GET("api/v2/hospital/{hospitalId}/departments/{departmentName}/Usersidedoctors")
     suspend fun getUserDoctors(
         @Path("hospitalId") hospitalId: String,

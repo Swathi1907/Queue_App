@@ -121,10 +121,11 @@ class LoginActivity : AppCompatActivity() {
                                     userData?.jwt_token?.let { token ->
                                         tokenManager.saveAuthData(token, userRole)
                                         Toast.makeText(this@LoginActivity, "Login Successful!", Toast.LENGTH_SHORT).show()
-                                        // TODO: Navigate to Patient Activity
+
                                         val intent = Intent(this@LoginActivity,
                                            MainActivity::class.java)
                                         startActivity(intent)
+
                                     }
                                 }
                             }

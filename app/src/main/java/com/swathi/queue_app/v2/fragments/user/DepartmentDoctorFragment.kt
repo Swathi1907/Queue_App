@@ -1,6 +1,7 @@
 package com.swathi.queue_app.v2.fragments.user
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -32,9 +33,9 @@ class DepartmentDoctorFragment : Fragment(R.layout.department_doctor_fragment) {
         super.onViewCreated(view, savedInstanceState)
 
         // Retrieve arguments passed from UserHospitalFragment
-        hospitalId = arguments?.getString("hospitalId") ?: ""
-        departmentName = arguments?.getString("departmentName") ?: ""
-
+        hospitalId = arguments?.getString("HOSPITAL_CODE") ?: ""
+        departmentName = arguments?.getString("DEPARTMENT_NAME") ?: ""
+Log.d("deptdoctorfrag","${hospitalId}, ${departmentName} received")
         // Bind Views matching your XML layout IDs
         tvPageTitle = view.findViewById(R.id.tvPageTitle)
         chipDepartment = view.findViewById(R.id.chipDepartment)
@@ -52,7 +53,8 @@ class DepartmentDoctorFragment : Fragment(R.layout.department_doctor_fragment) {
                 putString("DOCTOR_CODE", selectedDoctor.doctorCode)
                 putInt("CONSULTATION_FEE_INR", selectedDoctor.consultationFee.toInt())
                 putString("DOCTOR_NAME", selectedDoctor.name)
-                putString("SPECIALTY", selectedDoctor.specialty ?: departmentName)
+                putString("HOSPITAL_CODE",hospitalId)
+                putString("DEPARTMENT_NAME", selectedDoctor.specialty ?: departmentName)
                 putString("WAIT_TIME", "🕒 Current Wait: ~${selectedDoctor.estimatedWaitTime} mins")
             }
 
