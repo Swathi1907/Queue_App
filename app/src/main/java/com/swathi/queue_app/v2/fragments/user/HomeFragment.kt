@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.swathi.queue_app.R
 import com.swathi.queue_app.v2.adapter.HospitalAdapter
 import com.swathi.queue_app.databinding.UserHomeScreenBinding
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
@@ -42,8 +43,22 @@ class HomeFragment : Fragment() {
 
     private fun setupRecyclerView() {
         hospitalAdapter = HospitalAdapter(emptyList()) { hospital ->
-            Toast.makeText(requireContext(), "Selected: ${hospital.name}", Toast.LENGTH_SHORT).show()
+        // 1. Create a bundle to pass the hospital ID directly
+        val bundle = Bundle().apply {
+            putString("hospitalId", hospital._id)
         }
+Log.d("homeuser","${hospital._id}")
+        // 2. Instantiate UserHospitalFragment and attach arguments
+        val hospitalFragment = UserHospitalFragment().apply {
+            arguments = bundle
+        }
+
+        // 3. Perform the fragment transaction to navigate
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, hospitalFragment) // Make sure this matches your container ID
+            .addToBackStack(null)
+            .commit()
+    }
 
         binding.rvNearbyHospitals.apply {
             layoutManager = LinearLayoutManager(requireContext())

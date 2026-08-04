@@ -372,7 +372,82 @@ const getDoctorsByDepartment = async (req, res) => {
   }
 };
 // Ensure your Doctor model path is correct
+// Adjust path to your queue model
 
+const getUserSideDoctorsByDepartment = async (req, res) => {
+    try {
+        const { hospitalId, departmentName } = req.params;
+        console.log(`Fetching doctors for hospital: ${hospitalId}, department: ${departmentName}`);
+
+        let hospitalQuery;
+        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
+            hospitalQuery = { _id: hospitalId };
+        } else {
+            hospitalQuery = { code: hospitalId };
+        }
+
+        const hospital = await HospitalV2.findOne(hospitalQuery);
+        if (!hospital) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital not found'
+            });
+        }
+
+        const doctors = await UserV2.find({
+            $or: [
+                { hospitalId: hospital._id.toString() },
+                { hospitalId: hospital.code }
+            ],
+            role: 'DOCTOR',
+            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
+        });
+
+        const todayDate = new Date().toISOString().split('T')[0];
+
+        // Format doctors and fetch real-time queue metrics for each
+        const formattedDoctors = await Promise.all(doctors.map(async (doc) => {
+            const activeQueue = await QueueV2.findOne({ 
+                doctorCode: doc.doctorCode || doc._id.toString(), 
+                date: todayDate,
+                isActive: true 
+            });
+
+            let peopleAheadCount = 0;
+            if (activeQueue && activeQueue.tokens) {
+                peopleAheadCount = activeQueue.tokens.filter(t => t.status === 'WAITING').length;
+            }
+
+            const calculatedWaitMinutes = peopleAheadCount * 15;
+            const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
+
+            return {
+                _id: doc._id,
+                doctorCode: doc.doctorCode || doc._id.toString(),
+                name: doc.name,
+                specialty: doc.qualification || departmentName,
+                imageUrl: doc.imageUrl || "",
+                consultationFee: doc.consultationFee || 0, // Included consultation fee (stored in INR)
+                peopleAhead: peopleAheadCount,
+                estimatedWaitTime: waitTimeText
+            };
+        }));
+
+        return res.status(200).json({
+            success: true,
+            count: formattedDoctors.length,
+            data: formattedDoctors
+        });
+
+    } catch (error) {
+        console.error("Error fetching doctors by department:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
 /*
 const getUserSideDoctorsByDepartment = async (req, res) => {
     try {

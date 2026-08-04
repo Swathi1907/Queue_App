@@ -15,7 +15,6 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
     phoneNumber: {
       type: String,
       required: [true, 'Phone number is required'],
@@ -46,8 +45,8 @@ const userSchema = new mongoose.Schema(
         'Hospital link is required for doctors and compounders',
       ],
     },
-   department: {
-      type: [String], // Changed from String to an array of strings
+    department: {
+      type: [String],
       trim: true,
       default: undefined,
       index: true,
@@ -59,7 +58,6 @@ const userSchema = new mongoose.Schema(
       ],
       validate: {
         validator: function (v) {
-          // If role is DOCTOR, ensure the array is provided and has at least 1 item
           if (this.role === 'DOCTOR') {
             return Array.isArray(v) && v.length > 0;
           }
@@ -89,6 +87,17 @@ const userSchema = new mongoose.Schema(
           return this.role === 'DOCTOR';
         },
         'Qualification is required for doctors',
+      ],
+    },
+    consultationFee: {
+      type: Number,
+      default: 0,
+      min: [0, 'Consultation fee cannot be negative'],
+      required: [
+        function () {
+          return this.role === 'DOCTOR';
+        },
+        'Consultation fee is required for doctors',
       ],
     },
     rating: {
@@ -122,9 +131,6 @@ userSchema.index(
   { hospitalId: 1, doctorCode: 1 },
   { unique: true, sparse: true }
 );
-
-// REMOVED the pre('save') hook entirely. 
-// Passwords are now handled and hashed manually in the controllers.
 
 // Helper method to compare passwords during login
 userSchema.methods.comparePassword = async function (candidatePassword) {

@@ -111,7 +111,41 @@ data class DepartmentData(
     val hospitalName: String,
     val departments: List<DepartmentItem>
 )
+data class HospitalDetailResponse(
+    val success: Boolean,
+    val data: HospitalDetailItem
+)
+// --- User-Side Doctor Display Models ---
 
+
+data class UserDoctorResponse(
+    val success: Boolean,
+    val count: Int,
+    val message: String?,
+    val data: List<UserDoctorItem>
+)
+
+data class UserDoctorItem(
+    @SerializedName("_id") val id: String,
+    val doctorCode: String,
+    val name: String,
+    val specialty: String,
+    val imageUrl: String?,
+    val consultationFee: Double, // Matches the fee sent from the backend (in INR)
+    val peopleAhead: Int,
+    val estimatedWaitTime: String
+)
+data class HospitalDetailItem(
+    @SerializedName("_id") val id: String,
+    val name: String,
+    val code: String,
+    val address: String,
+    val distance: String?,
+    val rating: Double?,
+    val reviewsCount: Int?,
+    val waitTime: String?,
+    val imageUrl: String?
+)
 data class DepartmentItem(
     val name: String,
     val waitingCount: Int

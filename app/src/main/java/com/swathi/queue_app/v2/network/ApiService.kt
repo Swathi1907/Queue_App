@@ -5,10 +5,12 @@ import com.swathi.queue_app.v2.models.CreateQueueRequest
 import com.swathi.queue_app.v2.models.DepartmentResponse
 import com.swathi.queue_app.v2.models.DepartmentResponseWrapper
 import com.swathi.queue_app.v2.models.DoctorResponse
+import com.swathi.queue_app.v2.models.HospitalDetailResponse
 import com.swathi.queue_app.v2.models.HospitalResponse
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
 import com.swathi.queue_app.v2.models.SignupRequest
+import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeResponse
 import com.swathi.queue_app.v2.models.VerifyHospitalRequest
@@ -44,12 +46,21 @@ interface ApiService {
 
     @GET("api/v2/hospital/getAllHospitals") // Update with your exact route path if needed
     suspend fun getAllHospitals(): Response<HospitalResponse>
-
+    @GET("api/v2/hospital/{hospitalId}/getHospital") // Match your exact Express route path
+    suspend fun getHospitalById(
+        @Path("hospitalId") hospitalId: String
+    ): Response<HospitalDetailResponse>
     @GET("api/v2/hospital/{hospitalId}/getDepartments")
    suspend  fun getDepartments(
         @Path("hospitalId") hospitalId: String
     ): Response<DepartmentResponseWrapper>
 
+
+    @GET("api/v2/hospital/{hospitalId}/departments/{departmentName}/Usersidedoctors")
+    suspend fun getUserDoctors(
+        @Path("hospitalId") hospitalId: String,
+        @Path("departmentName") departmentName: String
+    ): Response<UserDoctorResponse>
     @GET("api/v2/hospital/{hospitalId}/departments/{departmentName}/doctors")
     suspend fun getDoctorsByDepartment(
         @Path("hospitalId") hospitalId: String,

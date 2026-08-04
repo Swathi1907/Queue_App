@@ -4,7 +4,9 @@ const app=express(); // express appliaction
 app.use(express.urlencoded({ extended: true }));
 require("./firebase");
 app.use(express.json());
-const PORT = 5000;
+const crypto = require('crypto');
+const PORT = 5001;
+const QueueModel = require('./VERSION_2/new_models/new_queuev2')
 const mongoose=require('mongoose');
 MONGO_URI=process.env.MONGO_URI;
 mongoose.connect(MONGO_URI).then(()=>{
@@ -75,11 +77,19 @@ const v2QueueRoutes = require('./VERSION_2/new_routes/new_queue');
 app.use('/api/v2/queue', v2QueueRoutes);
 
 
-
-
-app.post('/api/v2/payment/verify', (req, res) => {
+app.post('/api/v2/payment/verify', async (req, res) => {
     try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const { 
+            razorpay_order_id, 
+            razorpay_payment_id, 
+            razorpay_signature, 
+            doctorCode, 
+            hospitalId, 
+            department, 
+            userId, 
+            patientName,
+            amount 
+        } = req.body;
 
         // Your Razorpay Key Secret from the dashboard
         const secret = process.env.PAYMENT_TEST_KEY_SECRET; 
@@ -90,29 +100,59 @@ app.post('/api/v2/payment/verify', (req, res) => {
             .update(razorpay_order_id + '|' + razorpay_payment_id)
             .digest('hex');
 
-        if (generated_signature === razorpay_signature) {
-            // Signature matches! Payment is authentic.
-            // TODO: Update your database to mark the consultation slot as booked/confirmed.
-            return res.status(200).json({ 
-                success: true, 
-                message: 'Payment verified successfully and queue slot confirmed.' 
-            });
-        } else {
-            // Signature mismatch
+        if (generated_signature !== razorpay_signature) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Payment verification failed: Invalid signature.' 
             });
         }
+
+        // Signature matches! Payment is authentic. Now update the queue database.
+        const todayDate = new Date().toISOString().split('T')[0];
+
+        // 1. Atomically find the queue document for today or create one if it doesn't exist
+        const queueDoc = await QueueModel.findOneAndUpdate(
+            { doctorCode: doctorCode, date: todayDate },
+            { 
+                $setOnInsert: { 
+                    hospitalId: hospitalId, 
+                    department: department,
+                    isActive: true 
+                } 
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+
+        // 2. Determine the next sequential token number
+        const nextTokenNumber = queueDoc.tokens.length + 1;
+
+        // 3. Push the patient token into the array with payment details
+        queueDoc.tokens.push({
+            tokenNumber: nextTokenNumber,
+            userId: userId,
+            patientName: patientName,
+            orderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+            amountPaid: amount || 0,
+            status: 'WAITING'
+        });
+
+        await queueDoc.save();
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Payment verified successfully and queue slot confirmed.',
+            tokenNumber: nextTokenNumber
+        });
+
     } catch (error) {
-        console.error('Error verifying payment:', error);
+        console.error('Error verifying payment and updating queue:', error);
         return res.status(500).json({ 
             success: false, 
             error: error.message 
         });
     }
 });
-
 
 server.listen(PORT, "0.0.0.0",()=>{
     console.log(`server running at ${PORT}`);

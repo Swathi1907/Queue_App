@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.v2.models.DepartmentData
 import com.swathi.queue_app.v2.models.Doctor
 import com.swathi.queue_app.v2.models.Hospital
+import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.UserDoctorItem
+import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.repo.HospitalRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,10 +23,30 @@ class HospitalViewModel : ViewModel() {
 
     private val _doctorState = MutableStateFlow<Resource<List<Doctor>>>(Resource.Idle)
     val doctorState: StateFlow<Resource<List<Doctor>>> = _doctorState.asStateFlow()
-
+    private val _hospitalDetail = MutableLiveData<HospitalDetailResponse?>()
+    val hospitalDetail: LiveData<HospitalDetailResponse?> get() = _hospitalDetail
     private val _departmentState = MutableStateFlow<Resource<DepartmentData>?>(null)
     val departmentState: StateFlow<Resource<DepartmentData>?> = _departmentState
+    private val _userDoctorsState = MutableStateFlow<Resource<List<UserDoctorItem>>>(Resource.Idle)
+    val userDoctorsState: StateFlow<Resource<List<UserDoctorItem>>> = _userDoctorsState.asStateFlow()
 
+    fun fetchUserDoctors(hospitalId: String, department: String) {
+        viewModelScope.launch {
+            _userDoctorsState.value = Resource.Loading
+            try {
+                val response = repository.getUserDoctors(hospitalId, department)
+                val body = response?.body()
+                if (response != null && response.isSuccessful && body?.success == true) {
+                    // Directly use body.data since it's already a List<UserDoctorItem>
+                    _userDoctorsState.value = Resource.Success(body.data)
+                } else {
+                    _userDoctorsState.value = Resource.Error(body?.message ?: "Failed to load user doctors")
+                }
+            } catch (e: Exception) {
+                _userDoctorsState.value = Resource.Error(e.message ?: "Unknown error occurred")
+            }
+        }
+    }
     fun fetchDepartments(hospitalId: String) {
         viewModelScope.launch {
             _departmentState.value = Resource.Loading
@@ -78,6 +101,21 @@ class HospitalViewModel : ViewModel() {
             }
         }
     }
+    fun loadHospitalById(hospitalId: String) {
+        viewModelScope.launch {
+            val result = repository.getHospitalDetails(hospitalId)
+
+            result.onSuccess {
+                Log.d("hospvies","hosp sucess")
+                _hospitalDetail.value = it
+            }.onFailure {
+
+                _error.value = it.localizedMessage ?: "Failed to load hospital details"
+                Log.d("hospvies","${_error.value}")
+            }
+        }
+    }
+
     sealed class Resource<out T> {
         object Idle : Resource<Nothing>()
         object Loading : Resource<Nothing>()
