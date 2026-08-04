@@ -427,7 +427,7 @@ const getUserSideDoctorsByDepartment = async (req, res) => {
                 name: doc.name,
                 specialty: doc.qualification || departmentName,
                 imageUrl: doc.imageUrl || "",
-                consultationFee: doc.consultationFee || 0, // Included consultation fee (stored in INR)
+                consultationFee: doc.consultationFee || 100, // Included consultation fee (stored in INR)
                 peopleAhead: peopleAheadCount,
                 estimatedWaitTime: waitTimeText
             };

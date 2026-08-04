@@ -6,6 +6,8 @@ require("./firebase");
 app.use(express.json());
 const crypto = require('crypto');
 const PORT = 5001;
+const Razorpay = require('razorpay');
+
 const QueueModel = require('./VERSION_2/new_models/new_queuev2')
 const mongoose=require('mongoose');
 MONGO_URI=process.env.MONGO_URI;
@@ -76,9 +78,11 @@ app.use('/api/v2/auth', v2AuthRoutes);
 const v2QueueRoutes = require('./VERSION_2/new_routes/new_queue');
 app.use('/api/v2/queue', v2QueueRoutes);
 
-
 app.post('/api/v2/payment/verify', async (req, res) => {
     try {
+        console.log("=== PAYMENT VERIFY HIT ===");
+        console.log("Request Body Received:", JSON.stringify(req.body, null, 2));
+
         const { 
             razorpay_order_id, 
             razorpay_payment_id, 
@@ -91,6 +95,15 @@ app.post('/api/v2/payment/verify', async (req, res) => {
             amount 
         } = req.body;
 
+        // Validate required fields before proceeding with database operations
+        if (!hospitalId || !department || !userId || !doctorCode) {
+            console.log("Validation Failed! Missing fields:", { hospitalId, department, userId, doctorCode });
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Validation failed: hospitalId, department, userId, and doctorCode are required.' 
+            });
+        }
+
         // Your Razorpay Key Secret from the dashboard
         const secret = process.env.PAYMENT_TEST_KEY_SECRET; 
 
@@ -101,17 +114,20 @@ app.post('/api/v2/payment/verify', async (req, res) => {
             .digest('hex');
 
         if (generated_signature !== razorpay_signature) {
+            console.log("Signature Mismatch! Expected:", generated_signature, "Got:", razorpay_signature);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Payment verification failed: Invalid signature.' 
             });
         }
 
+        console.log("Signature verified successfully. Updating database...");
+
         // Signature matches! Payment is authentic. Now update the queue database.
         const todayDate = new Date().toISOString().split('T')[0];
 
         // 1. Atomically find the queue document for today or create one if it doesn't exist
-        const queueDoc = await QueueModel.findOneAndUpdate(
+       /* const queueDoc = await QueueModel.findOneAndUpdate(
             { doctorCode: doctorCode, date: todayDate },
             { 
                 $setOnInsert: { 
@@ -120,8 +136,22 @@ app.post('/api/v2/payment/verify', async (req, res) => {
                     isActive: true 
                 } 
             },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+        );*/
+        // Change this block in server.js around line 150:
+const queueDoc = await QueueModel.findOneAndUpdate(
+    { doctorCode: doctorCode, date: todayDate },
+    { 
+        $set: { 
+            hospitalId: hospitalId, 
+            department: department,
+            isActive: true 
+        }
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+);
+
+        console.log("Queue Document fetched/created:", queueDoc._id);
 
         // 2. Determine the next sequential token number
         const nextTokenNumber = queueDoc.tokens.length + 1;
@@ -138,6 +168,7 @@ app.post('/api/v2/payment/verify', async (req, res) => {
         });
 
         await queueDoc.save();
+        console.log("Queue updated successfully with token number:", nextTokenNumber);
 
         return res.status(200).json({ 
             success: true, 
@@ -154,6 +185,46 @@ app.post('/api/v2/payment/verify', async (req, res) => {
     }
 });
 
+// Initialize Razorpay instance with your test/live keys
+const razorpayInstance = new Razorpay({
+    key_id: process.env.PAYMENT_TEST_API_KEY,
+    key_secret: process.env.PAYMENT_TEST_KEY_SECRET
+});
+
+// Create Order Endpoint
+// Create Order Endpoint
+app.post('/api/v2/payment/create-order', async (req, res) => {
+    try {
+        const { amount, doctorCode } = req.body;
+
+        // Keep the receipt short (under 40 characters)
+        const shortDocCode = (doctorCode || 'doc').substring(0, 10);
+        const uniqueSuffix = Date.now().toString().slice(-8); // Last 8 digits of timestamp
+
+        const options = {
+            amount: amount * 100, // Amount in smallest currency unit (paise for INR)
+            currency: "INR",
+            receipt: `rcpt_${shortDocCode}_${uniqueSuffix}` // Well under 40 chars
+        };
+
+        const order = await razorpayInstance.orders.create(options);
+        
+        if (!order) {
+            return res.status(500).json({ success: false, message: "Error creating Razorpay order" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            orderId: order.id,
+            amount: order.amount,
+            currency: order.currency
+        });
+
+    } catch (error) {
+        console.error("Error creating order:", error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+});
 server.listen(PORT, "0.0.0.0",()=>{
     console.log(`server running at ${PORT}`);
 })

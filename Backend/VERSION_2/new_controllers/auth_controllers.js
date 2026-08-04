@@ -13,12 +13,13 @@ const registerUser = async (req, res, next) => {
   try {
     console.log("Register called");
     const { name, email, phoneNumber, password } = req.body;
-
+console.log(req.body)
     const queryConditions = [{ phoneNumber }];
     if (email) queryConditions.push({ email });
-
+console.log("user created")
     const existingUser = await User.findOne({ $or: queryConditions });
     if (existingUser) {
+console.log("existing")
       return res.status(400).json({
         success: false,
         message: 'User with this phone number or email already exists',
