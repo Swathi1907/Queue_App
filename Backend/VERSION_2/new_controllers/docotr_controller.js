@@ -72,7 +72,7 @@ const session_there = async (req, res) => {
                 data: null
             });
         }
-
+console.log("there")
         // Return the full session structure containing queue metadata and the tokens array
         return res.status(200).json({
             success: true,

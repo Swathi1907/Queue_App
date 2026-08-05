@@ -22,7 +22,7 @@ const { authmiddleware, authorize } = require('../new_middleware/authmiddleware'
 router.post('/Create', authmiddleware, authorize('SUPER_ADMIN'), createHospital);
 
 // Verify hospital existence by ID/Code
-router.post('/verifyHospitalId', authmiddleware, verifyHospitalId, (req, res) => {
+router.post('/verifyHospitalId', verifyHospitalId, (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'Hospital verified successfully!',
