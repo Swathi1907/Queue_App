@@ -79,27 +79,14 @@ class SignupActivity : AppCompatActivity() {
                         }
                         is Resource.Success<*> -> {
                             binding.btnSignup.isEnabled = true
-                            val authResponse = resource.data as? AuthResponse ?: return@collect
-                            val userData = authResponse.data
-                            val userRole = (userData?.role ?: "PATIENT").uppercase(java.util.Locale.ROOT)
 
-                            if (userData != null) {
-                                val userId = userData._id
-                                val token = userData.jwt_token ?: ""
-                                val userEmail = userData.email ?: binding.etEmail.text.toString().trim()
-                                val contact = userData.phoneNumber ?: binding.etPhone.text.toString().trim()
+                            // Optional: If you still need to capture any data or display a message
+                            Toast.makeText(this@SignupActivity, "Registration Successful! Please login.", Toast.LENGTH_LONG).show()
 
-                                tokenManager.saveAuthData(token, userRole)
-                                tokenManager.saveUserProfile(userId, userData.name)
-                                tokenManager.saveCredentials(userEmail, "")
-                                tokenManager.savecontact(contact)
-                            }
-
-                            Toast.makeText(this@SignupActivity, "Registration Successful!", Toast.LENGTH_SHORT).show()
-
+                            // Navigate to LoginActivity and clear the signup stack
                             val intent = Intent(
                                 this@SignupActivity,
-                                com.swathi.queue_app.v2.Activities.MainActivity::class.java
+                                LoginActivity::class.java
                             ).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             }

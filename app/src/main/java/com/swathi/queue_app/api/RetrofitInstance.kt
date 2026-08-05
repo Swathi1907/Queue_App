@@ -13,7 +13,7 @@ object RetrofitInstance {
     // 172.22.21.103    172.22.22.206
     //"http://172.22.22.206:1010/"
  // private const val BASE_URL = "http://172.22.22.206:1010/"
-    const val BASE_URL = "http://172.22.23.34:5000/"
+    const val BASE_URL = "http://10.125.17.138:5000/"
     private val client = OkHttpClient.Builder()
         .addInterceptor { chain ->
 
