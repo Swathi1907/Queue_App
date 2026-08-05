@@ -28,7 +28,7 @@ class AuthInterceptor : Interceptor {
 
 object RetrofitInstance {
     // Change this to match your PC's actual local IPv4 address (e.g., 192.168.x.x)
-    const val BASE_URL = "http://172.22.23.100:5001/"
+    const val BASE_URL = "http://10.125.17.138:5001/"
     val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }

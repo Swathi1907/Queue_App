@@ -1,269 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:clipToPadding="false"
+    android:paddingTop="48dp"
+    android:fillViewport="true">
 
-    <!-- 1. Background Image -->
-    <ImageView
-        android:id="@+id/img"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/myqueue_header"
-        android:scaleType="centerCrop"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:paddingBottom="32dp">
 
-    <!-- 2. Scrollable Content -->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        <!-- White Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSignup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="150dp"
+            android:layout_marginHorizontal="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <!-- White Card --><!-- White Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSignup"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="15dp"
-app:cardBackgroundColor="@color/white"
-                android:layout_marginTop="190dp"
-                app:cardCornerRadius="30dp"
-                app:cardElevation="12dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:paddingHorizontal="24dp"
+                android:paddingTop="56dp"
+                android:paddingBottom="24dp">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- Welcome Back Title -->
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome Back"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#0B3C5D"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Subtitle -->
+                <TextView
+                    android:id="@+id/tvSubtitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Log in to your account"
+                    android:textSize="13sp"
+                    android:textColor="#6C757D"
+                    android:textAlignment="center"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Email Address Label -->
+                <TextView
+                    android:id="@+id/lblEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingStart="24dp"
-                    android:paddingTop="60dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="50dp">
+                    android:text="Email Address"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#343A40"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginBottom="6dp"
+                    app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-                    <!-- Logo -->
+                <!-- Email Input Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEmail"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxStrokeColor="#CED4DA"
+                    app:boxStrokeWidth="1dp"
+                    android:layout_marginTop="7dp"
+                    app:startIconDrawable="@drawable/ic_email"
+                    app:startIconTint="#6C757D"
+                    app:hintEnabled="false"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/lblEmail"
+                    app:layout_constraintStart_toStartOf="parent">
 
-
-                    <!-- Title -->
-                    <TextView
-                        android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:text="Smart Queue"
-                        android:textColor="#1E293B"
-                        android:textSize="30sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <!-- Subtitle -->
-                    <TextView
-                        android:id="@+id/tvSubTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Management System"
-                        android:textColor="#00A99D"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
-
-                    <!-- Tagline -->
-                    <TextView
-                        android:id="@+id/tvTagline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Join queues digitally. Skip the wait."
-                        android:textColor="#6B7280"
-                        android:textSize="14sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvSubTitle" />
-
-                    <!-- Username -->
-
-
-                    <!-- Email -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/emailLayout"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="50dp"
-                        android:hint="Email"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvTagline"
-                        app:startIconDrawable="@drawable/ic_email">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etEmail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Password -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/passwordLayout"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:hint="Password"
-                        app:endIconMode="password_toggle"
-
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/emailLayout">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-                    <!-- Hospital ID (Conditional for Doctor / Compounder) -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/hospitalIdLayout"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:hint="Hospital ID"
-                        android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
-                        > <!-- Make sure you have a hospital icon or use any suitable drawable -->
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etHospitalId"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-                    <!-- New Doctor ID Input (Hidden by default) -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilDoctorCode"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/hospitalIdLayout"
-                        android:visibility="gone"
-                        android:hint="Doctor Code (e.g., DOC-HOSP-001)">
+                        android:hint="you@example.com"
+                        android:inputType="textEmailAddress"
+                        android:textSize="14sp"
+                        android:textColor="#212529"
+                        android:paddingVertical="12dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etDoctorCode"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textCapCharacters" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
+                <!-- Password Header Label -->
+                <TextView
+                    android:id="@+id/lblPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Password"
+                    android:textSize="13sp"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
+                    android:textColor="#343A40"
+                    android:layout_marginBottom="6dp"
+                    app:layout_constraintTop_toBottomOf="@id/tilEmail"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <!-- Password Input Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/passwordLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxStrokeColor="#CED4DA"
+                    app:boxStrokeWidth="1dp"
+                    app:startIconTint="#6C757D"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="#6C757D"
+                    app:hintEnabled="false"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/lblPassword"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/tilDoctorCode"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginHorizontal="24dp">
+                        android:hint="••••••••"
+                        android:inputType="textPassword"
+                        android:textSize="14sp"
+                        android:textColor="#212529"
+                        android:paddingVertical="12dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Left Line -->
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#D1D5DB"/>
+                <!-- Hospital ID Input Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/hospitalIdLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:hint="Hospital ID"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+                    app:layout_constraintStart_toStartOf="parent">
 
-                        <!-- Signup Text -->
-                        <TextView
-                            android:id="@+id/btnLogin"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="12dp"
-                            android:text="Login"
-                            android:textColor="@color/green"
-                            android:textStyle="bold"
-                            android:textSize="20sp"/>
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/outline_chevron_forward_24"/>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etHospitalId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Right Line -->
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#D1D5DB"/>
+                <!-- Doctor Code Input Field -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilDoctorCode"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:hint="Doctor Code (e.g., DOC-HOSP-001)"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/hospitalIdLayout"
+                    app:layout_constraintStart_toStartOf="parent">
 
-                    </LinearLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDoctorCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapCharacters" />
+                </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Login Button -->
+                <Button
+                    android:id="@+id/btnLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="Login"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="#004D40"
+                    app:cornerRadius="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/tilDoctorCode"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/logoCard"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:translationY="-60dp"
-                app:cardCornerRadius="60dp"
-                app:cardElevation="12dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:layout_constraintTop_toTopOf="@id/cardSignup"
-                app:layout_constraintStart_toStartOf="@id/cardSignup"
-                app:layout_constraintEnd_toEndOf="@id/cardSignup">
-
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/queue_name_logo"/>
-
-            </com.google.android.material.card.MaterialCardView>
-            <!-- Floating Signup Button -->
-
-            <!-- Login Text -->
+                <!-- Divider Layout -->
 
 
-            <TextView
-                android:id="@+id/tvsignup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:text="Don't have an account? Signup"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardSignup" />
+                <!-- Footer: Sign Up -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    app:layout_constraintTop_toBottomOf="@id/btnLogin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginBottom="12dp">
 
-            <!-- Floating Logo -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Don't have an account? "
+                        android:textSize="13sp"
+                        android:textColor="#6C757D" />
 
-            <!-- Floating Signup Button -->
+                    <TextView
+                        android:id="@+id/tvsignup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sign Up"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#0B3C5D" />
+                </LinearLayout>
 
-            <!-- Login Text -->
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Floating Logo Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/logoCard"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white"
+            android:translationY="-44dp"
+            app:layout_constraintTop_toTopOf="@id/cardSignup"
+            app:layout_constraintStart_toStartOf="@id/cardSignup"
+            app:layout_constraintEnd_toEndOf="@id/cardSignup">
 
-    </androidx.core.widget.NestedScrollView>
-    <!-- Background -->
-</FrameLayout>
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@drawable/logo"
+                android:contentDescription="App Logo" />
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -53,11 +53,17 @@ class TokenManager(context: Context) {
             .putString("contact",contact)
             .apply()
     }
-
+    fun clearSession() {
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
+    }
     fun saveUserDepartments(departments: String) {
         sharedPreferences.edit().putString("USER_DEPARTMENTS", departments).apply()
     }
-
+    fun getUserrole(): String?{
+        return sharedPreferences.getString("user_role", "User")
+    }
     fun getUserDepartments(): String? {
         return sharedPreferences.getString("USER_DEPARTMENTS", null)
     }

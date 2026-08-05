@@ -34,7 +34,7 @@
             android:textColor="#0A2540"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+
             app:layout_constraintStart_toEndOf="@+id/ivClinicIcon"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,19 +48,10 @@
             android:textColor="#5E6C84"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+
             app:layout_constraintStart_toEndOf="@+id/ivClinicIcon"
             app:layout_constraintTop_toBottomOf="@+id/tvClinicName" />
 
-        <ImageView
-            android:id="@+id/ivArrow"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/ic_menu_send"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="#5E6C84" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

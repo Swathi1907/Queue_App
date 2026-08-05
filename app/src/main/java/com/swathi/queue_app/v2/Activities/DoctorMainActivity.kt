@@ -1,6 +1,7 @@
 package com.swathi.queue_app.v2.Activities
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -22,6 +23,15 @@ class DoctorMainActivity : AppCompatActivity() {
 
         // Connect bottom navigation with nav controller
         binding.bottomNavView.setupWithNavController(navController)
+
+        // Show or hide bottom nav depending on the active fragment destination
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.doctorDepartmentFragment) {
+                binding.bottomNavView.visibility = View.GONE
+            } else {
+                binding.bottomNavView.visibility = View.VISIBLE
+            }
+        }
 
         // Handle session routing override if sent from LoginActivity
         if (intent.getStringExtra("NAVIGATE_TO") == "HOME" && savedInstanceState == null) {

@@ -14,9 +14,16 @@
         android:label="Doctor Dashboard" />
 
     <fragment
-        android:id="@+id/doctorHistoryFragment"
-        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorHomeFragment"
-        android:label="History" />
+        android:id="@+id/doctorQueueHistoryDetailFragment"
+        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorProfileFragment"
+        android:label="Queue History Details">
+
+        <argument
+            android:name="queueId"
+            app:argType="string"
+            android:defaultValue="" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/doctorProfileFragment"

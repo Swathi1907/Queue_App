@@ -11,7 +11,7 @@
         android:id="@+id/headerLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="#0A2540"
+        android:background="#004D40"
         android:paddingHorizontal="20dp"
         android:paddingTop="24dp"
         android:paddingBottom="20dp"
@@ -95,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:text="Recent History"
-                android:textColor="#0A2540"
+                android:textColor="#004D40"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 

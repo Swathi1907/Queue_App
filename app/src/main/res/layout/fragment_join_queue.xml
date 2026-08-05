@@ -110,7 +110,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="You'll receive a QR code here once your spot is confirmed."
+
                 android:textColor="#6C757D"
                 android:textSize="12sp"
                 android:gravity="center"

@@ -100,6 +100,7 @@ class Queueviewmodel : ViewModel() {
                 val response = queueRepository.callNextPatient(department,doctorCode)
 
                 if (response.isSuccessful && response.body()?.success == true) {
+
                     _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
                 } else {
                     _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to call next patient")

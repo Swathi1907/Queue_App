@@ -57,6 +57,10 @@ class SignupActivity : AppCompatActivity() {
 
             authViewModel.signup(request)
         }
+        binding.tvlogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun observeSignupState() {

@@ -166,7 +166,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#0A2540"
+            android:backgroundTint="#004D40"
             android:text="View QR Code"
             android:textAllCaps="false"
             android:textColor="@android:color/white"

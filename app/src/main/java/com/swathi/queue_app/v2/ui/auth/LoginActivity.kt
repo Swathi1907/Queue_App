@@ -32,11 +32,35 @@ class LoginActivity : AppCompatActivity() {
     private val queueViewModel: com.swathi.queue_app.v2.viewmodels.Queueviewmodel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check for an existing active session before rendering the UI
+        val tokenManager = TokenManager(this)
+        val token = tokenManager.getToken() // Adjust method name if your TokenManager uses a different getter (e.g. getAuthToken)
+        val role = tokenManager.getUserrole()?.uppercase(java.util.Locale.ROOT)
+
+        if (!token.isNullOrEmpty() && !role.isNullOrEmpty()) {
+            val targetIntent = when (role) {
+                "DOCTOR" -> Intent(this, DoctorMainActivity::class.java).apply {
+                    putExtra("NAVIGATE_TO", "DEPARTMENTS")
+                }
+                "COMPOUNDER" -> Intent(this, CompounderMainActivity::class.java)
+                "PATIENT" -> Intent(this, MainActivity::class.java)
+                else -> null
+            }
+
+            if (targetIntent != null) {
+                startActivity(targetIntent)
+                finish()
+                return
+            }
+        }
+
         binding = LoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupClickListeners()
         observeLoginStates()
-        binding.tvSubTitle.setOnClickListener {
+
+        binding.tvsignup.setOnClickListener {
             val intent = Intent(this, SignupActivity::class.java)
             startActivity(intent)
         }

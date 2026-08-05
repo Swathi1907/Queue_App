@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import androidx.navigation.fragment.findNavController
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -51,28 +52,26 @@ class DoctorDepartmentFragment : Fragment() {
 
         // Trigger fetching profile data when screen loads
         viewModel.fetchDoctorProfile()
+
     }
+
+
 
     private fun setupRecyclerView() {
         departmentAdapter = DoctorDepartmentAdapter(emptyList()) { selectedDepartment ->
             Toast.makeText(requireContext(), "Selected: $selectedDepartment", Toast.LENGTH_SHORT).show()
-            // Retrieve doctor code from TokenManager, with fallback to the fetched profile code
             val doctorCode = tokenManager.getDoctorCode() ?: currentDoctorCode ?: ""
             Log.d("dhf", "sending department: $selectedDepartment, doctorCode: $doctorCode")
 
-            // Create an instance of DoctorHomeFragment and pass parameters using arguments
-            val homeFragment = DoctorHomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString("DEPARTMENT", selectedDepartment)
-                    putString("DOCTOR_CODE", doctorCode)
-                }
+            // Pack your arguments into a Bundle
+            val bundle = Bundle().apply {
+                putString("DEPARTMENT", selectedDepartment)
+                putString("DOCTOR_CODE", doctorCode)
             }
 
-            // Replace the current fragment container with DoctorHomeFragment
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.doctorfragmentContainerView, homeFragment) // Replace R.id.fragment_container with your activity's actual container ID
-                .addToBackStack(null) // Allows the user to press back to return to the department list
-                .commit()
+            // Use the Jetpack NavController to navigate.
+            // This triggers the destination change listener in DoctorMainActivity automatically!
+            findNavController().navigate(R.id.doctorHomeFragment, bundle)
         }
 
         binding.rvDepartments.apply {

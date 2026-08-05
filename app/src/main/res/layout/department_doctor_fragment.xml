@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:background="#004D40"
         android:padding="16dp"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -37,19 +38,13 @@
             app:layout_constraintStart_toEndOf="@id/ivUserProfile"
             app:layout_constraintEnd_toStartOf="@id/notificationIcon">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WELCOME BACK"
-                android:textSize="10sp"
-                android:textColor="#B2DFDB"
-                android:textStyle="bold"/>
+
 
             <TextView
                 android:id="@+id/tvWelcomeUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Morning, Aurelia"
+                android:text="Specialists"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"/>

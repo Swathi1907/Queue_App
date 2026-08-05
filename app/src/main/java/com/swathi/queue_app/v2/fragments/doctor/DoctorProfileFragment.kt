@@ -1,5 +1,6 @@
 package com.swathi.queue_app.v2.fragments.doctor
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.swathi.queue_app.databinding.DoctorProfileBinding
+import com.swathi.queue_app.v2.ui.auth.LoginActivity
 import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.DoctorViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -41,6 +43,17 @@ class DoctorProfileFragment : Fragment() {
 
         // Fetch doctor profile details upon screen load
         viewModel.fetchDoctorProfile()
+        binding.layoutLogout.setOnClickListener {
+            // Clear saved tokens/session data
+            tokenManager.clearSession()
+
+            // Navigate back to LoginActivity and clear task stack
+            val intent = Intent(requireContext(), LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 
     private fun observeProfileState() {
@@ -57,7 +70,7 @@ class DoctorProfileFragment : Fragment() {
                                 binding.tvDoctorName.text = profile.name ?: "Dr. Unknown"
                                 binding.tvDoctorPhone.text = "${profile.phoneNumber ?: "N/A"}"
                                 binding.tvDoctorCode.text = "${profile.doctorCode ?: "N/A"}"
-                                binding.tvDoctorRating.text = "★ ${profile.rating ?: "4.5"}"
+                                binding.tvDoctorRating.text = "${profile.rating ?: "4.5"}"
 
                                 val departments = profile.department ?: emptyList()
                                 binding.tvDepartmentsValue.text = departments.joinToString(separator = ", ")
