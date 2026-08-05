@@ -27,7 +27,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"/> -->
-        <activity android:name=".v2.ui.main.CompounderMainActivity"
+        <activity android:name=".v2.Activities.CompounderMainActivity"
+            android:exported="false"/>
+        <activity android:name=".v2.Activities.DoctorMainActivity"
             android:exported="false"/>
         <activity
             android:name=".v2.Activities.MainActivity"

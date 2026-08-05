@@ -1,4 +1,4 @@
-package com.swathi.queue_app.v2.ui.main
+package com.swathi.queue_app.v2.Activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

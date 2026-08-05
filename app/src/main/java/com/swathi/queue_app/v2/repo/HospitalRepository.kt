@@ -39,9 +39,9 @@ class HospitalRepository {
             println("verify pay called through hosp repo")
         }
     }
-    suspend fun getUserDoctors(hospitalId: String, department: String): Response<UserDoctorResponse>? {
+    suspend fun getUserDoctors(hospitalId: String, department: String,currentUserId:String): Response<UserDoctorResponse>? {
         return try {
-            RetrofitInstance.api.getUserDoctors(hospitalId, department).also {
+            RetrofitInstance.api.getUserDoctors(hospitalId, department,currentUserId).also {
                 println("Through getUserDoctors HospitalRepository called")
             }
         } catch (e: Exception) {

@@ -1,6 +1,8 @@
 package com.swathi.queue_app.v2.viewmodels
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.v2.models.AuthResponse
@@ -14,11 +16,11 @@ import com.swathi.queue_app.v2.repo.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-class AuthViewModel : ViewModel() {
+import com.swathi.queue_app.v2.utilis.TokenManager
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val authRepository = AuthRepository()
-
+    private val tokenManager = TokenManager(application )
     private val _loginState = MutableStateFlow<Resource<AuthResponse>?>(null)
     val loginState: StateFlow<Resource<AuthResponse>?> get() = _loginState
 
@@ -45,6 +47,7 @@ Log.d("Authviewmodel","stopping")
                     Log.d("authviemodel", "success")
                     val body = response.body()
                     if (body != null) {
+
                         _loginState.value = Resource.Success(body)
                     } else {
                         _loginState.value = Resource.Error("Login response body is null")
@@ -91,8 +94,9 @@ Log.d("Authviewmodel","stopping")
         viewModelScope.launch {
             _verificationState.value = Resource.Loading
             try {
+                val token = tokenManager.getToken() ?: ""
                 val request = VerifyHospitalRequest(email, password, hospitalId)
-                val response = authRepository.verifyHospitalId(request)
+                val response = authRepository.verifyHospitalId("Bearer $token",request)
                 if (response.isSuccessful && response.body() != null) {
                     val body = response.body()!!
                     Log.d("authview", "Success: $body")

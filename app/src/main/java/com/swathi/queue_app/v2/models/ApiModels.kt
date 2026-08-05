@@ -2,6 +2,40 @@ package com.swathi.queue_app.v2.models
 
 import com.google.gson.annotations.SerializedName
 
+
+// Next and complete requests
+// --- Queue Action Request & Response Models ---
+
+data class QueueActionRequest(
+    val department: String,
+    val doctorCode: String
+)
+
+data class QueueActionResponse(
+    val success: Boolean,
+    val message: String,
+    val data: QueueActionData?
+)
+
+data class QueueActionData(
+    val sessionId: String,
+    val queueStatus: String,
+    val tokens: List<QueueTokenItem>
+)
+
+data class QueueTokenItem(
+    @SerializedName("_id") val id: String,
+    val tokenNumber: Int,
+    val userId: String,
+    val patientName: String,
+    val orderId: String,
+    val paymentId: String,
+    val amountPaid: Double,
+    val status: String, // "WAITING", "IN_CONSULTATION", "COMPLETED", "CANCELLED"
+    val createdAt: String
+)
+
+
 // --- Auth Models ---
 
 data class LoginRequest(
@@ -21,7 +55,85 @@ data class Hospital(
     val createdAt: String?,
     val updatedAt: String?
 )
+data class QueueDashboardResponse(
+    val success: Boolean = false,
+    val data: DashboardData? = null
+)
 
+data class DashboardData(
+    val activeQueue: List<ActiveQueueDto> = emptyList(),
+    val recentHistory: List<HistoryItemDto> = emptyList()
+)
+
+data class ActiveQueueDto(
+    val queueId: String = "",
+    val hospitalName: String = "",
+    val hospitalLogoUrl: String? = null,
+    val doctorDetails: String = "",
+    val status: String = "",
+    val peopleAheadText: String = "",
+    val estWaitTimeText: String = "",
+    val tokenNumber: Int = 0
+)
+data class DoctorProfileResponse(
+    @SerializedName("success")
+    val success: Boolean,
+
+    @SerializedName("data")
+    val data: DoctorData?
+)
+data class ActiveSessionResponse(
+    val success: Boolean,
+    val message: String,
+    val data: SessionData?
+)
+
+data class SessionData(
+    val sessionId: String,
+    val queueStatus: String?, // "ACTIVE", "PAUSED", "CLOSED"
+    val tokens: List<TokenItem>?
+)
+data class TokenItem(
+    val tokenId: String?,
+    val tokenNumber: String?, // Or Int?, depending on how token numbers are formatted (e.g., "A-124")
+    val patientName: String?,
+    val notes: String?,
+    val status: String? // "WAITING", "IN_CONSULTATION", "COMPLETED", "CANCELLED"
+)
+data class DoctorData(
+    @SerializedName("_id")
+    val id: String,
+
+    @SerializedName("name")
+    val name: String,
+
+    @SerializedName("email")
+    val email: String,
+    @SerializedName("department")
+    val department: List<String>?,
+
+    @SerializedName("hospitalId")
+    val hospitalId: String?,
+    @SerializedName("rating")
+    val rating: String?,
+
+    @SerializedName("phoneNumber")
+    val phoneNumber: String?,
+    @SerializedName("doctorCode")
+    val doctorCode: String?,
+
+    @SerializedName("qualification")
+    val qualification: String?,
+
+    @SerializedName("isAvailable")
+    val isAvailable: Boolean
+)
+data class HistoryItemDto(
+    val queueId: String = "",
+    val hospitalName: String = "",
+    val subText: String = "",
+    val date: String = ""
+)
 /*data class HospitalAddress(
     val street: String?,
     val city: String,
@@ -54,7 +166,7 @@ data class UserData(
     val phoneNumber: String,
     val role: String, // Explicitly captures 'PATIENT', 'DOCTOR', 'COMPOUNDERS', or 'SUPER_ADMIN'
     val hospitalId: String?,
-    val department: String?,
+    val department: List<String>,
     val doctorCode: String?,
     val qualification: String?,
     val rating: Double?,
@@ -150,9 +262,11 @@ data class UserDoctorItem(
     val name: String,
     val specialty: String,
     val imageUrl: String?,
-    val consultationFee: Double, // Matches the fee sent from the backend (in INR)
+    val consultationFee: Double,
     val peopleAhead: Int,
-    val estimatedWaitTime: String
+    val estimatedWaitTime: String,
+    @SerializedName("isJoined") val isJoined: Boolean = false,
+    @SerializedName("isQueuePaused") val isQueuePaused: Boolean = false // Added property
 )
 data class HospitalDetailItem(
     @SerializedName("_id") val id: String,

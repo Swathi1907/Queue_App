@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F6F8"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <!-- Dark Blue Top Header Background -->
+        <View
+            android:id="@+id/header_background"
+            android:layout_width="0dp"
+            android:layout_height="180dp"
+            android:background="#052C28"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Doctor Profile Header Section -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_doctor_avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_greeting"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Morning, Dr. Aurelia"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/iv_notification"
+            app:layout_constraintStart_toEndOf="@id/iv_doctor_avatar"
+            app:layout_constraintTop_toTopOf="@id/iv_doctor_avatar" />
+
+        <TextView
+            android:id="@+id/tv_department"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Cardiology Dept."
+            android:textColor="#A0B2B0"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/iv_notification"
+            app:layout_constraintStart_toEndOf="@id/iv_doctor_avatar"
+            app:layout_constraintTop_toBottomOf="@id/tv_greeting" />
+
+        <ImageView
+            android:id="@+id/iv_notification"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/baseline_circle_notifications_24"
+            android:padding="8dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/iv_doctor_avatar"
+            app:layout_constraintBottom_toBottomOf="@id/iv_doctor_avatar" />
+
+        <!-- Active Session Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_active_session"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_doctor_avatar">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/badge_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_green"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="● In Progress"
+                    android:textColor="#052C28"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_session_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Started 10m ago"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_token_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="A-124"
+                    android:textColor="#052C28"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/badge_status" />
+
+                <TextView
+                    android:id="@+id/tv_patient_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Aurelia Doe"
+                    android:textColor="#222222"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_token_number"
+                    app:layout_constraintStart_toEndOf="@id/tv_token_number"
+                    app:layout_constraintTop_toTopOf="@id/tv_token_number" />
+
+                <TextView
+                    android:id="@+id/tv_consult_details"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Follow-up consultation. Patient reported mild chest discomfort last week."
+                    android:textColor="#666666"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_token_number" />
+
+                <!-- Action Buttons -->
+                <Button
+                    android:id="@+id/btn_complete_next"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:backgroundTint="#052C28"
+                    android:text="Complete &amp; Next"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    app:cornerRadius="10dp"
+                    app:layout_constraintEnd_toStartOf="@id/btn_pause"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_consult_details" />
+
+                <Button
+                    android:id="@+id/btn_pause"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="#EAECEE"
+                    android:text="Pause Session"
+                    android:textColor="#333333"
+                    android:textSize="13sp"
+                    app:cornerRadius="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btn_complete_next"
+                    app:layout_constraintTop_toBottomOf="@id/tv_consult_details" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Session Stats Section -->
+        <TextView
+            android:id="@+id/lbl_session_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Session Stats"
+            android:textColor="#222222"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_active_session" />
+
+        <!-- Stats Cards Grid -->
+        <LinearLayout
+            android:id="@+id/layout_stats"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lbl_session_stats">
+
+            <!-- Patients Seen Stat Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <!-- Add inner elements for patients seen count -->
+            </androidx.cardview.widget.CardView>
+
+            <!-- Avg Consult Time Stat Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <!-- Add inner elements for time stats -->
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <!-- Up Next Header -->
+        <TextView
+            android:id="@+id/lbl_up_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Up Next"
+            android:textColor="#222222"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_stats" />
+
+        <TextView
+            android:id="@+id/tv_view_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:text="View All"
+            android:textColor="#052C28"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/lbl_up_next"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/lbl_up_next" />
+
+        <!-- Up Next RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_up_next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lbl_up_next" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

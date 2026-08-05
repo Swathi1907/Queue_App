@@ -31,7 +31,7 @@ router.post('/verifyHospitalId', authmiddleware, verifyHospitalId, (req, res) =>
 });
 
 // Standalone Doctor Code verification route
-router.post('/verifyDoctorCode', authmiddleware, verifyDoctorCode, (req, res) => {
+router.post('/verifyDoctorCode', verifyDoctorCode, (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'Doctor verified successfully!',

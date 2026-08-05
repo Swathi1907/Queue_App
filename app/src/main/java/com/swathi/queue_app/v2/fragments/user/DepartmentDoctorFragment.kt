@@ -16,6 +16,9 @@ import com.swathi.queue_app.v2.adapter.UserDoctorAdapter
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.swathi.queue_app.v2.fragments.user.QueueDashboardFragment
+import com.swathi.queue_app.v2.utilis.TokenManager
+import kotlin.apply
 
 class DepartmentDoctorFragment : Fragment(R.layout.department_doctor_fragment) {
 
@@ -35,40 +38,61 @@ class DepartmentDoctorFragment : Fragment(R.layout.department_doctor_fragment) {
         // Retrieve arguments passed from UserHospitalFragment
         hospitalId = arguments?.getString("HOSPITAL_CODE") ?: ""
         departmentName = arguments?.getString("DEPARTMENT_NAME") ?: ""
-Log.d("deptdoctorfrag","${hospitalId}, ${departmentName} received")
+        Log.d("deptdoctorfrag","${hospitalId}, ${departmentName} received")
+
         // Bind Views matching your XML layout IDs
         tvPageTitle = view.findViewById(R.id.tvPageTitle)
         chipDepartment = view.findViewById(R.id.chipDepartment)
         recyclerView = view.findViewById(R.id.recyclerDoctors)
         progressBar = view.findViewById(R.id.progressBarDoctors)
-
+        val tokenManager = TokenManager(requireContext())
+        val currentUserId = tokenManager.getUserId() ?: ""
         // Set dynamic text based on the selected department
         tvPageTitle.text = "$departmentName Specialists"
         chipDepartment.text = departmentName
 
-        // Setup RecyclerView with UserDoctorAdapter correctly
-        doctorAdapter = UserDoctorAdapter(emptyList()) { selectedDoctor ->
-            // Package the selected doctor's real data into a Bundle
-            val bundle = Bundle().apply {
-                putString("DOCTOR_CODE", selectedDoctor.doctorCode)
-                putInt("CONSULTATION_FEE_INR", selectedDoctor.consultationFee.toInt())
-                putString("DOCTOR_NAME", selectedDoctor.name)
-                putString("HOSPITAL_CODE",hospitalId)
-                putString("DEPARTMENT_NAME", selectedDoctor.specialty ?: departmentName)
-                putString("WAIT_TIME", "🕒 Current Wait: ~${selectedDoctor.estimatedWaitTime} mins")
-            }
+        // Setup RecyclerView with UserDoctorAdapter handling both join and view dashboard actions
+        doctorAdapter = UserDoctorAdapter(
+            doctors = emptyList(),
+            onJoinQueueClick = { selectedDoctor ->
+                // Package the selected doctor's real data into a Bundle for joining
+                val bundle = Bundle().apply {
+                    putString("DOCTOR_CODE", selectedDoctor.doctorCode)
+                    putInt("CONSULTATION_FEE_INR", selectedDoctor.consultationFee.toInt())
+                    putString("DOCTOR_NAME", selectedDoctor.name)
+                    putString("HOSPITAL_CODE", hospitalId)
+                    putString("DEPARTMENT_NAME", selectedDoctor.specialty ?: departmentName)
+                    putString("WAIT_TIME", "🕒 Current Wait: ~${selectedDoctor.estimatedWaitTime} mins")
+                }
 
-            // Instantiate JoinQueueFragment and attach arguments
-            val joinQueueFragment = JoinQueueFragment().apply {
-                arguments = bundle
-            }
+                val joinQueueFragment = JoinQueueFragment().apply {
+                    arguments = bundle
+                }
 
-            // Perform manual fragment transaction to open JoinQueueFragment
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, joinQueueFragment) // Match your activity container ID
-                .addToBackStack(null)
-                .commit()
-        }
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, joinQueueFragment)
+                    .addToBackStack(null)
+                    .commit()
+            },
+            onViewDashboardClick = { selectedDoctor ->
+                // Navigate to the user queue dashboard fragment if already joined
+                val dashboardFragment = QueueDashboardFragment().apply{
+
+                    arguments = Bundle().apply {
+
+                        putString("HOSPITAL_CODE", hospitalId)
+                        putString("DOCTOR_CODE", selectedDoctor.doctorCode)
+                        putString("USER_ID",currentUserId);
+                    }
+
+                }
+
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, dashboardFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = doctorAdapter
@@ -81,7 +105,7 @@ Log.d("deptdoctorfrag","${hospitalId}, ${departmentName} received")
 
         // Fetch user-side doctors for this department
         if (hospitalId.isNotEmpty() && departmentName.isNotEmpty()) {
-            viewModel.fetchUserDoctors(hospitalId, departmentName)
+            viewModel.fetchUserDoctors(hospitalId, departmentName,currentUserId)
         }
     }
 

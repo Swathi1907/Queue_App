@@ -66,6 +66,14 @@ app.use("/api/notification", notificationRoutes);
 // ==========================================
 // V2 ROUTES (New Modular Routes)
 // ==========================================
+
+const v2DoctorRoutes=require('./VERSION_2/new_routes/new_doctor')
+
+app.use('/api/v2/doctor',v2DoctorRoutes);
+
+
+
+
 const v2HospitalRoutes = require('./VERSION_2/new_routes/new_hosp'); // Ensure route file is in new_routes
 
 app.use('/api/v2/hospital', v2HospitalRoutes);
@@ -144,7 +152,7 @@ const queueDoc = await QueueModel.findOneAndUpdate(
     { 
         $set: { 
             hospitalId: hospitalId, 
-            department: department,
+            
             isActive: true 
         }
     },
@@ -195,6 +203,7 @@ const razorpayInstance = new Razorpay({
 // Create Order Endpoint
 app.post('/api/v2/payment/create-order', async (req, res) => {
     try {
+        console.log("hit")
         const { amount, doctorCode } = req.body;
 
         // Keep the receipt short (under 40 characters)
@@ -212,7 +221,7 @@ app.post('/api/v2/payment/create-order', async (req, res) => {
         if (!order) {
             return res.status(500).json({ success: false, message: "Error creating Razorpay order" });
         }
-
+console.log("response sent",order.id)
         return res.status(200).json({
             success: true,
             orderId: order.id,

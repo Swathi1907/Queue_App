@@ -83,6 +83,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                     safeBinding.btnPayNow.isEnabled = true
 
                     if (!serverGeneratedOrderId.isNullOrEmpty()) {
+                        Log.d("pf","starting razor payment")
                         startRazorpayPayment(serverGeneratedOrderId, amountInINR, userEmail, userContact)
                     } else {
                         if (isAdded) {
@@ -101,9 +102,10 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     }
 
     private fun startRazorpayPayment(orderId: String, amountInINR: Int, email: String, contact: String) {
+        val currentActivity = activity ?: return
         val checkout = Checkout()
         checkout.setKeyID("rzp_test_TL8wCC2G31Lu5O")
-
+//rzp_test_TL8wCC2G31Lu5O
         try {
             val options = JSONObject().apply {
                 put("name", "Queue App")
@@ -117,12 +119,15 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                 put("theme.color", "#0B3C5D")
             }
 
-            checkout.open(requireActivity(), options)
-        } catch (e: Exception) {
-            if (isAdded) {
-                Toast.makeText(requireContext(), "Error in payment: ${e.message}", Toast.LENGTH_SHORT).show()
+            // Ensure it opens on the main thread safely
+            currentActivity.runOnUiThread {
+                checkout.open(currentActivity, options)
             }
-            e.printStackTrace()
+        } catch (e: Exception) {
+            Log.e("RazorpayCrash", "Failed to open checkout: ${e.localizedMessage}", e)
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Error opening payment gateway: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

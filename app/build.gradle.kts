@@ -47,7 +47,7 @@ android {
 dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
-
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.google.firebase:firebase-analytics")
     // in messaging dependencies specify the versions
     implementation("com.google.firebase:firebase-messaging:25.0.0")

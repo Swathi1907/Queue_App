@@ -22,8 +22,8 @@ class AuthRepository {
             println(" through sign up Repository called")
         }
 
-    suspend fun verifyHospitalId(request: VerifyHospitalRequest)
-    =RetrofitInstance.api.verifyHospitalId(request).also{
+    suspend fun verifyHospitalId(token: String,request: VerifyHospitalRequest)
+    =RetrofitInstance.api.verifyHospitalId(token,request).also{
         println(" through verify hospital Repository called")
     }
     suspend fun verifyDoctor(request: VerifyDoctorCodeRequest)

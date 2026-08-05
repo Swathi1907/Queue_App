@@ -126,19 +126,22 @@ let query;
     }
 
     const departmentsList = hospital.departments || [];
-
+// Extract both possible identifiers for robust queue matching
+    const hospitalObjectIdStr = hospital._id.toString();
+    const hospitalCodeStr = hospital.code;
     // 2. For each department, aggregate the waiting tokens across all doctor queues for this hospital
     const departmentsWithCounts = await Promise.all(
       departmentsList.map(async (deptName) => {
         const result = await QueueV2.aggregate([
           {
-            $match: {
-              hospitalId: hospitalId,
+         $match: {
+              // Match whether the queue document saved hospitalId as the code or the ObjectId string
+              hospitalId: { $in: [hospitalObjectIdStr, hospitalCodeStr] },
               department: deptName,
               isActive: true
             }
           },
-          { $unwind: "$tokens" },
+         { $unwind: { path: "$tokens", preserveNullAndEmptyArrays: false } },
           {
             $match: {
               "tokens.status": "WAITING"
@@ -151,7 +154,7 @@ let query;
 
         // If no matching documents/tokens are found, count is 0
         const waitingCount = result.length > 0 ? result[0].waitingCount : 0;
-
+console.log(waitingCount)
         return {
           name: deptName,
           waitingCount: waitingCount
@@ -373,7 +376,99 @@ const getDoctorsByDepartment = async (req, res) => {
 };
 // Ensure your Doctor model path is correct
 // Adjust path to your queue model
+const getUserSideDoctorsByDepartment = async (req, res) => {
+    try {
+        const { hospitalId, departmentName } = req.params;
+        // Get the current user's ID from authentication middleware (e.g., req.user.id) or query params
+        const currentUserId = req.user?.id || req.query.userId; 
+console.log(currentUserId)
+        console.log(`Fetching doctors with queues for hospital: ${hospitalId}, department: ${departmentName}`);
 
+        let hospitalQuery;
+        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
+            hospitalQuery = { _id: hospitalId };
+        } else {
+            hospitalQuery = { code: hospitalId };
+        }
+
+        const hospital = await HospitalV2.findOne(hospitalQuery);
+        if (!hospital) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital not found'
+            });
+        }
+
+        const doctors = await UserV2.find({
+            $or: [
+                { hospitalId: hospital._id.toString() },
+                { hospitalId: hospital.code }
+            ],
+            role: 'DOCTOR',
+            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
+        });
+
+        const todayDate = new Date().toISOString().split('T')[0];
+
+        const formattedDoctors = (await Promise.all(doctors.map(async (doc) => {
+            const queue = await QueueV2.findOne({ 
+                doctorCode: doc.doctorCode || doc._id.toString(), 
+                date: todayDate
+            });
+
+            if (!queue) {
+                return null;
+            }
+
+            let peopleAheadCount = 0;
+            let userHasJoined = false;
+
+            if (queue.tokens && Array.isArray(queue.tokens)) {
+                peopleAheadCount = queue.tokens.filter(t => t.status === 'WAITING').length;
+
+                // Check if the current user has already joined this queue and has an active/waiting token
+                if (currentUserId) {
+                    userHasJoined = queue.tokens.some(t => 
+                        (t.userId?.toString() === currentUserId || t.patientId?.toString() === currentUserId) &&
+                        t.status !== 'CANCELLED' && t.status !== 'COMPLETED'
+                    );
+                }
+            }
+            console.log(userHasJoined)
+
+            const calculatedWaitMinutes = peopleAheadCount * 15;
+            const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
+
+            return {
+                _id: doc._id,
+                doctorCode: doc.doctorCode || doc._id.toString(),
+                name: doc.name,
+                specialty: doc.qualification || departmentName,
+                imageUrl: doc.imageUrl || "",
+                consultationFee: doc.consultationFee || 100,
+                peopleAhead: peopleAheadCount,
+                estimatedWaitTime: waitTimeText,
+                isQueuePaused: !queue.isActive,
+                isJoined: userHasJoined // <-- Returns true if user already holds a token in this queue
+            };
+        }))).filter(Boolean);
+
+        return res.status(200).json({
+            success: true,
+            count: formattedDoctors.length,
+            data: formattedDoctors
+        });
+
+    } catch (error) {
+        console.error("Error fetching doctors by department:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
+/*
 const getUserSideDoctorsByDepartment = async (req, res) => {
     try {
         const { hospitalId, departmentName } = req.params;
@@ -447,7 +542,7 @@ const getUserSideDoctorsByDepartment = async (req, res) => {
             error: error.message
         });
     }
-};
+}; */
 /*
 const getUserSideDoctorsByDepartment = async (req, res) => {
     try {

@@ -15,6 +15,7 @@ import com.swathi.queue_app.R
 import com.swathi.queue_app.v2.adapter.DepartmentAdapter
 import com.swathi.queue_app.v2.adapter.UserDepartmentAdapter
 import com.swathi.queue_app.v2.fragments.SelectDoctorFragment
+import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -52,9 +53,11 @@ Log.d("userhospfrag","${hospitalId} received")
         // Setup RecyclerView Grid
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         departmentAdapter = UserDepartmentAdapter(emptyList()) { selectedDepartmentItem ->
+
             val bundle = Bundle().apply {
                 putString("HOSPITAL_CODE", hospitalId)
                 putString("DEPARTMENT_NAME", selectedDepartmentItem.name)
+
             }
 Log.d("userhospfrag","sending ${hospitalId}")
             val doctorFragment = DepartmentDoctorFragment().apply {

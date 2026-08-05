@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.swathi.queue_app.databinding.LoginBinding
 import com.swathi.queue_app.databinding.UserMainActivityBinding
+import com.swathi.queue_app.v2.Activities.DoctorMainActivity
 import com.swathi.queue_app.v2.models.AuthResponse
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeResponse
@@ -21,27 +22,25 @@ import com.swathi.queue_app.v2.viewmodels.AuthViewModel.Resource
 import com.swathi.queue_app.v2.utilis.TokenManager
 import kotlinx.coroutines.launch
 import com.swathi.queue_app.v2.Activities.MainActivity
-import com.swathi.queue_app.v2.ui.main.CompounderMainActivity
+import com.swathi.queue_app.v2.Activities.CompounderMainActivity
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: LoginBinding
     private val authViewModel: AuthViewModel by viewModels()
-
+    // Add this near the top with your other viewModels:
+    private val queueViewModel: com.swathi.queue_app.v2.viewmodels.Queueviewmodel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupClickListeners()
         observeLoginStates()
-
         binding.tvSubTitle.setOnClickListener {
             val intent = Intent(this, SignupActivity::class.java)
             startActivity(intent)
         }
     }
-
     private fun setupClickListeners() {
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
@@ -51,7 +50,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             // Check if we are currently waiting for a Doctor Code submission
             if (binding.tilDoctorCode.visibility == View.VISIBLE) {
                 val hospitalId = binding.etHospitalId.text.toString().trim()
@@ -97,6 +95,7 @@ class LoginActivity : AppCompatActivity() {
                             }
                             is Resource.Error -> {
                                 binding.btnLogin.isEnabled = true
+                                Log.d("login","${resource.message}")
                                 Toast.makeText(this@LoginActivity, resource.message, Toast.LENGTH_LONG).show()
                             }
                             // Inside your observeLoginStates() -> loginState Success block:
@@ -112,7 +111,8 @@ class LoginActivity : AppCompatActivity() {
                                 val emailInput = binding.etEmail.text.toString().trim()
                                 val passwordInput = binding.etPassword.text.toString().trim()
                                 tokenManager.saveCredentials(emailInput, passwordInput)
-
+tokenManager.saveUserProfile(userData?._id ?: "", userData?.name ?: "")
+                                Log.d("login","${userData?._id} is null")
                                 if (userRole == "DOCTOR" || userRole == "COMPOUNDER") {
                                     Toast.makeText(this@LoginActivity, "Please enter your Hospital ID.", Toast.LENGTH_SHORT).show()
                                     binding.hospitalIdLayout.visibility = View.VISIBLE
@@ -144,6 +144,7 @@ class LoginActivity : AppCompatActivity() {
                             }
                             is Resource.Error -> {
                                 binding.btnLogin.isEnabled = true
+                                Log.d("login","${resource.message}")
                                 Toast.makeText(this@LoginActivity, resource.message, Toast.LENGTH_LONG).show()
                             }
                             is Resource.Success<*> -> {
@@ -157,6 +158,7 @@ class LoginActivity : AppCompatActivity() {
                                 if (verifyResponse.requiresDoctorCode == true) {
                                     // Doctor workflow: Dynamically reveal Doctor Code field
                                     if (binding.tilDoctorCode.visibility != View.VISIBLE) {
+                                        Log.d("login","${verifyResponse.message}")
                                         Toast.makeText(this@LoginActivity, verifyResponse.message, Toast.LENGTH_SHORT).show()
                                         tokenManager.saveHospitalId(hospitalId)
                                         binding.tilDoctorCode.visibility = View.VISIBLE
@@ -179,6 +181,7 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 // 3. Observe Doctor Code Verification State (Final Step for Doctors)
+                // 3. Observe Doctor Code Verification State (Final Step for Doctors)
                 launch {
                     authViewModel.doctorCodeVerificationState.collect { resource ->
                         if (resource == null) return@collect
@@ -189,21 +192,30 @@ class LoginActivity : AppCompatActivity() {
                             }
                             is Resource.Error -> {
                                 binding.btnLogin.isEnabled = true
+                                Log.d("login doctor","${resource.message}")
                                 Toast.makeText(this@LoginActivity, resource.message, Toast.LENGTH_LONG).show()
                             }
                             is Resource.Success<*> -> {
                                 binding.btnLogin.isEnabled = true
                                 val responseBody = resource.data as? VerifyDoctorCodeResponse
                                 val token = responseBody?.data?.jwt_token
+                                val doctorCode = responseBody?.data?.doctorCode
                                 val hospitalId = binding.etHospitalId.text.toString().trim()
 
                                 if (token != null) {
                                     val tokenManager = TokenManager(this@LoginActivity)
                                     tokenManager.saveAuthData(token, "DOCTOR")
                                     if (hospitalId.isNotEmpty()) tokenManager.saveHospitalId(hospitalId)
+                                    if (!doctorCode.isNullOrEmpty()) {
+                                        tokenManager.saveDoctorCode(doctorCode)
+                                    }
 
-                                    Toast.makeText(this@LoginActivity, "Doctor Login Successful!", Toast.LENGTH_SHORT).show()
-                                    // TODO: Navigate to Doctor Activity
+                                    Toast.makeText(this@LoginActivity, "Login Successful!", Toast.LENGTH_SHORT).show()
+
+                                    // Route directly to DoctorMainActivity (which will open the Department fragment by default)
+                                    val intent = Intent(this@LoginActivity, DoctorMainActivity::class.java)
+                                    startActivity(intent)
+                                    finish()
                                 } else {
                                     Toast.makeText(this@LoginActivity, "Authentication token missing", Toast.LENGTH_LONG).show()
                                 }

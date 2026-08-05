@@ -35,13 +35,17 @@ class TokenManager(context: Context) {
             .putString("user_role", role)
             .apply()
     }
-
+    fun saveDoctorCode(doctorCode: String){
+        sharedPreferences.edit()
+        .putString("doctorId", doctorCode)
+            .apply()
+    }
+    fun getDoctorCode(): String?=sharedPreferences.getString("doctorId","")
     // Added method to save user profile info (ID and Name)
     fun saveUserProfile(userId: String, name: String) {
         sharedPreferences.edit()
             .putString("user_id", userId)
             .putString("user_name", name)
-
             .apply()
     }
     fun savecontact(contact: String){
@@ -49,8 +53,16 @@ class TokenManager(context: Context) {
             .putString("contact",contact)
             .apply()
     }
+
+    fun saveUserDepartments(departments: String) {
+        sharedPreferences.edit().putString("USER_DEPARTMENTS", departments).apply()
+    }
+
+    fun getUserDepartments(): String? {
+        return sharedPreferences.getString("USER_DEPARTMENTS", null)
+    }
     fun getContact(): String?=sharedPreferences.getString("contact","6281556414")
-    fun getUserId(): String? = sharedPreferences.getString("user_id", "6a701cfff46deb1aab284c0c")
+    fun getUserId(): String? = sharedPreferences.getString("user_id", " ")
 
     fun getUserName(): String? = sharedPreferences.getString("user_name", null)
 

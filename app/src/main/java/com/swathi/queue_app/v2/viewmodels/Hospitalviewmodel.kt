@@ -37,11 +37,11 @@ class HospitalViewModel : ViewModel() {
     private val _paymentVerificationState = MutableStateFlow<Resource<Int>>(Resource.Idle)
     val paymentVerificationState: StateFlow<Resource<Int>> = _paymentVerificationState.asStateFlow()
 
-    fun fetchUserDoctors(hospitalId: String, department: String) {
+    fun fetchUserDoctors(hospitalId: String, department: String, currentUserId:String) {
         viewModelScope.launch {
             _userDoctorsState.value = Resource.Loading
             try {
-                val response = repository.getUserDoctors(hospitalId, department)
+                val response = repository.getUserDoctors(hospitalId, department,currentUserId)
                 val body = response?.body()
                 if (response != null && response.isSuccessful && body?.success == true) {
                     // Directly use body.data since it's already a List<UserDoctorItem>

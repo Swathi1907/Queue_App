@@ -1,0 +1,25 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/doctor_nav_graph"
+    app:startDestination="@+id/doctorDepartmentFragment">
+
+    <fragment
+        android:id="@+id/doctorDepartmentFragment"
+        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorDepartmentFragment"
+        android:label="Department" />
+
+    <fragment
+        android:id="@+id/doctorHomeFragment"
+        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorHomeFragment"
+        android:label="Doctor Dashboard" />
+
+    <fragment
+        android:id="@+id/doctorHistoryFragment"
+        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorHomeFragment"
+        android:label="History" />
+
+    <fragment
+        android:id="@+id/doctorProfileFragment"
+        android:name="com.swathi.queue_app.v2.fragments.doctor.DoctorProfileFragment"
+        android:label="Profile" />
+</navigation>
