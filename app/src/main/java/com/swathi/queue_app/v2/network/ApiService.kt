@@ -1,13 +1,18 @@
 package com.swathi.queue_app.v2.network
 
 import com.swathi.queue_app.v2.models.ActiveSessionResponse
+import com.swathi.queue_app.v2.models.AdminDashboardResponse
+
 import com.swathi.queue_app.v2.models.AuthResponse
 import com.swathi.queue_app.v2.models.CreateQueueRequest
 import com.swathi.queue_app.v2.models.DepartmentResponse
 import com.swathi.queue_app.v2.models.DepartmentResponseWrapper
+import com.swathi.queue_app.v2.models.DoctorDirectoryResponse
 import com.swathi.queue_app.v2.models.DoctorProfileResponse
 import com.swathi.queue_app.v2.models.DoctorResponse
+import com.swathi.queue_app.v2.models.GlobalQueueResponseWrapper
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.HospitalIdRequest
 import com.swathi.queue_app.v2.models.HospitalResponse
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.OrderCreateRequest
@@ -18,6 +23,7 @@ import com.swathi.queue_app.v2.models.QueueActionRequest
 import com.swathi.queue_app.v2.models.QueueActionResponse
 import com.swathi.queue_app.v2.models.QueueDashboardResponse
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
+import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
@@ -105,9 +111,31 @@ interface ApiService {
         @Path("departmentName") departmentName: String
     ): Response<DoctorResponse>
 
+
+    @POST("api/v2/admin/dashboardStats")
+    suspend fun getAdminDashboardStats(
+@Body request: HospitalIdRequest
+    ): Response<AdminDashboardResponse>
+
     @GET("api/v2/queue/getUserQueues/{userId}")
     suspend fun getUserDashboard(
         @Path("userId") userId: String
     ): Response<QueueDashboardResponse>
 
+    @POST("/api/v2/doctor/updateQueueStatus")
+    suspend fun updateQueueStatus(
+@Body request: QueueStatusUpdateRequest
+    ): Response<QueueActionResponse>
+
+
+    @POST("api/v2/admin/doctors-directory")
+    suspend fun getDoctorDirectory(
+        @Body request: HospitalIdRequest
+    ): Response<DoctorDirectoryResponse>
+
+
+    @POST("api/v2/admin/queues/global-monitor")
+    suspend fun getGlobalDepartments(
+        @Body request: HospitalIdRequest
+    ): Response<GlobalQueueResponseWrapper>
 }

@@ -18,6 +18,7 @@ const queueSchema = new mongoose.Schema({
         enum: ['WAITING', 'IN_CONSULTATION', 'COMPLETED', 'CANCELLED'], 
         default: 'WAITING' 
       },
+      notes: { type: String, default: "" },
       createdAt: { type: Date, default: Date.now }
     }
   ],
@@ -31,5 +32,4 @@ const queueSchema = new mongoose.Schema({
 
 // Ensure a doctor only has one active queue per day for a department
 queueSchema.index({ doctorCode: 1, date: 1 }, { unique: true });
-
-module.exports = mongoose.model('new_queueV2', queueSchema);
+module.exports = mongoose.models.new_queueV2 || mongoose.model('new_queueV2', queueSchema);

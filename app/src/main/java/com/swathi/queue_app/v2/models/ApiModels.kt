@@ -16,7 +16,11 @@ data class QueueActionResponse(
     val message: String,
     val data: QueueActionData?
 )
-
+data class QueueStatusUpdateRequest(
+    val department: String,
+    val doctorCode: String,
+    val queueStatus: String // "ACTIVE", "PAUSED", "CLOSED"
+)
 data class QueueActionData(
     val sessionId: String,
     val queueStatus: String,
@@ -59,7 +63,9 @@ data class QueueDashboardResponse(
     val success: Boolean = false,
     val data: DashboardData? = null
 )
-
+data class HospitalIdRequest(
+    val hospitalId: String
+)
 data class DashboardData(
     val activeQueue: List<ActiveQueueDto> = emptyList(),
     val recentHistory: List<HistoryItemDto> = emptyList()
@@ -93,6 +99,41 @@ data class SessionData(
     val queueStatus: String?, // "ACTIVE", "PAUSED", "CLOSED"
     val tokens: List<TokenItem>?
 )
+
+data class AdminDashboardResponse(
+    val success: Boolean,
+    val message: String,
+    val data: AdminDashboardData
+)
+
+data class AdminDashboardData(
+    val totalQueues: Int,
+    val activeQueues: Int,
+    val totalDoctors: Int,
+    val doctorsWithQueues: Int,
+    val totalWaitingPatients: Int
+)
+
+
+data class DoctorDirectoryResponse(
+    val success: Boolean,
+    val message: String,
+    val data: List<DoctorDirectoryItem>
+)
+
+data class DoctorDirectoryItem(
+    @SerializedName("_id") val id: String,
+    val name: String,
+    val email: String?,
+    val specialization: String,
+    val doctorCode: String,
+    val role: String,
+    val hospitalId: String,
+    val status: String,
+    val activeQueue: QueueData?
+)
+
+
 data class TokenItem(
     val tokenId: String?,
     val tokenNumber: String?, // Or Int?, depending on how token numbers are formatted (e.g., "A-124")
@@ -208,13 +249,15 @@ data class PaymentVerifyRequest(
     val department: String,
     val userId: String,
     val patientName: String,
-    val amount: Int
+    val amount: Int,
+    val notes:String
 )
 
 data class PaymentVerifyResponse(
     val success: Boolean,
     val message: String,
     val tokenNumber: Int?
+
 )
 data class QueueResponseWrapper(
     val success: Boolean,
@@ -222,6 +265,30 @@ data class QueueResponseWrapper(
     val data: QueueData?
 )
 
+
+data class GlobalQueueResponseWrapper(
+    val success: Boolean,
+    val data: List<GlobalQueueItemRemote>
+)
+
+data class GlobalQueueItemRemote(
+    val departmentId: String,
+    val departmentName: String,
+    val location: String,
+    val waitingCount: Int,
+    val avgWaitTime: String,
+    val loadStatus: String,
+    val assignedDoctorsCount: Int
+)
+data class GlobalQueueItem(
+    val departmentId: String,
+    val departmentName: String,
+    val location: String,
+    val waitingCount: Int,
+    val avgWaitTime: String,
+    val loadStatus: String, // e.g., "HIGH_LOAD", "NORMAL", "MODERATE"
+    val assignedDoctorsCount: Int
+)
 data class QueueData(
     val _id: String,
     val hospitalId: String,
@@ -229,7 +296,7 @@ data class QueueData(
     val doctorCode: String,
     val date: String,
     val tokens: List<Any>,
-    val isActive: Boolean
+    val queueStatus:String
 )
 /*data class DepartmentData(
     val hospitalCode: String,

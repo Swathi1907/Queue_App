@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/new_admin_nav_graph"
+    app:startDestination="@id/newAdminDashboardFragment">
+
+    <fragment
+        android:id="@+id/newAdminDashboardFragment"
+        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalAdminDashboardFragment"
+
+        android:label="Overview" />
+
+    <fragment
+        android:id="@+id/newAdminDoctorsFragment"
+        android:name="com.swathi.queue_app.v2.fragments.admin.AdminDoctorsFragment"
+        android:label="Doctors" />
+
+    <fragment
+        android:id="@+id/newAdminQueuesFragment"
+        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalAdminDashboardFragment"
+        android:label="Queues" />
+
+    <fragment
+        android:id="@+id/newAdminSettingsFragment"
+        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalAdminDashboardFragment"
+        android:label="Settings" />
+
+</navigation>

@@ -8,6 +8,7 @@ const UserV2 = require('../new_models/peron_model');
 const { createDepartmentQueue,getUserQueuesDashboard } = require('../new_controllers/queue_controllers');
 
 
+
 // POST route to create a department queue (protected by authentication middleware)
 console.log('--- DEBUG IMPORTS ---');
 

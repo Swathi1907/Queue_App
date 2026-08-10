@@ -379,9 +379,8 @@ const getDoctorsByDepartment = async (req, res) => {
 const getUserSideDoctorsByDepartment = async (req, res) => {
     try {
         const { hospitalId, departmentName } = req.params;
-        // Get the current user's ID from authentication middleware (e.g., req.user.id) or query params
         const currentUserId = req.user?.id || req.query.userId; 
-console.log(currentUserId)
+        console.log("Current User ID:", currentUserId);
         console.log(`Fetching doctors with queues for hospital: ${hospitalId}, department: ${departmentName}`);
 
         let hospitalQuery;
@@ -408,51 +407,78 @@ console.log(currentUserId)
             department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
         });
 
-        const todayDate = new Date().toISOString().split('T')[0];
+       const formattedDoctors = (await Promise.all(doctors.map(async (doc) => {
+    const doctorCodeVal = doc.doctorCode || doc._id.toString();
 
-        const formattedDoctors = (await Promise.all(doctors.map(async (doc) => {
-            const queue = await QueueV2.findOne({ 
-                doctorCode: doc.doctorCode || doc._id.toString(), 
-                date: todayDate
-            });
+    let queue = null;
 
-            if (!queue) {
-                return null;
-            }
-
-            let peopleAheadCount = 0;
-            let userHasJoined = false;
-
-            if (queue.tokens && Array.isArray(queue.tokens)) {
-                peopleAheadCount = queue.tokens.filter(t => t.status === 'WAITING').length;
-
-                // Check if the current user has already joined this queue and has an active/waiting token
-                if (currentUserId) {
-                    userHasJoined = queue.tokens.some(t => 
-                        (t.userId?.toString() === currentUserId || t.patientId?.toString() === currentUserId) &&
-                        t.status !== 'CANCELLED' && t.status !== 'COMPLETED'
-                    );
+    // 1. If a user is logged in, prioritize finding a queue where this user specifically has an active WAITING token
+    if (currentUserId) {
+        queue = await QueueV2.findOne({
+            doctorCode: doctorCodeVal,
+            "tokens": {
+                $elemMatch: {
+                    $or: [
+                        { userId: currentUserId },
+                        { patientId: currentUserId }
+                    ],
+                    status: "WAITING"
                 }
             }
-            console.log(userHasJoined)
+        });
+    }
 
-            const calculatedWaitMinutes = peopleAheadCount * 15;
-            const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
+    // 2. Fallback: If no user-specific waiting queue was found, find the general active queue
+    if (!queue) {
+        queue = await QueueV2.findOne({ 
+            doctorCode: doctorCodeVal,
+            queueStatus: "ACTIVE"
+        }).sort({ createdAt: -1 });
+    }
 
-            return {
-                _id: doc._id,
-                doctorCode: doc.doctorCode || doc._id.toString(),
-                name: doc.name,
-                specialty: doc.qualification || departmentName,
-                imageUrl: doc.imageUrl || "",
-                consultationFee: doc.consultationFee || 100,
-                peopleAhead: peopleAheadCount,
-                estimatedWaitTime: waitTimeText,
-                isQueuePaused: !queue.isActive,
-                isJoined: userHasJoined // <-- Returns true if user already holds a token in this queue
-            };
-        }))).filter(Boolean);
+    // 3. Final Fallback: Absolute latest queue if nothing else matches
+    if (!queue) {
+        queue = await QueueV2.findOne({ 
+            doctorCode: doctorCodeVal 
+        }).sort({ createdAt: -1 });
+    }
 
+    if (!queue) {
+        return null;
+    }
+
+    let peopleAheadCount = 0;
+    let userHasJoined = false;
+
+    if (queue.tokens && Array.isArray(queue.tokens)) {
+        peopleAheadCount = queue.tokens.filter(t => t.status === 'WAITING').length;
+
+        if (currentUserId) {
+            userHasJoined = queue.tokens.some(t => 
+                (t.userId?.toString() === currentUserId || t.patientId?.toString() === currentUserId) &&
+                t.status !== 'CANCELLED' && t.status !== 'COMPLETED'
+            );
+        }
+    }
+    
+    console.log(`User joined status for doctor ${doc.name}:`, userHasJoined);
+
+    const calculatedWaitMinutes = peopleAheadCount * 15;
+    const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
+
+    return {
+        _id: doc._id,
+        doctorCode: doctorCodeVal,
+        name: doc.name,
+        specialty: doc.qualification || departmentName,
+        imageUrl: doc.imageUrl || "",
+        consultationFee: doc.consultationFee || 100,
+        peopleAhead: peopleAheadCount,
+        estimatedWaitTime: waitTimeText,
+        isQueuePaused: queue.queueStatus !== "ACTIVE",
+        isJoined: userHasJoined
+    };
+}))).filter(Boolean);
         return res.status(200).json({
             success: true,
             count: formattedDoctors.length,

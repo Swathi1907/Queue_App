@@ -25,7 +25,7 @@ class NextMembersAdapter : ListAdapter<TokenItem,NextMembersAdapter.TokenViewHol
         fun bind(token: TokenItem) {
             binding.tvTokenNumber.text = token.tokenNumber
             binding.tvPatientName.text = token.patientName
-            binding.tvTokenStatus.text = token.status
+           binding.tvSymptomsNote.text=token.notes
         }
     }
 

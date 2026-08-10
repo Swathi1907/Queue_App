@@ -53,7 +53,6 @@ class JoinQueueFragment : Fragment() {
         binding.tvWaitTime.text = waitTimeText
 
         // Handle button click to pass data over to the Payment Fragment
-
             // Handle button click to pass data over to the Payment Fragment
             binding.btnConfirmJoin.setOnClickListener {
                 val symptoms = binding.etSymptoms.text.toString().trim()

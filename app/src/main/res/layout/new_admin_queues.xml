@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Top Screen Title & Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Global Queue Monitor"
+        android:textColor="#0B2545"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Real-time overview of active waitlists across all departments."
+        android:textColor="#6C757D"
+        android:textSize="13sp" />
+
+    <!-- Filter Action Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnFilterQueues"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginBottom="16dp"
+        android:text="Filter"
+        android:textColor="#0B2545"
+        android:textSize="12sp"
+
+        app:iconTint="#0B2545"
+        app:cornerRadius="10dp"
+        app:strokeColor="#DEE2E6" />
+
+    <!-- Queue Cards RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvGlobalQueues"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+
+</LinearLayout>

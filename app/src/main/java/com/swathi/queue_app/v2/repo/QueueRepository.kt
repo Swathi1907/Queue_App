@@ -9,6 +9,7 @@ import com.swathi.queue_app.v2.network.RetrofitInstance
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.QueueActionRequest
 import com.swathi.queue_app.v2.models.QueueActionResponse
+import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.VerifyHospitalRequest
 import retrofit2.Response
@@ -42,5 +43,7 @@ class QueueRepository {
     suspend fun completeCurrent(department: String, doctorCode: String): Response<QueueActionResponse> {
         return RetrofitInstance.api.completeConsultation(QueueActionRequest(department, doctorCode))
     }
-
+    suspend fun updateQueueStatus(department: String,doctorCode:String,Status:String): Response <QueueActionResponse>{
+        return RetrofitInstance.api.updateQueueStatus(QueueStatusUpdateRequest(department,doctorCode,Status))
+    }
 }

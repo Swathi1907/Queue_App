@@ -122,7 +122,69 @@ const createStaffUser = async (req, res, next) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+// 3. Login User
+const loginUser = async (req, res) => {
+  try {
+    console.log("login");
+    const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password',
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
+    
+    if (!user) {
+      console.log('Login failed: User not found for email:', email);
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      console.log('Login failed: Password mismatch for email:', email);
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const jwt_token = generateToken(user._id, user.role);
+    console.log(jwt_token);
+
+    // Check if user belongs to an admin role and has a hospital assigned
+    const isAdminRole = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+    let hospitalDetails = null;
+
+    if (isAdminRole && user.hospitalId) {
+      hospitalDetails = await HospitalV2.findOne({ code: user.hospitalId });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        hospitalId: user.hospitalId,
+        hospitalDetails: hospitalDetails || null, // Attach hospital screen context for admins
+        department: user.department,
+        doctorCode: user.doctorCode,
+        qualification: user.qualification,
+        rating: user.rating,
+        isAvailable: user.isAvailable,
+        isActive: user.isActive,
+        jwt_token,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+/*
 // 3. Login User
 const loginUser = async (req, res) => {
   try {
@@ -175,7 +237,7 @@ console.log(jwt_token)
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
-};
+}; */
 
 // 4. Register Doctor (Triggered by Superadmin)
 /*const registerDoctor = async (req, res) => {
@@ -307,9 +369,68 @@ const registerDoctor = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+const registerAdmin = async (req, res) => {
+  try {
+    const { name, email, phoneNumber, password, hospitalId } = req.body;
+
+    // 1. Verify that the hospital exists
+    const hospital = await HospitalV2.findOne({ code: hospitalId });
+    if (!hospital) {
+      return res.status(404).json({ success: false, message: 'Hospital not found with that code.' });
+    }
+
+    // 2. Check if user with this email or phone number already exists
+    const queryConditions = [{ phoneNumber }];
+    if (email) queryConditions.push({ email });
+
+    const existingUser = await User.findOne({ $or: queryConditions });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this phone number or email already exists',
+      });
+    }
+
+    // 3. Hash password manually
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Create the Admin user linked to the hospital
+    const newAdmin = await User.create({
+      name,
+      email: email || null,
+      phoneNumber,
+      password: hashedPassword,
+      role: 'ADMIN', // Explicitly set role to ADMIN
+      hospitalId: hospital.code, // Bind to the specific hospital code
+      department: null,
+      qualification: null,
+      doctorCode: null,
+    });
+
+    const adminResponse = newAdmin.toObject();
+    delete adminResponse.password;
+
+    return res.status(201).json({
+      success: true,
+      message: `Admin account successfully created for hospital: ${hospital.name}`,
+      data: adminResponse,
+    });
+
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Phone number or email already exists.' 
+      });
+    }
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
 module.exports = {
   registerDoctor,
   registerUser,
   createStaffUser,
   loginUser,
+  registerAdmin
 };

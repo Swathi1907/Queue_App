@@ -29,6 +29,8 @@
             android:exported="false"/> -->
         <activity android:name=".v2.Activities.CompounderMainActivity"
             android:exported="false"/>
+        <activity android:name=".v2.Activities.HospitalAdminActivity"
+            android:exported="false"/>
         <activity android:name=".v2.Activities.DoctorMainActivity"
             android:exported="false"/>
         <activity
@@ -40,7 +42,7 @@
             android:exported="false"/>
         <activity
             android:name=".v2.ui.auth.LoginActivity"
-
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

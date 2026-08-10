@@ -39,6 +39,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _loginState.value = Resource.Loading
             try {
+                Log.d("Auth","Login request received")
                 val response = authRepository.login(request)
                 Log.d("AuthViewModel", "${response.code()}")
                 Log.d("AuthViewModel", "${response.body()}")

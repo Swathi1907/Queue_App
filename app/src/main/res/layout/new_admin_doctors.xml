@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA"
+    android:padding="16dp">
+
+    <!-- Title and Subtitle -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Medical Staff Directory"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#0B2545" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage doctors, view statuses, and access queues."
+        android:textSize="13sp"
+        android:textColor="#6C757D"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Add Doctor Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddDoctor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ Add Doctor"
+        android:textColor="@android:color/white"
+        app:backgroundTint="#0B2545"
+        app:cornerRadius="24dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Search Bar Layout -->
+    <!-- Search Bar Layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_search_container"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:hint="Search by name or ID..."
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textSize="14sp" />
+
+        <!-- Spinners Row for Filters -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <!-- Department Spinner -->
+            <Spinner
+                android:id="@+id/spinnerDepartment"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+
+                android:background="@drawable/spinner_outline"
+                android:layout_marginEnd="8dp"
+                android:spinnerMode="dropdown" />
+
+            <!-- Status Spinner -->
+            <Spinner
+                android:id="@+id/spinnerStatus"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:background="@drawable/spinner_outline"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- RecyclerView for Doctor Cards -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDoctors"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+
+</LinearLayout>

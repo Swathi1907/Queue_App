@@ -6,7 +6,8 @@ const {
   registerUser, 
   createStaffUser, 
   loginUser, 
-  registerDoctor
+  registerDoctor,
+  registerAdmin
 } = require('../new_controllers/auth_controllers');
 
 // 2. Import middleware functions
@@ -21,16 +22,23 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // 4. Protected Routes (Must invoke authorize as a function with 'SUPER_ADMIN')
+
+router.post(
+    '/registerAdmin', 
+    authmiddleware, 
+    authorize('SUPER_ADMIN'), 
+    registerAdmin
+);
 router.post(
   '/createCompounder', 
   authmiddleware, 
-  authorize('SUPER_ADMIN'), 
+  authorize('ADMIN'), 
   createStaffUser
 );
 router.post(
   '/registerDoctor', 
   authmiddleware, 
-  authorize('SUPER_ADMIN'), 
+  authorize('ADMIN'), 
   registerDoctor
 );
 module.exports = router;

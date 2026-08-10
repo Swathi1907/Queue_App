@@ -215,12 +215,12 @@
                         android:textColor="#FFFFFF"
                         android:textSize="13sp"
                         app:cornerRadius="10dp"
-                        app:layout_constraintEnd_toStartOf="@id/btn_pause"
+                        app:layout_constraintEnd_toStartOf="@id/btnPauseResume"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tv_consult_details" />
 
                     <Button
-                        android:id="@+id/btn_pause"
+                        android:id="@+id/btnPauseResume"
                         android:layout_width="0dp"
                         android:layout_height="45dp"
                         android:layout_marginStart="6dp"
@@ -299,6 +299,7 @@
             </LinearLayout>
 
             <!-- Up Next Header -->
+            <!-- Up Next Header -->
             <TextView
                 android:id="@+id/lbl_up_next"
                 android:layout_width="wrap_content"
@@ -325,6 +326,23 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/lbl_up_next" />
 
+            <!-- EMPTY STATE MESSAGE -->
+            <TextView
+                android:id="@+id/tv_empty_queue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="No members currently in queue"
+                android:textColor="#888888"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lbl_up_next" />
+
             <!-- Up Next RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_up_next"
@@ -336,7 +354,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/lbl_up_next" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

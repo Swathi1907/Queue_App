@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Top Row: Icon, Department Name/Location, and Arrow -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="14dp">
+
+            <!-- Department Icon / Badge Container -->
+            <FrameLayout
+                android:id="@+id/flDepartmentIconBg"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+
+                android:layout_marginEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/ivDepartmentIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+
+                    app:tint="#D9381E" />
+            </FrameLayout>
+
+            <!-- Titles -->
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvDepartmentName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cardiology"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#0B2545" />
+
+                <TextView
+                    android:id="@+id/tvDepartmentLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Level 3, North Wing"
+                    android:textSize="12sp"
+                    android:textColor="#6C757D" />
+            </LinearLayout>
+
+            <!-- Arrow Action Icon -->
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/outline_arrow_forward_24"
+                app:tint="#0B2545" />
+        </LinearLayout>
+
+        <!-- Metrics Row: Waiting & Average Wait Cards -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="14dp">
+
+            <!-- Waiting Metric Box -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+
+                android:gravity="center"
+                android:paddingVertical="12dp"
+                android:layout_marginEnd="6dp">
+
+                <TextView
+                    android:id="@+id/tvWaitingCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#D9381E" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waiting"
+                    android:textSize="11sp"
+                    android:textColor="#6C757D" />
+            </LinearLayout>
+
+            <!-- Average Wait Metric Box -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+
+                android:gravity="center"
+                android:paddingVertical="12dp"
+                android:layout_marginStart="6dp">
+
+                <TextView
+                    android:id="@+id/tvAvgWaitTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="45m"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#0B2545" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Avg Wait"
+                    android:textSize="11sp"
+                    android:textColor="#6C757D" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bottom Row: Avatars & Status Badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Placeholder for overlapping doctor avatars -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvAssignedDoctorsLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Active Doctors assigned"
+                    android:textSize="12sp"
+                    android:textColor="#6C757D" />
+            </LinearLayout>
+
+            <!-- Load Status Badge -->
+            <TextView
+                android:id="@+id/tvLoadStatusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="● High Load"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#D9381E"
+
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -141,7 +141,9 @@ const getUserQueuesDashboard = async (req, res) => {
 */
 const getUserQueuesDashboard = async (req, res) => {
   try {
+    console.log("user queues dash hit")
     const { userId } = req.params;
+    console.log(userId)
     const today = new Date().toISOString().split('T')[0];
 
     // 1. Fetch ALL queues where the user has at least one token
@@ -226,6 +228,7 @@ const getUserQueuesDashboard = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error.message)
     return res.status(500).json({ success: false, error: error.message });
   }
 };

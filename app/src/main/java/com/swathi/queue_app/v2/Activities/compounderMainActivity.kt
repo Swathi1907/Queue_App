@@ -9,10 +9,8 @@ import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.ActivityCompounderBinding
 
 class CompounderMainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityCompounderBinding
     private lateinit var navController: NavController
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCompounderBinding.inflate(layoutInflater)
@@ -22,10 +20,8 @@ class CompounderMainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainer) as NavHostFragment
         navController = navHostFragment.navController
-
         setupActionBarWithNavController(navController)
     }
-
     // Enables back button support in the action bar if you use one
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()

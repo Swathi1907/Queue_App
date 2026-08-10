@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/newAdminDashboardFragment"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Overview" />
+
+    <item
+        android:id="@+id/newAdminDoctorsFragment"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:title="Doctors" />
+
+    <item
+        android:id="@+id/newAdminQueuesFragment"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Queues" />
+
+    <item
+        android:id="@+id/newAdminSettingsFragment"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Settings" />
+
+</menu>

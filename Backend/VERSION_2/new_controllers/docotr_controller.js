@@ -97,6 +97,7 @@ console.log("there")
 
 const next =  async (req, res) => {
     try {
+        console.log("next hit")
         const { department, doctorCode} = req.body; // Pass 'date' (YYYY-MM-DD) or use today's date
 
         if (!doctorCode || !department) {
@@ -124,7 +125,12 @@ const next =  async (req, res) => {
                 message: "A patient is already in consultation. Complete the current consultation first."
             });
         }
-
+if (queueDoc.queueStatus === 'PAUSED') {
+            return res.status(404).json({
+                success: false,
+                message: "Cannot call next patient while the queue is paused."
+            });
+        }
         // Find the next WAITING patient and make them IN_CONSULTATION
         const nextToken = queueDoc.tokens.find(t => t.status === 'WAITING');
         
@@ -203,10 +209,73 @@ const completeCurrent = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+const updateQueueStatus = async (req, res) => {
+    try {
+    console.log("update hit")
+        const { department, doctorCode, queueStatus } = req.body;
 
+        // 1. Validate required fields
+        if (!doctorCode || !department || !queueStatus) {
+            return res.status(400).json({
+                success: false,
+                message: "doctorCode, department, and queueStatus parameters are required"
+            });
+        }
+
+        // 2. Validate allowed queue status values based on schema enum
+        const validStatuses = ['ACTIVE', 'PAUSED', 'CLOSED'];
+        if (!validStatuses.includes(queueStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid queueStatus value. Allowed values are: ${validStatuses.join(', ')}`
+            });
+        }
+
+        // 3. Find the active/open queue document
+        const query = { doctorCode, department, queueStatus: { $ne: 'CLOSED' } };
+        const queueDoc = await Queue.findOne(query);
+
+        if (!queueDoc) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Active queue session not found" 
+            });
+        }if (queueStatus === 'PAUSED') {
+            const activeConsultation = queueDoc.tokens.find(t => t.status === 'IN_CONSULTATION');
+            if (activeConsultation) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please complete the current consultation before pausing the queue."
+                });
+            }
+        }
+console.log(queueStatus)
+        // 4. Update queue status and sync boolean flag
+        queueDoc.queueStatus = queueStatus;
+        queueDoc.isActive = (queueStatus === 'ACTIVE');
+        
+        await queueDoc.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Queue status updated to ${queueStatus} successfully`,
+            data: {
+                sessionId: queueDoc._id,
+                queueStatus: queueDoc.queueStatus,
+                isActive: queueDoc.isActive,
+                tokens: queueDoc.tokens
+            }
+        });
+
+    } catch (error) {
+        console.error("Error updating queue status:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
 module.exports = {
   getDoctorProfile,
   session_there,
   next,
-  completeCurrent
+  completeCurrent,
+  updateQueueStatus
 };

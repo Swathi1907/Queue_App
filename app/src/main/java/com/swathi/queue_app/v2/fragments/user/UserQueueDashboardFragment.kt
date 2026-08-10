@@ -8,9 +8,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.swathi.queue_app.databinding.UserQueuesBinding // Ensure package name matches your project structure
+import com.swathi.queue_app.databinding.UserQueuesBinding
 import com.swathi.queue_app.v2.adapter.ActiveQueueAdapter
 import com.swathi.queue_app.v2.adapter.QueueHistoryAdapter
+import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.DashboardState
 import com.swathi.queue_app.v2.viewmodels.Queueviewmodel
 
@@ -20,6 +21,8 @@ class QueueDashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: Queueviewmodel by viewModels()
+    private lateinit var tokenManager: TokenManager
+    private var userId: String = ""
 
     private lateinit var activeQueueAdapter: ActiveQueueAdapter
     private lateinit var historyAdapter: QueueHistoryAdapter
@@ -30,6 +33,11 @@ class QueueDashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = UserQueuesBinding.inflate(inflater, container, false)
+        tokenManager = TokenManager(requireContext())
+
+        // Retrieve userId early so it's available for onResume()
+        userId = arguments?.getString("USER_ID") ?: tokenManager.getUserId() ?: ""
+
         return binding.root
     }
 
@@ -39,15 +47,19 @@ class QueueDashboardFragment : Fragment() {
         setupRecyclerViews()
         setupObservers()
         setupListeners()
+    }
 
-        // Replace with your actual dynamic user ID retrieved from local session storage
-     val  userId = arguments?.getString("USER_ID") ?: ""
-
-        viewModel.loadDashboardData(userId)
+    override fun onResume() {
+        super.onResume()
+        // Now userId is reliably present when returning to this screen via backstack
+        if (userId.isNotEmpty()) {
+            viewModel.loadDashboardData(userId)
+        } else {
+            Toast.makeText(requireContext(), "User session not found", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupRecyclerViews() {
-        // Initialize Active Queue Adapter
         activeQueueAdapter = ActiveQueueAdapter(emptyList()) { queueId ->
             Toast.makeText(requireContext(), "Opening QR for Queue: $queueId", Toast.LENGTH_SHORT).show()
         }
@@ -56,7 +68,6 @@ class QueueDashboardFragment : Fragment() {
             adapter = activeQueueAdapter
         }
 
-        // Initialize Recent History Adapter
         historyAdapter = QueueHistoryAdapter(emptyList())
         binding.rvRecentHistory.apply {
             layoutManager = LinearLayoutManager(requireContext())

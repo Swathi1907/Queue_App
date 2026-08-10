@@ -25,6 +25,8 @@ class Queueviewmodel : ViewModel() {
     // Change this line in your ViewModel:
     private val _queueState = MutableStateFlow<Resource<Any>?>(null)
     val queueState: StateFlow<Resource<Any>?> get() = _queueState
+
+
     fun createQueue(hospitalId: String, department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
@@ -42,7 +44,22 @@ class Queueviewmodel : ViewModel() {
             }
         }
     }
+    fun updateQueueStatus(department: String, doctorCode: String, status: String) {
+        viewModelScope.launch {
+            _queueState.value = Resource.Loading
+            try {
+                val response = queueRepository.updateQueueStatus(department, doctorCode, status)
 
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
+                } else {
+                    _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to update queue status")
+                }
+            } catch (e: Exception) {
+                _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
+            }
+        }
+    }
     fun fetchActiveSession(department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
@@ -92,7 +109,7 @@ class Queueviewmodel : ViewModel() {
             }
         }
     }
-    fun callNextPatient(department: String, doctorCode: String) {
+   /* fun callNextPatient(department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
             try {
@@ -122,6 +139,47 @@ class Queueviewmodel : ViewModel() {
                     _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
                 } else {
                     _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to complete consultation")
+                }
+            } catch (e: Exception) {
+                _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
+            }
+        }
+    } */
+   fun callNextPatient(department: String, doctorCode: String) {
+       viewModelScope.launch {
+           _queueState.value = Resource.Loading
+           try {
+               val response = queueRepository.callNextPatient(department, doctorCode)
+               if (response.isSuccessful) {
+                   val body = response.body()
+                   if (body?.success == true && body.data != null) {
+                       _queueState.value = Resource.Success<Any>(body.data as Any)
+                   } else {
+                       _queueState.value = Resource.Error(body?.message ?: "Failed to call next patient")
+                   }
+               } else {
+                   _queueState.value = Resource.Error("Failed to call next patient")
+               }
+           } catch (e: Exception) {
+               _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
+           }
+       }
+   }
+
+    fun completeConsultation(department: String, doctorCode: String) {
+        viewModelScope.launch {
+            _queueState.value = Resource.Loading
+            try {
+                val response = queueRepository.completeCurrent(department, doctorCode)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.success == true && body.data != null) {
+                        _queueState.value = Resource.Success<Any>(body.data as Any)
+                    } else {
+                        _queueState.value = Resource.Error(body?.message ?: "Failed to complete consultation")
+                    }
+                } else {
+                    _queueState.value = Resource.Error("Failed to complete consultation")
                 }
             } catch (e: Exception) {
                 _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")

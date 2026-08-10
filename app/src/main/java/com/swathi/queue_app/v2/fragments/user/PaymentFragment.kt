@@ -9,9 +9,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
+import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.FragmentPaymentBinding
 import com.swathi.queue_app.v2.models.PaymentVerifyRequest
 import com.swathi.queue_app.v2.utilis.TokenManager
@@ -32,6 +35,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     private var consultationFeeINR: Int = 500
     private var departmentName: String = ""
     private var hospitalId: String = ""
+    private var symptoms:String=""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +46,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
             consultationFeeINR = it.getInt("CONSULTATION_FEE_INR", 100)
             departmentName = it.getString("DEPARTMENT_NAME", "")
             hospitalId = it.getString("HOSPITAL_CODE", "")
+            symptoms = it.getString("SYMPTOMS", "")
         }
     }
 
@@ -117,6 +122,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                 put("prefill.email", email)
                 put("prefill.contact", contact)
                 put("theme.color", "#0B3C5D")
+
             }
 
             // Ensure it opens on the main thread safely
@@ -146,7 +152,6 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
         Log.d("RazorpaySuccess", "Payment ID: $paymentId, Order ID: $orderId, Signature: $signature")
 
         val userId = tokenManager.getUserId() ?: ""
-        Log.d("payfrag", userId)
         val patientName = tokenManager.getUserName() ?: "Patient"
 
         val verifyRequest = PaymentVerifyRequest(
@@ -158,10 +163,14 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
             department = departmentName,
             userId = userId,
             patientName = patientName,
-            amount = consultationFeeINR
+            amount = consultationFeeINR,
+            notes = symptoms
         )
-        Log.d("payfrag", "verify called")
+
         viewModel.verifyPayment(verifyRequest)
+
+        // INSTANT NAVIGATION: Pop right back to your Queues Fragment safely
+
     }
 
     private fun observePaymentState() {
@@ -180,6 +189,14 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                             "Queue Confirmed! Token Number: $tokenNumber",
                             Toast.LENGTH_LONG
                         ).show()
+                        try {
+                            // Pop back stack cleanly to your queues fragment destination ID
+                            findNavController().popBackStack(R.id.nav_queues, false)
+
+                        } catch (e: Exception) {
+                            Log.e("NavigationError", "Failed to navigate after payment: ${e.message}")
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
                     }
                     is HospitalViewModel.Resource.Error -> {
                         Toast.makeText(

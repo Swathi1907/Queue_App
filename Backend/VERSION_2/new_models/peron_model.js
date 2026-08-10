@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['PATIENT', 'COMPOUNDER', 'SUPER_ADMIN', 'DOCTOR'],
+      enum: ['PATIENT', 'COMPOUNDER', 'SUPER_ADMIN', 'DOCTOR','ADMIN'],
       default: 'PATIENT',
       required: true,
     },
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
       index: true,
       required: [
         function () {
-          return this.role === 'DOCTOR' || this.role === 'COMPOUNDER';
+          return this.role === 'DOCTOR' || this.role === 'COMPOUNDER'||this.role==='ADMIN';
         },
         'Hospital link is required for doctors and compounders',
       ],

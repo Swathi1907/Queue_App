@@ -67,21 +67,29 @@ app.use("/api/notification", notificationRoutes);
 // V2 ROUTES (New Modular Routes)
 // ==========================================
 
-const v2DoctorRoutes=require('./VERSION_2/new_routes/new_doctor')
 
+const v2AdminRoutes=require('./VERSION_2/new_routes/new_admin')
+app.use('/api/v2/admin',v2AdminRoutes);
+
+
+const v2DoctorRoutes=require('./VERSION_2/new_routes/new_doctor')
 app.use('/api/v2/doctor',v2DoctorRoutes);
 
 
 
 
 const v2HospitalRoutes = require('./VERSION_2/new_routes/new_hosp'); // Ensure route file is in new_routes
-
 app.use('/api/v2/hospital', v2HospitalRoutes);
+
+
+
 // Import v2 Auth Routes
 const v2AuthRoutes = require('./VERSION_2/new_routes/new_auth');
-
 // Mount v2 Auth Router under /api/v2/auth
 app.use('/api/v2/auth', v2AuthRoutes);
+
+
+
 
 const v2QueueRoutes = require('./VERSION_2/new_routes/new_queue');
 app.use('/api/v2/queue', v2QueueRoutes);
@@ -100,7 +108,8 @@ app.post('/api/v2/payment/verify', async (req, res) => {
             department, 
             userId, 
             patientName,
-            amount 
+            amount ,
+            notes
         } = req.body;
 
         // Validate required fields before proceeding with database operations
@@ -172,7 +181,8 @@ const queueDoc = await QueueModel.findOneAndUpdate(
             orderId: razorpay_order_id,
             paymentId: razorpay_payment_id,
             amountPaid: amount || 0,
-            status: 'WAITING'
+            status: 'WAITING',
+            notes: notes||" "
         });
 
         await queueDoc.save();
