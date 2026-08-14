@@ -184,15 +184,13 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
         }
     }
     private fun updateSessionUI(sessionData: SessionData?) {
-        if (sessionData == null || sessionData.sessionId.isNullOrEmpty() && (sessionData.tokens.isNullOrEmpty() || sessionData.queueStatus.isNullOrEmpty())) {
-            // Explicitly show "No Session" view and hide active session group
+        if (sessionData == null || (sessionData.sessionId.isNullOrEmpty() && (sessionData.tokens.isNullOrEmpty() || sessionData.queueStatus.isNullOrEmpty()))) {
             binding.layoutNoSession.visibility = View.VISIBLE
             binding.layoutActiveSessionGroup.visibility = View.GONE
             nextMembersAdapter.submitList(emptyList())
             return
         }
 
-        // Check if queue is explicitly closed or non-existent
         if (sessionData.queueStatus.equals("CLOSED", ignoreCase = true)) {
             binding.layoutNoSession.visibility = View.VISIBLE
             binding.layoutActiveSessionGroup.visibility = View.GONE
@@ -204,8 +202,20 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
         binding.layoutActiveSessionGroup.visibility = View.VISIBLE
 
         val isPaused = sessionData.queueStatus.equals("PAUSED", ignoreCase = true)
-
         binding.badgeStatus.text = "● ${sessionData.queueStatus ?: "Active"}"
+
+        // --- UPDATE STATS CARDS ---
+        val waitingTokens = sessionData.tokens?.filter {
+            it.status == "WAITING" || it.status == "PENDING"
+        } ?: emptyList()
+
+        // Set Total in Queue Count
+        binding.tvStatStatusValue.text = waitingTokens.size.toString()
+
+        // Set Average Service Time (defaults to 5 mins if null)
+        val avgTime = sessionData.avgServiceTime ?: 5
+        binding.tvAvgServiceTime.text = "$avgTime mins"
+        // --------------------------
 
         if (isPaused) {
             binding.btnPauseResume.text = "Resume"
@@ -231,10 +241,6 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
                 binding.btnCompleteNext.text = "Call Next"
             }
         }
-
-        val waitingTokens = sessionData.tokens?.filter {
-            it.status == "WAITING" || it.status == "PENDING"
-        } ?: emptyList()
 
         if (waitingTokens.isEmpty()) {
             binding.rvUpNext.visibility = View.GONE

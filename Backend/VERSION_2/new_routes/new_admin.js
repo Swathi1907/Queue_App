@@ -4,7 +4,8 @@ const router = express.Router();
 // 1. Destructure named exports cleanly from your admin/dashboard controller
 const { 
     getAdminDashboardData, 
-   getDoctorDirectory
+   getDoctorDirectory,
+   getGlobalQueues
 } = require('../new_controllers/admin_controllers');
 
 // 2. Import middleware functions
@@ -29,6 +30,12 @@ router.post(
 authmiddleware,
 authorize('SUPER_ADMIN', 'ADMIN'), 
 getDoctorDirectory
+)
+router.post(
+'/global-monitor',
+authmiddleware,
+authorize('SUPER_ADMIN', 'ADMIN'), 
+getGlobalQueues
 )
 
 module.exports = router;

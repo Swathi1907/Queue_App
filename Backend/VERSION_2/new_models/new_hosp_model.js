@@ -32,6 +32,18 @@ const hospitalSchema = new mongoose.Schema(
       state: { type: String, required: true, trim: true },
       zipCode: { type: String, trim: true },
     },
+    // --- ADD THIS: GeoJSON Point for mapping and radius filtering ---
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // Array of numbers: [longitude, latitude]
+        required: [true, 'Geospatial coordinates are required'],
+      },
+    },
     departments: [
       {
         type: String,
@@ -47,5 +59,8 @@ const hospitalSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// --- ADD THIS: Essential for fast geospatial radius queries ($near) ---
+hospitalSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('HospitalV2', hospitalSchema);

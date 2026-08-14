@@ -54,6 +54,7 @@ class UserDoctorAdapter(
                 onJoinQueueClick(doctor)
             }
         }
+
     }
 
     override fun getItemCount(): Int = doctors.size

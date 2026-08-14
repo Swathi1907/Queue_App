@@ -21,12 +21,22 @@ data class QueueStatusUpdateRequest(
     val doctorCode: String,
     val queueStatus: String // "ACTIVE", "PAUSED", "CLOSED"
 )
-data class QueueActionData(
+/*data class QueueActionData(
     val sessionId: String,
     val queueStatus: String,
     val tokens: List<QueueTokenItem>
 )
-
+*/
+data class QueueActionData(
+    val sessionId: String,
+    val queueStatus: String,
+    val avgServiceTime: Int?,               // <-- Added to capture service time updates
+    val calledToken: QueueTokenItem?,       // <-- Added for next() responses
+    val completedToken: QueueTokenItem?,    // <-- Added for completeCurrent() responses
+    val metrics: EtaMetrics?,               // <-- Added for call next ETA metrics
+    val nextMetrics: EtaMetrics?,           // <-- Added for subsequent patient metrics
+    val tokens: List<QueueTokenItem>
+)
 data class QueueTokenItem(
     @SerializedName("_id") val id: String,
     val tokenNumber: Int,
@@ -53,11 +63,24 @@ data class Hospital(
     val code: String,
     val contactNumber: String,
     val email: String?,
-    val address:String,
+    val address: HospitalAddress?,
+    val location: HospitalLocation?, // Added to map MongoDB GeoJSON location
     val departments: List<String>,
     val isActive: Boolean,
     val createdAt: String?,
     val updatedAt: String?
+)
+
+data class HospitalAddress(
+    val street: String?,
+    val city: String?,
+    val state: String?,
+    val zipCode: String?
+)
+
+data class HospitalLocation(
+    val type: String?, // Usually "Point"
+    val coordinates: List<Double>? // Array of numbers: [longitude, latitude]
 )
 data class QueueDashboardResponse(
     val success: Boolean = false,
@@ -93,10 +116,17 @@ data class ActiveSessionResponse(
     val message: String,
     val data: SessionData?
 )
+/*
+data class SessionData(
+    val sessionId: String,
+    val queueStatus: String?, // "ACTIVE", "PAUSED", "CLOSED"
+    val tokens: List<TokenItem>?
+) */
 
 data class SessionData(
     val sessionId: String,
     val queueStatus: String?, // "ACTIVE", "PAUSED", "CLOSED"
+    val avgServiceTime: Int?, // <-- Added to capture active session service time
     val tokens: List<TokenItem>?
 )
 
@@ -265,7 +295,21 @@ data class QueueResponseWrapper(
     val data: QueueData?
 )
 
+data class HospitalUpdateRequest(
+    val hospitalId: String,
+    val hospitalName: String,
+    val description: String,
+    val departments: List<String>,
+    val phone: String,
+    val address: HospitalAddress?,
+    val bannerImageUrl: String?
+)
 
+data class StandardResponse(
+    val success: Boolean,
+    val message: String,
+    val data: Any? = null
+)
 data class GlobalQueueResponseWrapper(
     val success: Boolean,
     val data: List<GlobalQueueItemRemote>
@@ -309,9 +353,28 @@ data class DepartmentData(
     val hospitalName: String,
     val departments: List<DepartmentItem>
 )
+
 data class HospitalDetailResponse(
     val success: Boolean,
     val data: HospitalDetailItem
+)
+
+
+
+data class HospitalDetailItem(
+    @SerializedName("_id") val id: String,
+    val name: String,
+    val code: String,
+    val email: String,
+    val address: HospitalAddress?, // Changed from String to HospitalAddress object
+    val description: String?,
+    val contactNumber: String,
+    val departments: List<String>?,
+    val distance: String?,
+    val rating: Double?,
+    val reviewsCount: Int?,
+    val waitTime: String?,
+    val imageUrl: String?
 )
 // --- User-Side Doctor Display Models ---
 
@@ -327,25 +390,34 @@ data class UserDoctorItem(
     @SerializedName("_id") val id: String,
     val doctorCode: String,
     val name: String,
+    val description: String?,
+    val contactNumber: String?,
     val specialty: String,
     val imageUrl: String?,
     val consultationFee: Double,
     val peopleAhead: Int,
+    val avgServiceTime: String?, // Added property to match backend response
     val estimatedWaitTime: String,
     @SerializedName("isJoined") val isJoined: Boolean = false,
-    @SerializedName("isQueuePaused") val isQueuePaused: Boolean = false // Added property
+    @SerializedName("isQueuePaused") val isQueuePaused: Boolean = false
 )
-data class HospitalDetailItem(
-    @SerializedName("_id") val id: String,
-    val name: String,
-    val code: String,
-    val address: String,
-    val distance: String?,
-    val rating: Double?,
-    val reviewsCount: Int?,
-    val waitTime: String?,
-    val imageUrl: String?
+data class EtaMetrics(
+    val eta: Int,
+    @SerializedName("queue_status") val queueStatus: String?,
+    val avgServiceTime: Int,
+    val activeCount: Int,
+    val totalPeople: Int,
+    val peopleAhead: Int,
+    val waitingAhead: Int,
+    val remaining: Double,
+    val progress: Int,
+    val currentMember: QueueTokenItem?,
+    val servingMember: QueueTokenItem?
 )
+
+
+
+
 data class DepartmentItem(
     val name: String,
     val waitingCount: Int

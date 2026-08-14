@@ -120,10 +120,10 @@
                 android:layout_marginStart="6dp">
 
                 <TextView
-                    android:id="@+id/tvAvgWaitTime"
+                    android:id="@+id/tvdoctors"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="45m"
+                    android:text="45"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="#0B2545" />
@@ -131,7 +131,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Avg Wait"
+                    android:text="Total Doctors"
                     android:textSize="11sp"
                     android:textColor="#6C757D" />
             </LinearLayout>
@@ -156,10 +156,12 @@
                     android:id="@+id/tvAssignedDoctorsLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Active Doctors assigned"
+                    android:text="Condition of the particualr department"
                     android:textSize="12sp"
                     android:textColor="#6C757D" />
             </LinearLayout>
+
+
 
             <!-- Load Status Badge -->
             <TextView

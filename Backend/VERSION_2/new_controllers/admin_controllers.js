@@ -74,6 +74,78 @@ const getAdminDashboardData = async (req, res) => {
   }
 };
 
+
+const getGlobalQueues = async (req, res) => {
+  try {
+    let hospitalId = req.body.hospitalId || req.user?.hospitalId;
+    if (typeof hospitalId === 'string') {
+      hospitalId = hospitalId.trim();
+    }
+
+    if (!hospitalId && req.user?.role !== 'SUPER_ADMIN') {
+      return res.status(400).json({
+        success: false,
+        message: 'Hospital ID is missing.'
+      });
+    }
+
+    const filter = hospitalId ? { hospitalId } : {};
+
+    // Fetch all queues for the hospital
+    const queues = await Queue.find(filter).lean();
+
+    // Map each queue entry into the global monitor structure expected by Android
+    const globalQueueItems = await Promise.all(queues.map(async (queue) => {
+      const tokens = Array.isArray(queue.tokens) ? queue.tokens : [];
+      
+      // Count waiting patients
+      const waitingCount = tokens.filter(t => 
+        t.status === 'WAITING' || t.status === 'waiting'
+      ).length;
+
+      // Calculate or assign dynamic load status based on waiting count
+      let loadStatus = 'NORMAL';
+      if (waitingCount >= 15) {
+        loadStatus = 'HIGH_LOAD';
+      } else if (waitingCount >= 8) {
+        loadStatus = 'MODERATE';
+      }
+
+      const avgServiceTimeMinutes = queue.avgServiceTime || 5;
+
+      // Count active or paused doctor queues linked to this specific department
+      const departmentName = queue.department || queue.queueName;
+      const activeDoctorsCount = await Queue.countDocuments({
+        ...filter,
+        ...(departmentName ? { department: departmentName } : {}),
+        queueStatus: { $in: ['ACTIVE', 'PAUSED', 'active', 'paused'] },
+        doctorCode: { $exists: true, $ne: null }
+      });
+
+      return {
+        departmentId: queue._id.toString(),
+        departmentName: departmentName || `Dr. ${queue.doctorCode} Queue`,
+        location: queue.location || 'Main Building, Floor 2',
+        waitingCount: waitingCount,
+        avgWaitTime: queue.avgWaitTime || `${Math.max(5, waitingCount * avgServiceTimeMinutes)}m`,
+        avgServiceTime: `${avgServiceTimeMinutes} mins/patient`,
+        loadStatus: loadStatus,
+        assignedDoctorsCount: activeDoctorsCount // Updated with active/paused count for this department
+      };
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Global queues fetched successfully',
+      data: globalQueueItems
+    });
+
+  } catch (error) {
+    console.log("Error fetching global queues:", error.message);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 const getDoctorDirectory = async (req, res) => {
   try {
     let hospitalId = req.body.hospitalId || req.user?.hospitalId;
@@ -159,5 +231,6 @@ const getDoctorDirectory = async (req, res) => {
 
 module.exports = {
   getAdminDashboardData,
-  getDoctorDirectory
+  getDoctorDirectory,
+   getGlobalQueues
 };

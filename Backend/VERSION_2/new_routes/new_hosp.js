@@ -9,7 +9,8 @@ const {
   verifyDoctorCode,
   getAllHospitals,
   getHospitalById,
-  getUserSideDoctorsByDepartment
+  getUserSideDoctorsByDepartment,
+  updateHospitalDetails
 } = require('../new_controllers/hospital_controller');
 
 const { authmiddleware, authorize } = require('../new_middleware/authmiddleware');
@@ -60,5 +61,5 @@ router.get('/:hospitalId/departments/:departmentName/doctors', getDoctorsByDepar
 
 // Get user-side doctors by department
 router.get('/:hospitalId/departments/:departmentName/Usersidedoctors', getUserSideDoctorsByDepartment);
-
+router.put('/update',updateHospitalDetails)
 module.exports = router;

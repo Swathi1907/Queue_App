@@ -9,8 +9,10 @@ import com.swathi.queue_app.v2.models.DepartmentData
 import com.swathi.queue_app.v2.models.Doctor
 import com.swathi.queue_app.v2.models.Hospital
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.HospitalUpdateRequest
 import com.swathi.queue_app.v2.models.OrderCreateRequest
 import com.swathi.queue_app.v2.models.PaymentVerifyRequest
+import com.swathi.queue_app.v2.models.StandardResponse
 import com.swathi.queue_app.v2.models.UserDoctorItem
 import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.network.RetrofitInstance
@@ -36,7 +38,15 @@ class HospitalViewModel : ViewModel() {
 
     private val _paymentVerificationState = MutableStateFlow<Resource<Int>>(Resource.Idle)
     val paymentVerificationState: StateFlow<Resource<Int>> = _paymentVerificationState.asStateFlow()
+    private val _updateResult = MutableLiveData<Result<StandardResponse>>()
+    val updateResult: LiveData<Result<StandardResponse>> get() = _updateResult
 
+    fun saveHospitalDetails(request: HospitalUpdateRequest) {
+        viewModelScope.launch {
+            val result = repository.updateHospitalDetails(request)
+            _updateResult.value = result
+        }
+    }
     fun fetchUserDoctors(hospitalId: String, department: String, currentUserId:String) {
         viewModelScope.launch {
             _userDoctorsState.value = Resource.Loading

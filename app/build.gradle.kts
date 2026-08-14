@@ -45,6 +45,14 @@ android {
 }
 
 dependencies {
+
+// Google Maps and Location Services
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Material Components (Required for your distance filter chips and modern UI themes)
+    implementation("com.google.android.material:material:1.11.0")
+
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")

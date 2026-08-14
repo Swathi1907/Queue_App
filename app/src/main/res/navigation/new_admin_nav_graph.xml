@@ -17,12 +17,12 @@
 
     <fragment
         android:id="@+id/newAdminQueuesFragment"
-        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalAdminDashboardFragment"
+        android:name="com.swathi.queue_app.v2.fragments.admin.GlobalQueueMonitorFragment"
         android:label="Queues" />
 
     <fragment
         android:id="@+id/newAdminSettingsFragment"
-        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalAdminDashboardFragment"
-        android:label="Settings" />
+        android:name="com.swathi.queue_app.v2.fragments.admin.HospitalSettingsFragment"
+            android:label="Settings" />
 
 </navigation>

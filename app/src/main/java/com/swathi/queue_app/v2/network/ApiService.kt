@@ -14,6 +14,7 @@ import com.swathi.queue_app.v2.models.GlobalQueueResponseWrapper
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
 import com.swathi.queue_app.v2.models.HospitalIdRequest
 import com.swathi.queue_app.v2.models.HospitalResponse
+import com.swathi.queue_app.v2.models.HospitalUpdateRequest
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.OrderCreateRequest
 import com.swathi.queue_app.v2.models.OrderCreateResponse
@@ -25,6 +26,7 @@ import com.swathi.queue_app.v2.models.QueueDashboardResponse
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
 import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
 import com.swathi.queue_app.v2.models.SignupRequest
+import com.swathi.queue_app.v2.models.StandardResponse
 import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeResponse
@@ -36,6 +38,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -134,7 +137,15 @@ interface ApiService {
     ): Response<DoctorDirectoryResponse>
 
 
-    @POST("api/v2/admin/queues/global-monitor")
+    @PUT("api/v2/hospital/update")
+    suspend fun updateHospitalDetails(
+        @Body request: HospitalUpdateRequest
+    ): Response<StandardResponse>
+
+
+
+
+    @POST("api/v2/admin/global-monitor")
     suspend fun getGlobalDepartments(
         @Body request: HospitalIdRequest
     ): Response<GlobalQueueResponseWrapper>

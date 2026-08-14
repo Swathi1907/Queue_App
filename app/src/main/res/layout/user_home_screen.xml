@@ -8,13 +8,15 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:fillViewport="true"
-        android:paddingBottom="24dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="24dp">
 
             <!-- Top Header Card -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,8 +31,8 @@
                     android:id="@+id/ivProfile"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-
                     android:scaleType="centerCrop"
+                    android:background="@drawable/logo"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -76,8 +78,9 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-
+                android:layout_marginTop="16dp"
+                android:background="@android:color/white"
+                android:drawableStart="@drawable/outline_arrow_forward_24"
                 android:drawablePadding="10dp"
                 android:hint="Search doctor or clinic"
                 android:imeOptions="actionSearch"
@@ -88,8 +91,81 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-            <!-- Horizontal Category Chips -->
+            <!-- Horizontal Category Chips (Distance Filters) -->
+            <!-- Horizontal Category Chips (Distance Filters) -->
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="20dp"
+                android:scrollbars="none"
+                app:layout_constraintTop_toBottomOf="@id/etSearch">
 
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/horizontalScrollChips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="false">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip2km"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Within 2km" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip5km"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5km" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip10km"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10km" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+            <!-- Embedded Google Map View Card -->
+            <!-- Embedded Google Map View Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mapCardView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:layout_constraintTop_toBottomOf="@id/horizontalScrollContainer">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <androidx.fragment.app.FragmentContainerView
+                        android:id="@+id/mapFragment"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Transparent overlay to capture clicks and trigger navigation -->
+                    <View
+                        android:id="@+id/mapOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
 
             <!-- Section Title: Nearby Hospitals -->
             <TextView
@@ -97,13 +173,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:text="Nearby Hospitals"
                 android:textColor="#212121"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/etSearch" />
+                app:layout_constraintTop_toBottomOf="@id/mapCardView" />
 
             <TextView
                 android:id="@+id/tvSeeAll"

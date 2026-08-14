@@ -1,13 +1,12 @@
 const UserV2 = require('../new_models/peron_model');
 const HospitalV2 = require('../new_models/new_hosp_model');
-
+const Queue = require("../new_models/new_queuev2");
+const { calculateETA } = require("../new_controllers/eta_control");
 
 // 1. Fetch Assigned Doctor Profile and Department Details
 const getDoctorProfile = async (req, res) => {
   try {
-    // req.user comes from the auth middleware decoding the JWT token
     const doctorId = req.user.id;
-
     const doctor = await UserV2.findById(doctorId).select('-password');
 
     if (!doctor) {
@@ -17,7 +16,6 @@ const getDoctorProfile = async (req, res) => {
       });
     }
 
-    // Ensure department is always returned as an array
     let departmentList = doctor.department;
     if (!Array.isArray(departmentList)) {
       departmentList = departmentList ? [departmentList] : [];
@@ -29,10 +27,10 @@ const getDoctorProfile = async (req, res) => {
         _id: doctor._id,
         name: doctor.name,
         email: doctor.email,
-        department: departmentList, // Now strictly a list/array
+        department: departmentList,
         hospitalId: doctor.hospitalId,
-        rating:doctor.rating,
-        phoneNumber:doctor.phoneNumber,
+        rating: doctor.rating,
+        phoneNumber: doctor.phoneNumber,
         doctorCode: doctor.doctorCode,
         qualification: doctor.qualification,
         isAvailable: doctor.isAvailable
@@ -44,12 +42,9 @@ const getDoctorProfile = async (req, res) => {
   }
 };
 
-const Queue = require('../new_models/new_queuev2');
 const session_there = async (req, res) => {
     try {
-        console.log("Session_there hit")
         const { department, doctorCode } = req.query;
-        const todayDate = new Date().toISOString().split('T')[0];
 
         if (!doctorCode || !department) {
             return res.status(400).json({
@@ -58,11 +53,10 @@ const session_there = async (req, res) => {
             });
         }
 
-        // Find today's queue document based on queueStatus instead of isActive
         const queueDoc = await Queue.findOne({
             doctorCode: doctorCode,
             department: department,
-            queueStatus: { $ne: 'CLOSED' } // Ensures we fetch queues that are ACTIVE or PAUSED, but not closed
+            queueStatus: { $ne: 'CLOSED' }
         });
 
         if (!queueDoc) {
@@ -72,14 +66,14 @@ const session_there = async (req, res) => {
                 data: null
             });
         }
-console.log("there")
-        // Return the full session structure containing queue metadata and the tokens array
+
         return res.status(200).json({
             success: true,
             message: "Active session retrieved successfully",
             data: {
                 sessionId: queueDoc._id,
-                queueStatus: queueDoc.queueStatus, // 'ACTIVE', 'PAUSED'
+                queueStatus: queueDoc.queueStatus,
+                avgServiceTime: queueDoc.avgServiceTime || 5, // Exposed here
                 tokens: queueDoc.tokens
             }
         });
@@ -93,12 +87,9 @@ console.log("there")
     }
 };
 
- // Point to your queueV2 model file path
-
-const next =  async (req, res) => {
+const next = async (req, res) => {
     try {
-        console.log("next hit")
-        const { department, doctorCode} = req.body; // Pass 'date' (YYYY-MM-DD) or use today's date
+        const { department, doctorCode } = req.body;
 
         if (!doctorCode || !department) {
             return res.status(400).json({
@@ -107,17 +98,13 @@ const next =  async (req, res) => {
             });
         }
 
-        // Find the active queue for the doctor, department, and date
         const query = { doctorCode, department, queueStatus: { $ne: 'CLOSED' } };
-   //     if (date) query.date = date;
-
         const queueDoc = await Queue.findOne(query);
 
         if (!queueDoc) {
             return res.status(404).json({ success: false, message: "Active queue session not found" });
         }
 
-        // Optional check: ensure there isn't already someone active
         const existingActive = queueDoc.tokens.find(t => t.status === 'IN_CONSULTATION');
         if (existingActive) {
             return res.status(400).json({
@@ -125,13 +112,14 @@ const next =  async (req, res) => {
                 message: "A patient is already in consultation. Complete the current consultation first."
             });
         }
-if (queueDoc.queueStatus === 'PAUSED') {
+
+        if (queueDoc.queueStatus === 'PAUSED') {
             return res.status(404).json({
                 success: false,
                 message: "Cannot call next patient while the queue is paused."
             });
         }
-        // Find the next WAITING patient and make them IN_CONSULTATION
+
         const nextToken = queueDoc.tokens.find(t => t.status === 'WAITING');
         
         if (!nextToken) {
@@ -142,7 +130,12 @@ if (queueDoc.queueStatus === 'PAUSED') {
         }
 
         nextToken.status = 'IN_CONSULTATION';
+        // Optional tracking timestamp for precise remaining duration calculations in ETA
+        nextToken.createdAt = new Date(); 
         await queueDoc.save();
+
+        // Calculate dynamic ETA metrics for the newly called token
+        const etaData = await calculateETA(queueDoc, nextToken.tokenNumber);
 
         return res.status(200).json({
             success: true,
@@ -150,6 +143,9 @@ if (queueDoc.queueStatus === 'PAUSED') {
             data: {
                 sessionId: queueDoc._id,
                 queueStatus: queueDoc.queueStatus,
+                avgServiceTime: queueDoc.avgServiceTime || 5,
+                calledToken: nextToken,
+                metrics: etaData, // Full breakdown including progress, activeCount, remaining times
                 tokens: queueDoc.tokens
             }
         });
@@ -158,7 +154,7 @@ if (queueDoc.queueStatus === 'PAUSED') {
         console.error("Error calling next patient:", error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
 const completeCurrent = async (req, res) => {
     try {
@@ -172,15 +168,12 @@ const completeCurrent = async (req, res) => {
         }
 
         const query = { doctorCode, department, queueStatus: { $ne: 'CLOSED' } };
-      //  if (date) query.date = date;
-
         const queueDoc = await Queue.findOne(query);
 
         if (!queueDoc) {
             return res.status(404).json({ success: false, message: "Active queue session not found" });
         }
 
-        // Find the patient currently in consultation
         const activeToken = queueDoc.tokens.find(t => t.status === 'IN_CONSULTATION');
         
         if (!activeToken) {
@@ -190,9 +183,15 @@ const completeCurrent = async (req, res) => {
             });
         }
 
-        // Update status to COMPLETED
         activeToken.status = 'COMPLETED';
         await queueDoc.save();
+
+        // Optionally calculate metrics for the next person in line to keep dashboard live
+        const nextWaitingToken = queueDoc.tokens.find(t => t.status === 'WAITING');
+        let nextMetrics = null;
+        if (nextWaitingToken) {
+            nextMetrics = await calculateETA(queueDoc, nextWaitingToken.tokenNumber);
+        }
 
         return res.status(200).json({
             success: true,
@@ -200,6 +199,9 @@ const completeCurrent = async (req, res) => {
             data: {
                 sessionId: queueDoc._id,
                 queueStatus: queueDoc.queueStatus,
+                avgServiceTime: queueDoc.avgServiceTime || 5,
+                completedToken: activeToken,
+                nextMetrics: nextMetrics,
                 tokens: queueDoc.tokens
             }
         });
@@ -209,12 +211,11 @@ const completeCurrent = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
 const updateQueueStatus = async (req, res) => {
     try {
-    console.log("update hit")
         const { department, doctorCode, queueStatus } = req.body;
 
-        // 1. Validate required fields
         if (!doctorCode || !department || !queueStatus) {
             return res.status(400).json({
                 success: false,
@@ -222,7 +223,6 @@ const updateQueueStatus = async (req, res) => {
             });
         }
 
-        // 2. Validate allowed queue status values based on schema enum
         const validStatuses = ['ACTIVE', 'PAUSED', 'CLOSED'];
         if (!validStatuses.includes(queueStatus)) {
             return res.status(400).json({
@@ -231,7 +231,6 @@ const updateQueueStatus = async (req, res) => {
             });
         }
 
-        // 3. Find the active/open queue document
         const query = { doctorCode, department, queueStatus: { $ne: 'CLOSED' } };
         const queueDoc = await Queue.findOne(query);
 
@@ -240,7 +239,9 @@ const updateQueueStatus = async (req, res) => {
                 success: false, 
                 message: "Active queue session not found" 
             });
-        }if (queueStatus === 'PAUSED') {
+        }
+
+        if (queueStatus === 'PAUSED') {
             const activeConsultation = queueDoc.tokens.find(t => t.status === 'IN_CONSULTATION');
             if (activeConsultation) {
                 return res.status(400).json({
@@ -249,11 +250,9 @@ const updateQueueStatus = async (req, res) => {
                 });
             }
         }
-console.log(queueStatus)
-        // 4. Update queue status and sync boolean flag
+
         queueDoc.queueStatus = queueStatus;
         queueDoc.isActive = (queueStatus === 'ACTIVE');
-        
         await queueDoc.save();
 
         return res.status(200).json({
@@ -262,6 +261,7 @@ console.log(queueStatus)
             data: {
                 sessionId: queueDoc._id,
                 queueStatus: queueDoc.queueStatus,
+                avgServiceTime: queueDoc.avgServiceTime || 5,
                 isActive: queueDoc.isActive,
                 tokens: queueDoc.tokens
             }
@@ -272,6 +272,7 @@ console.log(queueStatus)
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
 module.exports = {
   getDoctorProfile,
   session_there,

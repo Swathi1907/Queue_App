@@ -20,8 +20,10 @@
     "express": "^5.2.1",
     "firebase-admin": "^14.1.0",
     "groq-sdk": "^1.5.0",
+    "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.3",
+    "multer": "^2.2.0",
     "razorpay": "^2.9.8",
     "socket.io": "^4.8.3"
   },

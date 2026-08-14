@@ -18,59 +18,68 @@ const generateHospitalCode = (name) => {
   return `${prefix}-${randomDigits}`;
 };
 
+
 // @desc    Get single hospital details by ID
 // @route   GET /api/v2/hospital/:id
 // @access  Public
 const getHospitalById = async (req, res) => {
     try {
-      console.log("by id hit")
-      console.log(req.params.hospitalId)
-        const hospital = await HospitalV2.findById(req.params.hospitalId);
+      console.log("called hosp");
+        console.log("admin hospital details hit");
+        let hospitalId = req.params.hospitalId || req.user?.hospitalId;
+        
+        if (typeof hospitalId === 'string') {
+            hospitalId = hospitalId.trim();
+        }
 
-        if (!hospital) {
-         console.log("not found")
-            return res.status(404).json({
+        if (!hospitalId) {
+            return res.status(400).json({
                 success: false,
-                message: 'Hospital not found or inactive'
+                message: 'Hospital ID is required.'
             });
         }
 
-        // Format the response to match your Android app's HospitalDetailItem model
-        const formattedHospital = {
-            _id: hospital._id,
-            name: hospital.name,
-            code: hospital.code,
-            address: `${hospital.address.street || ''}, ${hospital.address.city}, ${hospital.address.state}`.trim(),
-            distance: "1.2 km away", // Can be calculated dynamically or mocked
-            rating: 4.8,
-            reviewsCount: 124,
-            waitTime: "Short wait time",
-            imageUrl: hospital.imageUrl || ""
-        };
+        // Query by your fixed code/identifier field used in settings
+        const hospital = await HospitalV2.findOne({ code: hospitalId });
 
-        res.status(200).json({
+        if (!hospital) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital profile not found.'
+            });
+        }
+console.log("success hit")
+console.log(hospital);
+        return res.status(200).json({
             success: true,
-            data: formattedHospital
+            data: hospital
         });
+
     } catch (error) {
-      
-        res.status(500).json({
+        console.error("Error fetching hospital details for admin:", error.message);
+        return res.status(500).json({
             success: false,
             message: 'Server Error',
             error: error.message
         });
     }
 };
-
-
 const createHospital = async (req, res) => {
   try {
-    const { name, contactNumber, email, address } = req.body;
+    const { name, contactNumber, email, address, description, departments, latitude, longitude } = req.body;
 
     if (!name || !contactNumber) {
       return res.status(400).json({
         success: false,
         message: 'Hospital name and contact number are required.',
+      });
+    }
+
+    // Validate that coordinates are provided for the map and geospatial queries
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required for hospital location.',
       });
     }
 
@@ -92,6 +101,13 @@ const createHospital = async (req, res) => {
       contactNumber,
       email,
       address,
+      description,
+      departments,
+      // GeoJSON requires longitude first, then latitude: [lng, lat]
+      location: {
+        type: 'Point',
+        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+      },
     });
 
     res.status(201).json({
@@ -106,8 +122,6 @@ const createHospital = async (req, res) => {
     });
   }
 };
-
-
 const getHospitalDepartments = async (req, res) => {
   try {
     console.log("get hit");
@@ -373,9 +387,133 @@ const getDoctorsByDepartment = async (req, res) => {
       message: 'Internal server error while fetching doctors.',
     });
   }
-};
+}; 
 // Ensure your Doctor model path is correct
 // Adjust path to your queue model
+const getUserSideDoctorsByDepartment = async (req, res) => {
+    try {
+        const { hospitalId, departmentName } = req.params;
+        const currentUserId = req.user?.id || req.query.userId; 
+        console.log("Current User ID:", currentUserId);
+        console.log(`Fetching doctors with queues for hospital: ${hospitalId}, department: ${departmentName}`);
+
+        let hospitalQuery;
+        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
+            hospitalQuery = { _id: hospitalId };
+        } else {
+            hospitalQuery = { code: hospitalId };
+        }
+
+        const hospital = await HospitalV2.findOne(hospitalQuery);
+        if (!hospital) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hospital not found'
+            });
+        }
+
+        const doctors = await UserV2.find({
+            $or: [
+                { hospitalId: hospital._id.toString() },
+                { hospitalId: hospital.code }
+            ],
+            role: 'DOCTOR',
+            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
+        });
+
+        const formattedDoctors = (await Promise.all(doctors.map(async (doc) => {
+            const doctorCodeVal = doc.doctorCode || doc._id.toString();
+
+            let queue = null;
+
+            // 1. If a user is logged in, prioritize finding a queue where this user specifically has an active WAITING token
+            if (currentUserId) {
+                queue = await QueueV2.findOne({
+                    doctorCode: doctorCodeVal,
+                    "tokens": {
+                        $elemMatch: {
+                            $or: [
+                                { userId: currentUserId },
+                                { patientId: currentUserId }
+                            ],
+                            status: "WAITING"
+                        }
+                    }
+                });
+            }
+
+            // 2. Fallback: If no user-specific waiting queue was found, find the general active queue
+            if (!queue) {
+                queue = await QueueV2.findOne({ 
+                    doctorCode: doctorCodeVal,
+                    queueStatus: "ACTIVE"
+                }).sort({ createdAt: -1 });
+            }
+
+            // 3. Final Fallback: Absolute latest queue if nothing else matches
+            if (!queue) {
+                queue = await QueueV2.findOne({ 
+                    doctorCode: doctorCodeVal 
+                }).sort({ createdAt: -1 });
+            }
+
+            if (!queue) {
+                return null;
+            }
+
+            let peopleAheadCount = 0;
+            let userHasJoined = false;
+
+            if (queue.tokens && Array.isArray(queue.tokens)) {
+                peopleAheadCount = queue.tokens.filter(t => t.status === 'WAITING').length;
+
+                if (currentUserId) {
+                    userHasJoined = queue.tokens.some(t => 
+                        (t.userId?.toString() === currentUserId || t.patientId?.toString() === currentUserId) &&
+                        t.status !== 'CANCELLED' && t.status !== 'COMPLETED'
+                    );
+                }
+            }
+            
+            console.log(`User joined status for doctor ${doc.name}:`, userHasJoined);
+
+            // Use queue-specific avgServiceTime if defined, otherwise fallback to 5 minutes per patient
+            const avgServiceTimeMinutes = queue.avgServiceTime || 5;
+            const calculatedWaitMinutes = peopleAheadCount * avgServiceTimeMinutes;
+            
+            const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
+
+            return {
+                _id: doc._id,
+                doctorCode: doctorCodeVal,
+                name: doc.name,
+                specialty: doc.qualification || departmentName,
+                imageUrl: doc.imageUrl || "",
+                consultationFee: doc.consultationFee || 100,
+                peopleAhead: peopleAheadCount,
+                avgServiceTime: `${avgServiceTimeMinutes} mins/patient`,
+                estimatedWaitTime: waitTimeText,
+                isQueuePaused: queue.queueStatus !== "ACTIVE",
+                isJoined: userHasJoined
+            };
+        }))).filter(Boolean);
+
+        return res.status(200).json({
+            success: true,
+            count: formattedDoctors.length,
+            data: formattedDoctors
+        });
+
+    } catch (error) {
+        console.error("Error fetching doctors by department:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
+    }
+};
+/*
 const getUserSideDoctorsByDepartment = async (req, res) => {
     try {
         const { hospitalId, departmentName } = req.params;
@@ -493,168 +631,74 @@ const getUserSideDoctorsByDepartment = async (req, res) => {
             error: error.message
         });
     }
-};
-/*
-const getUserSideDoctorsByDepartment = async (req, res) => {
-    try {
-        const { hospitalId, departmentName } = req.params;
-        console.log(`Fetching doctors for hospital: ${hospitalId}, department: ${departmentName}`);
-
-        let hospitalQuery;
-        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
-            hospitalQuery = { _id: hospitalId };
-        } else {
-            hospitalQuery = { code: hospitalId };
-        }
-
-        const hospital = await HospitalV2.findOne(hospitalQuery);
-        if (!hospital) {
-            return res.status(404).json({
-                success: false,
-                message: 'Hospital not found'
-            });
-        }
-
-        const doctors = await UserV2.find({
-            $or: [
-                { hospitalId: hospital._id.toString() },
-                { hospitalId: hospital.code }
-            ],
-            role: 'DOCTOR',
-            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
-        });
-
-        const todayDate = new Date().toISOString().split('T')[0];
-
-        // Format doctors and fetch real-time queue metrics for each
-        const formattedDoctors = await Promise.all(doctors.map(async (doc) => {
-            const activeQueue = await QueueV2.findOne({ 
-                doctorCode: doc.doctorCode || doc._id.toString(), 
-                date: todayDate,
-                isActive: true 
-            });
-
-            let peopleAheadCount = 0;
-            if (activeQueue && activeQueue.tokens) {
-                peopleAheadCount = activeQueue.tokens.filter(t => t.status === 'WAITING').length;
-            }
-
-            const calculatedWaitMinutes = peopleAheadCount * 15;
-            const waitTimeText = peopleAheadCount === 0 ? "No wait" : `~${calculatedWaitMinutes} mins`;
-
-            return {
-                _id: doc._id,
-                doctorCode: doc.doctorCode || doc._id.toString(),
-                name: doc.name,
-                specialty: doc.qualification || departmentName,
-                imageUrl: doc.imageUrl || "",
-                consultationFee: doc.consultationFee || 100, // Included consultation fee (stored in INR)
-                peopleAhead: peopleAheadCount,
-                estimatedWaitTime: waitTimeText
-            };
-        }));
-
-        return res.status(200).json({
-            success: true,
-            count: formattedDoctors.length,
-            data: formattedDoctors
-        });
-
-    } catch (error) {
-        console.error("Error fetching doctors by department:", error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error',
-            error: error.message
-        });
-    }
 }; */
-/*
-const getUserSideDoctorsByDepartment = async (req, res) => {
-    try {
-        const { hospitalId, departmentName } = req.params;
-        console.log(`Fetching doctors for hospital: ${hospitalId}, department: ${departmentName}`);
-
-        // Resolve hospital query (supporting both ObjectId and custom string code)
-        let hospitalQuery;
-        if (mongoose.Types.ObjectId.isValid(hospitalId)) {
-            hospitalQuery = { _id: hospitalId };
-        } else {
-            hospitalQuery = { code: hospitalId };
-        }
-
-        const hospital = await HospitalV2.findOne(hospitalQuery);
-        if (!hospital) {
-            return res.status(404).json({
-                success: false,
-                message: 'Hospital not found'
-            });
-        }
-console.log("hosp found")
-console.log(hospital._id)
-        // Query UserV2 collection for users with role 'DOCTOR' belonging to this hospital 
-        // and whose department array contains the matching department name (case-insensitive)
-     console.log("Querying with:", {
-    hospitalId: hospital._id.toString(),
-    role: 'DOCTOR',
-    department: departmentName
-});
-
-const doctors = await UserV2.find({
-            $or: [
-                { hospitalId: hospital._id.toString() },
-                { hospitalId: hospital.code }
-            ],
-            role: 'DOCTOR',
-            department: { $regex: new RegExp(`^${departmentName}$`, 'i') }
-        });
-console.log("Raw doctors found in DB:", doctors);
-        console.log("docotors found")
-        // Format the response data to match your Android app's UserDoctorItem expectations
-        const formattedDoctors = doctors.map(doc => ({
-            _id: doc._id,
-            name: doc.name,
-            specialty: doc.qualification || departmentName, // Falls back to qualification or department name
-            imageUrl: doc.imageUrl || "",
-            peopleAhead: doc.peopleAhead || 0,
-            estimatedWaitTime: doc.estimatedWaitTime || "15 mins"
-        }));
-console.log(formattedDoctors)
-        return res.status(200).json({
-
-            success: true,
-            count: formattedDoctors.length,
-            data: formattedDoctors
-        });
-
-    } catch (error) {
-        console.error("Error fetching doctors by department:", error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error',
-            error: error.message
-        });
+const updateHospitalDetails = async (req, res) => {
+  try {
+    let hospitalId = req.body.hospitalId || req.user?.hospitalId;
+    if (typeof hospitalId === 'string') {
+      hospitalId = hospitalId.trim();
     }
+
+    if (!hospitalId && req.user?.role !== 'SUPER_ADMIN') {
+      return res.status(400).json({
+        success: false,
+        message: 'Hospital ID is missing.'
+      });
+    }
+
+    const { hospitalName, description, phone, address, bannerImageUrl } = req.body;
+
+    const updateFields = {};
+    if (hospitalName) updateFields.name = hospitalName; // Updated to match schema 'name'
+    if (description) updateFields.description = description;
+    if (phone) updateFields.contactNumber = phone; // Updated to match schema 'contactNumber'
+    if (address) updateFields.address = address;
+    if (bannerImageUrl) updateFields.imageUrl = bannerImageUrl; // Updated to match schema 'imageUrl'
+
+    // Fixed query from hospitalCode to code
+    const updatedHospital = await HospitalV2.findOneAndUpdate(
+      { code: hospitalId },
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedHospital) {
+      return res.status(404).json({
+        success: false,
+        message: 'Hospital profile not found.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Hospital details updated successfully',
+      data: updatedHospital
+    });
+
+  } catch (error) {
+    console.log("Error updating hospital details:", error.message);
+    return res.status(500).json({ success: false, error: error.message });
+  }
 };
 
-*/
-
-// Get all active hospitals
+// Get all active hospitals// Get all active hospitals
 const getAllHospitals = async (req, res) => {
     try {
         const hospitals = await HospitalV2.find({ isActive: true });
         
-        // Optional: Format the response to fit your UI display requirements
+        // Map fields to match your Kotlin Hospital data model structure
         const formattedHospitals = hospitals.map(hospital => ({
             _id: hospital._id,
             name: hospital.name,
             code: hospital.code,
-            address: `${hospital.address.street || ''}, ${hospital.address.city}, ${hospital.address.state}`.trim(),
-            distance: "1.2 km away", // You can calculate dynamically or mock for now
-            rating: 4.8,             // Add fields if stored or map default UI placeholders
-            reviewsCount: 124,
-            waitTime: "Short wait time",
-            imageUrl: ""             // Add image URL field to schema if needed
+            contactNumber: hospital.contactNumber,
+            email: hospital.email,
+            address: hospital.address, 
+            location: hospital.location, // <-- Add this line to include GeoJSON location [longitude, latitude]
+            departments: hospital.departments,
+            isActive: hospital.isActive,
+            createdAt: hospital.createdAt,
+            updatedAt: hospital.updatedAt
         }));
 
         res.status(200).json({
@@ -705,15 +749,14 @@ const getAllHospitals = async (req, res) => {
   }
 };
 */
-
-// Step 2: Verify Doctor Code within validated hospital context
 const verifyDoctorCode = async (req, res) => {
   try {
-    console.log("verify docotr hit")
-    const { email, password, doctorCode,hospitalId } = req.body;
-    const hospital = await HospitalV2.findOne({hospitalCode:hospitalId});
+    console.log("verify doctor hit");
+    const { doctorCode, hospitalId } = req.body;
+    
+    // Fixed query from hospitalCode to code
+    const hospital = await HospitalV2.findOne({ code: hospitalId });
 
-console.log(req.body);
     if (!doctorCode) {
       return res.status(400).json({
         success: false,
@@ -721,38 +764,35 @@ console.log(req.body);
       });
     }
 
-    // Find doctor linked to this hospital code and matching the doctor code
     const doctor = await UserV2.findOne({ 
       role: 'DOCTOR', 
       hospitalId: hospitalId, 
       doctorCode: doctorCode.toUpperCase() 
     }).select('-password');
-console.log(doctor)
+
     if (!doctor) {
       return res.status(404).json({
         success: false,
-       message: `Doctor with code '${doctorCode}' not found in hospital '${hospital?.name || hospitalId}'.`,
+        message: `Doctor with code '${doctorCode}' not found in hospital '${hospital?.name || hospitalId}'.`,
       });
     }
 
     const jwt_token = jwt.sign(
-  { 
-    id: doctor._id, 
-    email: doctor.email, 
-    role: doctor.role, 
-    hospitalId: hospitalId
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: '7d' }
-);
-    // Generate JWT or return final authorization payload here if needed
-    // const jwt_token = generateAuthToken(doctor);
-console.log("success")
+      { 
+        id: doctor._id, 
+        email: doctor.email, 
+        role: doctor.role, 
+        hospitalId: hospitalId
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     return res.status(200).json({
       success: true,
       message: 'Doctor code verified successfully!',
       data: {
-        jwt_token, // Include your token generation logic
+        jwt_token,
         role: doctor.role,
         hospitalId: hospitalId,
         doctorCode: doctor.doctorCode,
@@ -766,10 +806,11 @@ console.log("success")
       },
     });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+// Step 2: Verify Doctor Code within validated hospital context
 // Middleware or helper to verify hospital existence by code
 /*
 const verifyHospitalId = async (req, res, next) => {
@@ -871,6 +912,7 @@ verifyHospitalId,
 verifyDoctorCode,
 getAllHospitals,
 getHospitalById,
-getUserSideDoctorsByDepartment
+getUserSideDoctorsByDepartment,
+updateHospitalDetails
 };
 

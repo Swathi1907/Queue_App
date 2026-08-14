@@ -90,7 +90,16 @@ Log.d("userhospfrag","sending ${hospitalId}")
             response?.data?.let { hospital ->
                 toolbar.title = hospital.name
                 tvHospitalName.text = hospital.name
-                tvHospitalAddress.text = hospital.address
+
+                // Format the nested address object into a displayable string
+                hospital.address?.let { addr ->
+                    val fullAddress = listOfNotNull(addr.street, addr.city, addr.state, addr.zipCode)
+                        .filter { part -> part.isNotBlank() }
+                        .joinToString(", ")
+                    tvHospitalAddress.text = fullAddress
+                } ?: run {
+                    tvHospitalAddress.text = ""
+                }
             }
         }
 
@@ -103,13 +112,10 @@ Log.d("userhospfrag","sending ${hospitalId}")
                     }
                     is HospitalViewModel.Resource.Success -> {
                         progressBar.visibility = View.GONE
-                        // Assuming resource.data has a list of departments (e.g., resource.data.departments)
-                        // Adjust according to your DepartmentData model property name holding the list
                         departmentAdapter.updateData(resource.data.departments)
                     }
                     is HospitalViewModel.Resource.Error -> {
                         progressBar.visibility = View.GONE
-                        // Handle error message state if needed
                     }
                     is HospitalViewModel.Resource.Idle -> {
                         progressBar.visibility = View.GONE

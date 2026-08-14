@@ -2,8 +2,10 @@ package com.swathi.queue_app.v2.repo
 
 import com.swathi.queue_app.v2.models.Hospital
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
+import com.swathi.queue_app.v2.models.HospitalUpdateRequest
 import com.swathi.queue_app.v2.models.PaymentVerifyRequest
 import com.swathi.queue_app.v2.models.PaymentVerifyResponse
+import com.swathi.queue_app.v2.models.StandardResponse
 import com.swathi.queue_app.v2.models.UserDoctorResponse
 import com.swathi.queue_app.v2.network.RetrofitInstance
 import retrofit2.Response
@@ -19,7 +21,18 @@ class HospitalRepository {
         RetrofitInstance.api.getDoctorsByDepartment(hospitalId, department).also {
             println("Through getDoctors HospitalRepository called")
         }
-
+    suspend fun updateHospitalDetails(request: HospitalUpdateRequest): Result<StandardResponse> {
+        return try {
+            val response = RetrofitInstance.api.updateHospitalDetails(request)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception(response.errorBody()?.string() ?: "Failed to update hospital details"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     suspend fun fetchHospitals(): Result<List<Hospital>> {
         return try {
             val response = RetrofitInstance.api.getAllHospitals().also {
@@ -54,10 +67,12 @@ class HospitalRepository {
             val response = RetrofitInstance.api.getHospitalById(hospitalId).also {
                 println("Through getHospitalDetails HospitalRepository called")
             }
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+
+            val body = response.body()
+            if (response.isSuccessful && body != null && body.success) {
+                Result.success(body)
             } else {
-                Result.failure(Exception("Failed to load hospital details"))
+                Result.failure(Exception("Failed to load hospital details: ${response.message()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

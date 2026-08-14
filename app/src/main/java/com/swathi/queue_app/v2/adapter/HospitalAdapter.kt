@@ -17,9 +17,14 @@ class HospitalAdapter(
         fun bind(hospital: Hospital) {
             binding.tvHospitalName.text = hospital.name
 
-            // Format the nested address into a clean display string matching tvAdress ID
+            // Format the nested address object into a clean display string
+            val fullAddress = hospital.address?.let { addr ->
+                listOfNotNull(addr.street, addr.city, addr.state, addr.zipCode)
+                    .filter { part -> part.isNotBlank() }
+                    .joinToString(", ")
+            } ?: ""
 
-            binding.tvAdress.text = hospital.address
+            binding.tvAdress.text = fullAddress
 
             // Optional placeholders for UI elements present in your card XML
             binding.tvRating.text = "4.8 (124 reviews)"

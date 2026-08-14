@@ -5,6 +5,7 @@ const queueSchema = new mongoose.Schema({
   department: { type: String, required: true, index: true },
   doctorCode: { type: String, required: true, index: true },
   date: { type: String, required: true }, // Format: YYYY-MM-DD
+  avgServiceTime: { type: Number, default: 5 }, // Added avgServiceTime field (in minutes)
   tokens: [
     {
       tokenNumber: { type: Number, required: true },
@@ -32,4 +33,5 @@ const queueSchema = new mongoose.Schema({
 
 // Ensure a doctor only has one active queue per day for a department
 queueSchema.index({ doctorCode: 1, date: 1 }, { unique: true });
+
 module.exports = mongoose.models.new_queueV2 || mongoose.model('new_queueV2', queueSchema);

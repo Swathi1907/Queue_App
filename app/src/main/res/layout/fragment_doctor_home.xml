@@ -67,7 +67,6 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginTop="40dp"
-
             android:elevation="4dp"
             android:gravity="center"
             android:orientation="vertical"
@@ -80,9 +79,7 @@
             <ImageView
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-
                 android:padding="16dp"
-
                 app:tint="#052C28" />
 
             <TextView
@@ -114,14 +111,13 @@
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 app:cornerRadius="12dp"
-
                 app:iconGravity="textStart"
                 app:iconTint="@color/white" />
         </LinearLayout>
 
 
         <!-- ========================================== -->
-        <!-- ACTIVE SESSION GROUP (Your original UI)      -->
+        <!-- ACTIVE SESSION GROUP                       -->
         <!-- ========================================== -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_active_session_group"
@@ -164,7 +160,6 @@
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
 
                     <TextView
                         android:id="@+id/tv_token_number"
@@ -264,7 +259,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv" />
 
-            <!-- Stats Cards Grid -->
+            <!-- Stats Cards Grid (Includes Avg Service Time Card) -->
             <LinearLayout
                 android:id="@+id/layout_stats"
                 android:layout_width="0dp"
@@ -277,28 +272,75 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/lbl_session_stats">
 
+                <!-- Queue Status Card -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="6dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
-                    <!-- Add inner elements for patients seen count -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Total in Queue"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_status_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="67"
+                            android:textColor="#052C28"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
+                <!-- Average Service Time Card -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="6dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
-                    <!-- Add inner elements for time stats -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Avg Service Time"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_avg_service_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="5 mins"
+                            android:textColor="#052C28"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <!-- Up Next Header -->
             <!-- Up Next Header -->
             <TextView
                 android:id="@+id/lbl_up_next"
