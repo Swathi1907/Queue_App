@@ -82,6 +82,8 @@ const v2HospitalRoutes = require('./VERSION_2/new_routes/new_hosp'); // Ensure r
 app.use('/api/v2/hospital', v2HospitalRoutes);
 
 
+const v2AiRoutes = require('./VERSION_2/new_routes/new_ai');
+app.use('/api/v2/ai', v2AiRoutes); // Mounted under /api/v2/ai/scanResume
 
 // Import v2 Auth Routes
 const v2AuthRoutes = require('./VERSION_2/new_routes/new_auth');

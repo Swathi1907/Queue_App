@@ -144,26 +144,83 @@ class HospitalSettingsFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.hospitalDetail.observe(viewLifecycleOwner) { response ->
-            response?.data?.let { it ->
-                binding.etHospitalName.setText(it.name)
-                binding.etHospitalDescription.setText(it.description ?: "")
-                binding.etHospitalPhone.setText(it.contactNumber ?: "")
 
-                // Format the nested address object nicely into a single string for the EditText
-                it.address?.let { addr ->
-                    val fullAddress = listOfNotNull(addr.street, addr.city, addr.state, addr.zipCode)
-                        .filter { part -> part.isNotBlank() }
-                        .joinToString(", ")
-                    binding.etHospitalAddress.setText(fullAddress)
+            response?.data?.let { hospital ->
+
+                binding.etHospitalName.setText(
+                    hospital.name
+                )
+
+                binding.etHospitalDescription.setText(
+                    hospital.description ?: ""
+                )
+
+                binding.etHospitalPhone.setText(
+                    hospital.contactNumber ?: ""
+                )
+
+
+                // Address
+                hospital.address?.let { addr ->
+
+                    val fullAddress =
+                        listOfNotNull(
+                            addr.street,
+                            addr.city,
+                            addr.state,
+                            addr.zipCode
+                        )
+                            .filter { part ->
+                                part.isNotBlank()
+                            }
+                            .joinToString(", ")
+
+                    binding.etHospitalAddress.setText(
+                        fullAddress
+                    )
                 }
 
-                binding.etHospitalEmail.setText(it.email ?: "")
-                binding.etHospitalCode.setText(it.code ?: "")
 
-                val departments = it.departments?.joinToString(", ") ?: ""
-                binding.etDepartments.setText(departments)
+                binding.etHospitalEmail.setText(
+                    hospital.email ?: ""
+                )
 
-                uploadedBannerUrl = it.imageUrl
+                binding.etHospitalCode.setText(
+                    hospital.code ?: ""
+                )
+
+
+                // =================================================
+                // HOSPITAL DEPARTMENTS
+                // =================================================
+
+                val departmentsList =
+                    hospital.departments ?: emptyList()
+
+
+                // Show in settings EditText
+                binding.etDepartments.setText(
+                    departmentsList.joinToString(", ")
+                )
+
+
+                // Save to TokenManager
+                val tokenManager =
+                    TokenManager(requireContext())
+
+                tokenManager.saveHospitalDepartments(
+                    departmentsList
+                )
+
+
+                Log.d(
+                    "HospitalSettings",
+                    "Hospital departments saved: $departmentsList"
+                )
+
+
+                uploadedBannerUrl =
+                    hospital.imageUrl
             }
         }
 

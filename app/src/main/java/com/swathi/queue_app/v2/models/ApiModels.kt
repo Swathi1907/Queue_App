@@ -1,8 +1,9 @@
 package com.swathi.queue_app.v2.models
 
 import com.google.gson.annotations.SerializedName
-
-
+import kotlinx.serialization.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 // Next and complete requests
 // --- Queue Action Request & Response Models ---
 
@@ -89,11 +90,90 @@ data class QueueDashboardResponse(
 data class HospitalIdRequest(
     val hospitalId: String
 )
+
+
+
+@Parcelize
+@Serializable
+data class ResumeScanResponse(
+    val success: Boolean,
+    val message: String,
+    val data: DoctorResumeData? = null
+) : Parcelable
+
+@Parcelize
+@Serializable
+data class DoctorResumeData(
+    val name: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val qualification: String? = null,
+    val departments: List<String> = emptyList(),
+    val specializations: List<String> = emptyList(),
+    val experience: List<Experience> = emptyList(),
+    val education: List<Education> = emptyList(),
+    val rating: Double = 5.0,
+    val matchScore: Double? = 4.8,
+    val matchSummary: String? = "Exceptional match for current department needs based on 15 parameters.",
+    val isAiVerified: Boolean = true,
+    val availableDepartments: List<String>? = null
+) : Parcelable
+
+@Parcelize
+@Serializable
+data class Experience(
+    val role: String,
+    val hospital: String,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val duration: String? = null,
+    val highlights: List<String> = emptyList()
+) : Parcelable
+
+@Parcelize
+@Serializable
+data class Education(
+    val degree: String,
+    val institution: String,
+    val year: String? = null,
+    val status: String? = null,
+    val type: String? = null
+) : Parcelable
+
+
+
 data class DashboardData(
     val activeQueue: List<ActiveQueueDto> = emptyList(),
     val recentHistory: List<HistoryItemDto> = emptyList()
 )
+data class RegisterDoctorRequest(
+    val name: String?,
+    val email: String?,
+    val phoneNumber: String?,
+    val password: String,
+    val hospitalId: String,
+    val departments: List<String>,
+    val qualification: String?,
+    val rating: Double?
+)
 
+data class RegisterDoctorResponse(
+    val success: Boolean,
+    val message: String,
+    val data: DoctorRegistrationData?
+)
+
+data class DoctorRegistrationData(
+    val name: String?,
+    val email: String?,
+    val phoneNumber: String?,
+    val role: String?,
+    val hospitalId: String?,
+    val department: List<String>?,
+    val doctorCode: String?,
+    val qualification: String?,
+    val rating: Double?
+)
 data class ActiveQueueDto(
     val queueId: String = "",
     val hospitalName: String = "",

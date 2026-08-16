@@ -111,8 +111,30 @@ Log.d("userhospfrag","sending ${hospitalId}")
                         progressBar.visibility = View.VISIBLE
                     }
                     is HospitalViewModel.Resource.Success -> {
+
                         progressBar.visibility = View.GONE
-                        departmentAdapter.updateData(resource.data.departments)
+
+                        val departments = resource.data.departments
+
+                        // DepartmentItem -> String
+                        val departmentNames = departments.map { it.name }
+
+                        // Save only department names
+                        val tokenManager = TokenManager(requireContext())
+
+                        tokenManager.saveHospitalDepartments(
+                            departmentNames
+                        )
+
+                        // Keep DepartmentItem objects for RecyclerView
+                        departmentAdapter.updateData(
+                            departments
+                        )
+
+                        Log.d(
+                            "UserHospitalFragment",
+                            "Hospital departments saved: $departmentNames"
+                        )
                     }
                     is HospitalViewModel.Resource.Error -> {
                         progressBar.visibility = View.GONE

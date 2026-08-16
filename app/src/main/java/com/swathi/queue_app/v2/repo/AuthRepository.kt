@@ -2,6 +2,7 @@ package com.swathi.queue_app.v2.repo
 
 import com.swathi.queue_app.v2.network.RetrofitInstance
 import com.swathi.queue_app.v2.models.LoginRequest
+import com.swathi.queue_app.v2.models.RegisterDoctorRequest
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
 import com.swathi.queue_app.v2.models.VerifyHospitalRequest
@@ -21,7 +22,12 @@ class AuthRepository {
         ).also{
             println(" through sign up Repository called")
         }
-
+    suspend fun registerDoctor(
+        request: RegisterDoctorRequest
+    ) =
+        RetrofitInstance.api.registerDoctor(request).also {
+            println("through register doctor Repository called")
+        }
     suspend fun verifyHospitalId(token: String,request: VerifyHospitalRequest)
     =RetrofitInstance.api.verifyHospitalId(token,request).also{
         println(" through verify hospital Repository called")

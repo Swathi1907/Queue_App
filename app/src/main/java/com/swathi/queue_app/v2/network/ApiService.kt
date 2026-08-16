@@ -5,7 +5,6 @@ import com.swathi.queue_app.v2.models.AdminDashboardResponse
 
 import com.swathi.queue_app.v2.models.AuthResponse
 import com.swathi.queue_app.v2.models.CreateQueueRequest
-import com.swathi.queue_app.v2.models.DepartmentResponse
 import com.swathi.queue_app.v2.models.DepartmentResponseWrapper
 import com.swathi.queue_app.v2.models.DoctorDirectoryResponse
 import com.swathi.queue_app.v2.models.DoctorProfileResponse
@@ -25,6 +24,9 @@ import com.swathi.queue_app.v2.models.QueueActionResponse
 import com.swathi.queue_app.v2.models.QueueDashboardResponse
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
 import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
+import com.swathi.queue_app.v2.models.RegisterDoctorRequest
+import com.swathi.queue_app.v2.models.RegisterDoctorResponse
+import com.swathi.queue_app.v2.models.ResumeScanResponse
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.StandardResponse
 import com.swathi.queue_app.v2.models.UserDoctorResponse
@@ -32,13 +34,16 @@ import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeResponse
 import com.swathi.queue_app.v2.models.VerifyHospitalRequest
 import com.swathi.queue_app.v2.models.VerifyHospitalResponse
-import retrofit2.Call
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -115,6 +120,17 @@ interface ApiService {
     ): Response<DoctorResponse>
 
 
+    @POST("api/v2/auth/registerDoctor")
+    suspend fun registerDoctor(
+        @Body request: RegisterDoctorRequest
+    ): Response<RegisterDoctorResponse>
+
+    @Multipart
+    @POST("api/v2/ai/scanDoctorResume")
+    suspend fun scanDoctorResume(
+        @Part("hospitalId") hospitalId: RequestBody,
+        @Part resume: MultipartBody.Part
+    ): Response<ResumeScanResponse>
     @POST("api/v2/admin/dashboardStats")
     suspend fun getAdminDashboardStats(
 @Body request: HospitalIdRequest

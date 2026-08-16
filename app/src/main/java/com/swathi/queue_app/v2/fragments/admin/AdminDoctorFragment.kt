@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.NewAdminDoctorsBinding
 import com.swathi.queue_app.v2.adapter.doctor.DoctorDirectoryAdapter
 import com.swathi.queue_app.v2.models.DoctorDirectoryItem
@@ -43,7 +44,13 @@ class AdminDoctorsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         tokenManager = TokenManager(requireContext())
-
+        binding.btnAddDoctor.setOnClickListener {
+            val scanResumeFragment = ScanResumeFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.nav_admin_graph, scanResumeFragment) // Update with your actual container layout ID if different
+                .addToBackStack(null)
+                .commit()
+        }
         setupRecyclerView()
         setupFilters()
         observeViewModel()

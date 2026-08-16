@@ -4,9 +4,11 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.swathi.queue_app.v2.models.RegisterDoctorRequest
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.v2.models.AuthResponse
 import com.swathi.queue_app.v2.models.LoginRequest
+import com.swathi.queue_app.v2.models.RegisterDoctorResponse
 import com.swathi.queue_app.v2.models.SignupRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeRequest
 import com.swathi.queue_app.v2.models.VerifyDoctorCodeResponse
@@ -23,7 +25,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val tokenManager = TokenManager(application )
     private val _loginState = MutableStateFlow<Resource<AuthResponse>?>(null)
     val loginState: StateFlow<Resource<AuthResponse>?> get() = _loginState
+    private val _registerDoctorState =
+        MutableStateFlow<Resource<RegisterDoctorResponse>?>(null)
 
+    val registerDoctorState:
+            StateFlow<Resource<RegisterDoctorResponse>?>
+        get() = _registerDoctorState
     // In AuthViewModel.kt
     private val _signupState = MutableStateFlow<Resource<AuthResponse>?>(null)
     val signupState: StateFlow<Resource<AuthResponse>?> get() = _signupState
@@ -62,7 +69,76 @@ Log.d("Authviewmodel","stopping")
             }
         }
     }
+    fun registerDoctor(request: RegisterDoctorRequest) {
 
+        viewModelScope.launch {
+
+            _registerDoctorState.value =
+                Resource.Loading
+
+            try {
+
+                Log.d(
+                    "AuthViewModel",
+                    "Register doctor request: $request"
+                )
+
+                val response =
+                    authRepository.registerDoctor(request)
+
+                Log.d(
+                    "AuthViewModel",
+                    "Register doctor response code: ${response.code()}"
+                )
+
+                Log.d(
+                    "AuthViewModel",
+                    "Register doctor response: ${response.body()}"
+                )
+
+
+                if (response.isSuccessful) {
+
+                    val body = response.body()
+
+                    if (body != null) {
+
+                        _registerDoctorState.value =
+                            Resource.Success(body)
+
+                    } else {
+
+                        _registerDoctorState.value =
+                            Resource.Error(
+                                "Register doctor response body is null"
+                            )
+                    }
+
+                } else {
+
+                    _registerDoctorState.value =
+                        Resource.Error(
+                            response.errorBody()?.string()
+                                ?: "Doctor registration failed"
+                        )
+                }
+
+            } catch (e: Exception) {
+
+                Log.e(
+                    "AuthViewModel",
+                    "Register doctor error",
+                    e
+                )
+
+                _registerDoctorState.value =
+                    Resource.Error(
+                        e.localizedMessage
+                            ?: "Network error occurred"
+                    )
+            }
+        }
+    }
     fun signup(request: SignupRequest) {
         viewModelScope.launch {
             _signupState.value = Resource.Loading
@@ -138,6 +214,7 @@ Log.d("authview","${response.body()}")
             }
         }
     }
+
 
     sealed class Resource<out T> {
         object Loading : Resource<Nothing>()

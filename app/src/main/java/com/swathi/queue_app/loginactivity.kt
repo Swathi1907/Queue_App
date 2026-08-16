@@ -29,9 +29,7 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
             viewModel.login(
                 email,
                 password
-
             )
-
         }
         val prefs = getSharedPreferences("app", MODE_PRIVATE)
 
@@ -102,14 +100,13 @@ class loginactivity : AppCompatActivity() { // create a screen called main activ
         binding.tvsignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }
-        viewModel.verifyHospitalResponse.observe(this) {
 
+        viewModel.verifyHospitalResponse.observe(this) {
             val prefs =
                 getSharedPreferences(
                     "app",
                     MODE_PRIVATE
                 )
-
             prefs.edit()
                 .putString(
                     "hospitalId",

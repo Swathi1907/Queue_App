@@ -1,272 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#051424">
+    android:background="#1E1E2F"
+    android:fillViewport="true">
 
-    <!-- Top App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-
-                app:tint="#4CD6FF"
-                tools:ignore="ContentDescription" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-
-                android:text="Freelancer"
-                android:textColor="#4CD6FF"
-                android:textSize="18sp" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end"
-
-                app:tint="#4CD6FF"
-                tools:ignore="ContentDescription" />
-
-        </androidx.appcompat.widget.Toolbar>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:text="Project\nConfiguration"
-                android:textColor="#FFFFFF"
-                android:textSize="35sp"
-                android:lineSpacingExtra="4dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-
-                android:text="Initialize new analysis parameters and security baselines."
-                android:textColor="#94A3B8"
-                android:textSize="16sp" />
-
-            <!-- Input Fields -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-
-                android:text="PROJECT NAME"
-                android:textColor="#4CD6FF"
-                android:textSize="12sp"
-                android:letterSpacing="0.1" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="#1E293B"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_project_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#0D1C2D"
-
-                    android:hint="e.g. Project Phoenix"
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#475569" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-
-                android:text="NUMBER OF FEATURES"
-                android:textColor="#4CD6FF"
-                android:textSize="12sp"
-                android:letterSpacing="0.1" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="#1E293B"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_num_features"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#0D1C2D"
-
-                    android:hint="e.g. 12"
-                    android:inputType="number"
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#475569" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-
-                android:text="EST. BUDGET (USD)"
-                android:textColor="#4CD6FF"
-                android:textSize="12sp"
-                android:letterSpacing="0.1" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="#1E293B"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_est_budget"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#0D1C2D"
-
-                    android:text="$ 10,000 - 50,000"
-                    android:textColor="#FFFFFF" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-
-                android:text="TARGET DEADLINE"
-                android:textColor="#4CD6FF"
-                android:textSize="12sp"
-                android:letterSpacing="0.1" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="#1E293B"
-                app:hintEnabled="false"
-                app:endIconMode="custom"
-                >
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_target_deadline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#0D1C2D"
-
-                    android:hint="dd-mm-yyyy"
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#475569" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-
-                android:text="PROJECT DESCRIPTION"
-                android:textColor="#4CD6FF"
-                android:textSize="12sp"
-                android:letterSpacing="0.1" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="#1E293B"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_project_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:gravity="top"
-                    android:background="#0D1C2D"
-
-                    android:hint="Detail the scope, key objectives, and any specific AI analysis requirements..."
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#475569" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="100dp" />
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <!-- Bottom Actions -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:padding="24dp"
-        android:background="#051424"
-        android:elevation="8dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="SAVE"
+        <androidx.cardview.widget.CardView
+            android:layout_width="340dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="#FFFFFF"
+            android:elevation="8dp"
+            app:cardCornerRadius="16dp">
 
-            android:textColor="#FFFFFF"
-            app:strokeColor="#FFFFFF" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_continue"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="CONTINUE"
+                <!-- Header / Category -->
+                <TextView
+                    android:id="@+id/tvCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:letterSpacing="0.1"
+                    android:text="FREELANCER"
+                    android:textColor="#C85A32"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-            android:textColor="#051424"
-            android:textSize="12sp"
-            app:backgroundTint="#4CD6FF"
-            app:cornerRadius="4dp" />
+                <!-- Main Title -->
+                <TextView
+                    android:id="@+id/tvProjectTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="Project\nConfiguration"
+                    android:textColor="#111111"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+                <!-- Subtitle -->
+                <TextView
+                    android:id="@+id/tvProjectSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="Initialize new analysis parameters and security baselines."
+                    android:textColor="#666666"
+                    android:textSize="13sp" />
+
+                <!-- Form Container -->
+                <LinearLayout
+                    android:id="@+id/projectFormContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Field 1: Project Name -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:letterSpacing="0.05"
+                        android:text="PROJECT NAME"
+                        android:textColor="#A03A26"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etProjectName"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#FAFAFA"
+                        android:hint="e.g. Project Phoenix"
+                        android:inputType="text"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#111111"
+                        android:textColorHint="#999999"
+                        android:textSize="14sp" />
+
+                    <!-- Field 2: Number of Features -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:letterSpacing="0.05"
+                        android:text="NUMBER OF FEATURES"
+                        android:textColor="#A03A26"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etFeatures"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#FAFAFA"
+                        android:hint="e.g. 12"
+                        android:inputType="number"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#111111"
+                        android:textColorHint="#999999"
+                        android:textSize="14sp" />
+
+                    <!-- Field 3: Est. Budget -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:letterSpacing="0.05"
+                        android:text="EST. BUDGET (USD)"
+                        android:textColor="#A03A26"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etBudget"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#FAFAFA"
+                        android:hint="$10,000 - 50,000"
+                        android:inputType="text"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#111111"
+                        android:textColorHint="#999999"
+                        android:textSize="14sp" />
+
+                    <!-- Field 4: Target Deadline -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:letterSpacing="0.05"
+                        android:text="TARGET DEADLINE"
+                        android:textColor="#A03A26"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etDeadline"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="24dp"
+                        android:background="#FAFAFA"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:hint="Select date"
+                        android:inputType="date"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#111111"
+                        android:textColorHint="#999999"
+                        android:textSize="14sp" />
+
+                    <!-- Action Buttons Layout -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <Button
+                            android:id="@+id/btnSave"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#FFFFFF"
+                            android:text="SAVE"
+                            android:textColor="#A03A26"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            app:strokeColor="#A03A26"
+                            app:strokeWidth="1dp" />
+
+                        <Button
+                            android:id="@+id/btnContinue"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#A03A26"
+                            android:text="CONTINUE"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</ScrollView>
