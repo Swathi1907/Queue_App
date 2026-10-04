@@ -5,7 +5,7 @@ const { authmiddleware, authorize } = require('../new_middleware/authmiddleware'
 const QueueV2 = require('../new_models/new_queuev2');
 const UserV2 = require('../new_models/peron_model');
 
-const { createDepartmentQueue,getUserQueuesDashboard } = require('../new_controllers/queue_controllers');
+const { createDepartmentQueue,getUserQueuesDashboard,leaveQueue,getLiveQueueTicket } = require('../new_controllers/queue_controllers');
 
 
 
@@ -18,4 +18,6 @@ console.log('---------------------');
 
 router.post('/createDepartmentQueue', authmiddleware, authorize('DOCTOR'),createDepartmentQueue);
 router.get('/getUserQueues/:userId', getUserQueuesDashboard);
+router.get('/getLiveQueueTicket/:userId',authmiddleware,getLiveQueueTicket);
+router.post('/leaveQueue',authmiddleware,leaveQueue);
 module.exports = router;

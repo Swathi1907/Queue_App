@@ -120,6 +120,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    fcmToken: {
+    type: String,
+    default: null
+},
   },
   {
     timestamps: true,

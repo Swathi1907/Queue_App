@@ -77,10 +77,11 @@ app.use('/api/v2/doctor',v2DoctorRoutes);
 
 
 
-
 const v2HospitalRoutes = require('./VERSION_2/new_routes/new_hosp'); // Ensure route file is in new_routes
 app.use('/api/v2/hospital', v2HospitalRoutes);
 
+const v2notificationRoutes=require('./VERSION_2/new_routes/new_notifications')
+app.use("/api/v2/notifications", v2notificationRoutes);
 
 const v2AiRoutes = require('./VERSION_2/new_routes/new_ai');
 app.use('/api/v2/ai', v2AiRoutes); // Mounted under /api/v2/ai/scanResume
@@ -163,7 +164,7 @@ const queueDoc = await QueueModel.findOneAndUpdate(
     { 
         $set: { 
             hospitalId: hospitalId, 
-            
+            department:department,
             isActive: true 
         }
     },
@@ -204,13 +205,11 @@ const queueDoc = await QueueModel.findOneAndUpdate(
         });
     }
 });
-
 // Initialize Razorpay instance with your test/live keys
 const razorpayInstance = new Razorpay({
     key_id: process.env.PAYMENT_TEST_API_KEY,
     key_secret: process.env.PAYMENT_TEST_KEY_SECRET
 });
-
 // Create Order Endpoint
 // Create Order Endpoint
 app.post('/api/v2/payment/create-order', async (req, res) => {

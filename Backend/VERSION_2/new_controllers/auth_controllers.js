@@ -184,6 +184,46 @@ const loginUser = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+const updateFcmToken = async (req, res) => {
+    try {
+
+        const { fcmToken } = req.body;
+
+        if (!fcmToken) {
+            return res.status(400).json({
+                success: false,
+                message: "FCM token is required"
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { fcmToken },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "FCM token updated successfully"
+        });
+
+    } catch (error) {
+
+        console.error("Error updating FCM token:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
 const registerDoctor = async (req, res) => {
   try {
     // Note: Expecting 'departments' as an array now (e.g., ["Cardiology", "General Medicine"])
@@ -320,5 +360,6 @@ module.exports = {
   registerUser,
   createStaffUser,
   loginUser,
-  registerAdmin
+  registerAdmin,
+  updateFcmToken
 };

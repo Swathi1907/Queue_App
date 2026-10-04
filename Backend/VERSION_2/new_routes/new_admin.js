@@ -15,7 +15,7 @@ console.log('--- DEBUG ADMIN IMPORTS ---');
 console.log('authmiddleware type:', typeof authmiddleware);
 console.log('authorize type:', typeof authorize);
 console.log('getAdminDashboardStats type:', typeof getAdminDashboardStats);
-console.log('sendBroadcastAnnouncement type:', typeof sendBroadcastAnnouncement);
+//console.log('sendBroadcastAnnouncement type:', typeof sendBroadcastAnnouncement);
 console.log('---------------------------');
 
 // 3. Protected Admin Routes (Requires authentication and appropriate admin roles)

@@ -7,7 +7,8 @@ const {
   createStaffUser, 
   loginUser, 
   registerDoctor,
-  registerAdmin
+  registerAdmin,
+  updateFcmToken
 } = require('../new_controllers/auth_controllers');
 
 // 2. Import middleware functions
@@ -34,6 +35,11 @@ router.post(
   authmiddleware, 
   authorize('ADMIN'), 
   createStaffUser
+);
+router.patch(
+    "/fcm-token",
+    authmiddleware,
+    updateFcmToken
 );
 router.post(
   '/registerDoctor', 
