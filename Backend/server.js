@@ -5,7 +5,7 @@ app.use(express.urlencoded({ extended: true }));
 require("./firebase");
 app.use(express.json());
 const crypto = require('crypto');
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 
 
 const QueueModel = require('./VERSION_2/new_models/new_queuev2')
