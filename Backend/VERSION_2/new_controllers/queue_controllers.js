@@ -10,108 +10,197 @@ const oid = (v) => new mongoose.Types.ObjectId(v);
 const {
     sendNotification
 } = require("../new_controllers/notification_controller");
-
-
-
 const createDepartmentQueue = async (req, res) => {
   try {
-    console.log("hit");
+    console.log("🔥 CREATE QUEUE HIT");
 
-    const { hospitalId, department, doctorCode, queueStatus } = req.body;
+    const {
+      hospitalId,
+      department,
+      doctorCode,
+      queueStatus
+    } = req.body;
 
-    // 1. Verify doctor
+    // ---------------------------------------
+    // 1. VALIDATE INPUT
+    // ---------------------------------------
+
+    if (!hospitalId || !department || !doctorCode) {
+      return res.status(400).json({
+        success: false,
+        message: "hospitalId, department and doctorCode are required."
+      });
+    }
+
+    // ---------------------------------------
+    // 2. VERIFY DOCTOR
+    // ---------------------------------------
+
     const doctor = await UserV2.findOne({
       doctorCode,
       hospitalId,
-      role: 'DOCTOR'
+      role: "DOCTOR"
     });
 
     if (!doctor) {
       return res.status(404).json({
         success: false,
-        message: 'Doctor not found in this hospital.'
+        message: "Doctor not found in this hospital."
       });
     }
+
+    // ---------------------------------------
+    // 3. VERIFY DEPARTMENT
+    // ---------------------------------------
 
     if (!doctor.department.includes(department)) {
       return res.status(400).json({
         success: false,
-        message: `Doctor belongs to the ${doctor.department.join(', ')} department, not ${department}.`
+        message: `Doctor belongs to the ${doctor.department.join(", ")} department, not ${department}.`
       });
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date()
+      .toISOString()
+      .split("T")[0];
 
-    // 2. Check existing queue
-    const existingActiveQueue = await QueueV2.findOne({
-      doctorCode,
-      department,
-      queueStatus: { $ne: 'CLOSED' }
-    });
+    // ---------------------------------------
+    // 4. FIND EXISTING QUEUE
+    // ONE QUEUE PER DOCTOR PER HOSPITAL
+    // ---------------------------------------
 
-    if (existingActiveQueue) {
-      return res.status(400).json({
-        success: false,
-        message: 'An active or paused queue already exists for this department. Please close it before starting a new one.',
-        data: existingActiveQueue
-      });
-    }
-
-    // 3. Create new queue
-    const newQueue = await QueueV2.create({
+    let queue = await QueueV2.findOne({
       hospitalId,
-      department,
-      doctorCode,
-      date: today,
-      queueStatus: queueStatus || 'ACTIVE',
-      tokens: []
-    });
-
-    // 4. SOCKET EVENT
-    const io = socket.getIO();
-
-    io.emit("QUEUE_CREATED", {
-      queueId: newQueue._id.toString(),
-      hospitalId,
-      department,
-      doctorCode,
-      queueStatus: newQueue.queueStatus,
-      isActive: newQueue.isActive
-    });
-
-    console.log(
-      `QUEUE_CREATED emitted: ${newQueue._id}`
-    );
-
-    // 5. Admin notification
-    await sendNotification({
-      hospitalId,
-      targetRole: "ADMIN",
-      title: "Queue Started",
-      message: `${department} queue has been started by Dr. ${doctor.name}.`,
-      type: "QUEUE_STARTED",
-      department,
       doctorCode
     });
 
-    console.log("created", newQueue);
+    // ---------------------------------------
+    // 5. IF QUEUE ALREADY EXISTS
+    // REUSE IT FOR DEMO
+    // ---------------------------------------
 
-    return res.status(201).json({
+    if (queue) {
+
+      console.log(
+        "Existing queue found:",
+        queue._id.toString()
+      );
+
+      // Remove old active queue records
+      await UserActiveQueue.deleteMany({
+        queueId: queue._id
+      });
+
+      // Reset queue for new session
+      queue.department = department;
+      queue.date = today;
+
+      queue.avgServiceTime = 5;
+
+      queue.tokens = [];
+
+      queue.queueStatus =
+        queueStatus || "ACTIVE";
+
+      queue.isActive = true;
+
+      await queue.save();
+
+      console.log(
+        "♻️ Existing queue reused:",
+        queue._id.toString()
+      );
+
+    } else {
+
+      // ---------------------------------------
+      // 6. CREATE FIRST QUEUE
+      // ---------------------------------------
+
+      queue = await QueueV2.create({
+        hospitalId,
+        department,
+        doctorCode,
+        date: today,
+        avgServiceTime: 5,
+        queueStatus: queueStatus || "ACTIVE",
+        isActive: true,
+        tokens: []
+      });
+
+      console.log(
+        "🆕 New queue created:",
+        queue._id.toString()
+      );
+    }
+
+    // ---------------------------------------
+    // 7. SOCKET EVENT
+    // ---------------------------------------
+
+    const io = socket.getIO();
+
+    io.emit("QUEUE_CREATED", {
+      queueId: queue._id.toString(),
+      hospitalId,
+      department,
+      doctorCode,
+      queueStatus: queue.queueStatus,
+      isActive: queue.isActive
+    });
+
+    console.log(
+      "QUEUE_CREATED emitted:",
+      queue._id.toString()
+    );
+
+    // ---------------------------------------
+    // 8. ADMIN NOTIFICATION
+    // ---------------------------------------
+
+    try {
+      await sendNotification({
+        hospitalId,
+        targetRole: "ADMIN",
+        title: "Queue Started",
+        message: `${department} queue has been started by Dr. ${doctor.name}.`,
+        type: "QUEUE_STARTED",
+        department,
+        doctorCode
+      });
+    } catch (notificationError) {
+
+      // Don't fail queue creation if notification fails
+      console.error(
+        "Notification failed:",
+        notificationError.message
+      );
+    }
+
+    // ---------------------------------------
+    // 9. SUCCESS RESPONSE
+    // ---------------------------------------
+
+    return res.status(200).json({
       success: true,
-      message: 'Department queue created successfully.',
-      data: newQueue
+      message: "Department queue started successfully.",
+      data: queue
     });
 
   } catch (error) {
-    console.error("Error in createDepartmentQueue:", error);
+
+    console.error(
+      " Error in createDepartmentQueue:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
+      message: "Failed to create/start queue.",
       error: error.message
     });
   }
 };
-
 const getLiveQueueTicket = async (req, res) => {
     try {
 
