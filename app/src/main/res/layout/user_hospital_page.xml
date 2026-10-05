@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -6,25 +7,52 @@
     android:layout_height="match_parent"
     android:background="#F8F9FA">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- HEADER -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="72dp"
         android:background="#005B5C"
-        app:elevation="0dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="City Central"
-            app:titleTextColor="@android:color/white" />
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
 
-    </com.google.android.material.appbar.AppBarLayout>
+            android:contentDescription="Back"
+            app:tint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Hospital Name -->
+        <TextView
+            android:id="@+id/tvHeaderHospitalName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Hospital details"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="15sp"
+            app:layout_constraintStart_toEndOf="@id/ivBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_marginTop="72dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,10 +64,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -60,78 +88,83 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/tvHospitalName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/tvHospitalName"
+                            android:layout_marginBottom="8dp"
                             android:text="City Central Hospital"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
                             android:textColor="#005B5C"
-                            android:layout_marginBottom="8dp" />
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
-                        <!-- Badges Layout -->
+                        <!-- Badges -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="8dp">
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text=" 24/7 Service"
-                                android:textSize="12sp"
-                                android:textColor="#005B5C"
+                                android:layout_marginEnd="8dp"
                                 android:background="@drawable/bg_chip_green"
                                 android:paddingHorizontal="10dp"
                                 android:paddingVertical="4dp"
-                                android:layout_marginEnd="8dp" />
+                                android:text="24/7 Service"
+                                android:textColor="#005B5C"
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text=" Emergency Available"
-                                android:textSize="12sp"
-                                android:textColor="#C53030"
-
                                 android:paddingHorizontal="10dp"
-                                android:paddingVertical="4dp" />
+                                android:paddingVertical="4dp"
+                                android:text="Emergency Available"
+                                android:textColor="#C53030"
+                                android:textSize="12sp" />
+
                         </LinearLayout>
 
                         <!-- Address -->
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:id="@+id/tvAddress"
-                            android:text=" 123 Health Ave, Downtown"
-                            android:textSize="13sp"
-                            android:textColor="#6C757D"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:text="123 Health Ave, Downtown"
+                            android:textColor="#6C757D"
+                            android:textSize="13sp" />
+
+                        <!-- Description -->
+                        <TextView
                             android:id="@+id/tvHospitalDescription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:lineSpacingExtra="4dp"
                             android:text="Providing world-class healthcare with state-of-the-art facilities and a compassionate touch. Our dedicated team of specialists is here for you around the clock."
-                            android:textSize="13sp"
                             android:textColor="#495057"
-                            android:lineSpacingExtra="4dp" />
+                            android:textSize="13sp" />
 
                     </LinearLayout>
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Section Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="Select Department"
-                android:textSize="18sp"
-                android:textStyle="bold"
                 android:textColor="#212529"
-                android:layout_marginBottom="12dp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <!-- Departments Grid RecyclerView -->
+
+            <!-- Departments -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerDepartments"
                 android:layout_width="match_parent"
@@ -140,16 +173,18 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="2" />
 
-            <!-- ProgressBar for Loading State -->
+
+            <!-- Loading -->
             <ProgressBar
                 android:id="@+id/progressBarDepartments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:visibility="gone"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
 
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

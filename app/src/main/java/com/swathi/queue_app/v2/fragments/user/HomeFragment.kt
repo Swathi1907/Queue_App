@@ -7,6 +7,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.PolylineOptions
+import android.graphics.Color
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -100,9 +103,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragment) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
     }
-
-
-
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
@@ -212,18 +212,43 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private fun updateMapMarkers(hospitals: List<Hospital>) {
         googleMap?.clear()
+
+        // 1. Add User Location Marker with a BLUE pin
+        if (isLocationFetched) {
+            val userLatLng = LatLng(currentLatitude, currentLongitude)
+            googleMap?.addMarker(
+                MarkerOptions()
+                    .position(userLatLng)
+                    .title("Your Location")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+        }
+
+        // 2. Add Hospital Markers (RED) and draw route lines to each
         hospitals.forEach { hospital ->
             val coordinates = hospital.location?.coordinates
             if (coordinates != null && coordinates.size >= 2) {
-                val position = LatLng(coordinates[1], coordinates[0]) // Lat, Lng
+                val hospitalLatLng = LatLng(coordinates[1], coordinates[0]) // Lat, Lng
 
+                // Hospital Marker with RED pin (default)
                 val marker = googleMap?.addMarker(
                     MarkerOptions()
-                        .position(position)
+                        .position(hospitalLatLng)
                         .title(hospital.name)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                 )
-
                 marker?.tag = hospital
+
+                // 3. Draw route line connecting User (Blue) and Hospital (Red)
+                if (isLocationFetched) {
+                    val userLatLng = LatLng(currentLatitude, currentLongitude)
+                    googleMap?.addPolyline(
+                        PolylineOptions()
+                            .add(userLatLng, hospitalLatLng)
+                            .width(8f)
+                            .color(Color.parseColor("#00796B")) // Route line color
+                    )
+                }
             }
         }
     }

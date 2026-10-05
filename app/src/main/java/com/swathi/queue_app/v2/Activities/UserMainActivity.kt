@@ -9,7 +9,7 @@ import com.razorpay.PaymentResultWithDataListener
 import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.UserMainActivityBinding
 import com.swathi.queue_app.v2.fragments.user.HomeFragment
-
+import com.swathi.queue_app.v2.utilis.SocketManager
 import com.swathi.queue_app.v2.fragments.user.ProfileFragment
 import com.swathi.queue_app.v2.fragments.user.QueueDashboardFragment
 
@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
         super.onCreate(savedInstanceState)
         binding = UserMainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        Log.d("UserSocket", "Connecting User Socket...")
+        SocketManager.connect()
         // Load HomeFragment by default on initial creation
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())

@@ -80,6 +80,7 @@ dependencies {
 // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("com.airbnb.android:lottie:6.6.7")
+    //implementation(libs.androidx.foundation)
 // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")

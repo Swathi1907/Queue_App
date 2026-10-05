@@ -1,6 +1,7 @@
 package com.swathi.queue_app.v2.repo
 
 import com.swathi.queue_app.v2.models.DoctorProfileResponse
+import com.swathi.queue_app.v2.models.EndSessionResponse
 import com.swathi.queue_app.v2.models.ResumeScanResponse
 import com.swathi.queue_app.v2.network.ApiService
 import com.swathi.queue_app.v2.network.RetrofitInstance
@@ -25,6 +26,37 @@ class DoctorRepository(
         }
     }
 
+
+    suspend fun endSession(
+        department: String?,
+        doctorCode: String?
+    ): Result<EndSessionResponse> {
+
+        return try {
+            val response = apiService.end_session(
+                department,
+                doctorCode
+            )
+
+            if (response.isSuccessful && response.body() != null) {
+
+                Result.success(response.body()!!)
+
+            } else {
+
+                Result.failure(
+                    Exception(
+                        response.errorBody()?.string()
+                            ?: "Failed to end session"
+                    )
+                )
+            }
+
+        } catch (e: Exception) {
+
+            Result.failure(e)
+        }
+    }
     // New AI Resume Scan Repository Method
     suspend fun scanDoctorResume(
         hospitalId: String,

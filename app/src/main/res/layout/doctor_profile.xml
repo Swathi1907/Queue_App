@@ -161,37 +161,7 @@
                     </LinearLayout>
 
                     <!-- Action Buttons -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEditProfile"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#004D40"
-                            android:text="Edit Profile"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="12dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnShareProfile"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@android:color/white"
-                            android:text="Share Profile"
-                            android:textColor="#1F2937"
-                            app:cornerRadius="12dp"
-                            app:strokeColor="#D1D5DB"
-                            app:strokeWidth="1dp" />
-                    </LinearLayout>
 
                     <!-- SECTION: Professional Information -->
                     <TextView

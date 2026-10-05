@@ -8,65 +8,127 @@ const generateToken = (id, role) => {
 };
 
 // 1. Register Patient
-
 const registerUser = async (req, res, next) => {
-  try {
-    console.log("Register called");
-    const { name, email, phoneNumber, password } = req.body;
-console.log(req.body)
-    const queryConditions = [{ phoneNumber }];
-    if (email) queryConditions.push({ email });
-console.log("user created")
-    const existingUser = await User.findOne({ $or: queryConditions });
-    if (existingUser) {
-console.log("existing")
-      return res.status(400).json({
-        success: false,
-        message: 'User with this phone number or email already exists',
-      });
+    try {
+        console.log("\n========== SIGNUP START ==========");
+
+        const { name, email, phoneNumber, password } = req.body;
+
+        console.log("Received signup data:");
+        console.log({
+            name,
+            email,
+            phoneNumber,
+            password: password ? "********" : undefined
+        });
+
+        const queryConditions = [{ phoneNumber }];
+
+        if (email) {
+            queryConditions.push({ email });
+        }
+
+        console.log("Checking existing user...");
+        console.log("Query:", queryConditions);
+
+        const existingUser = await User.findOne({
+            $or: queryConditions
+        });
+
+        console.log(
+            "Existing user found:",
+            existingUser
+                ? {
+                    _id: existingUser._id,
+                    name: existingUser.name,
+                    email: existingUser.email,
+                    phoneNumber: existingUser.phoneNumber,
+                    role: existingUser.role
+                }
+                : "NONE"
+        );
+
+        if (existingUser) {
+            console.log("❌ USER ALREADY EXISTS");
+
+            return res.status(400).json({
+                success: false,
+                message: "User with this phone number or email already exists"
+            });
+        }
+
+        console.log("No existing user found.");
+        console.log("Creating new user...");
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const user = await User.create({
+            name,
+            email: email || null,
+            phoneNumber,
+            password: hashedPassword,
+            role: "PATIENT",
+            hospitalId: null,
+            department: null
+        });
+
+        console.log("✅ USER CREATED:");
+        console.log({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            role: user.role
+        });
+
+        const jwt_token = generateToken(
+            user._id,
+            user.role
+        );
+
+        console.log("✅ JWT GENERATED:");
+        console.log(jwt_token);
+
+        const responseData = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            hospitalId: user.hospitalId,
+            department: user.department,
+            doctorCode: user.doctorCode,
+            qualification: user.qualification,
+            rating: user.rating,
+            isAvailable: user.isAvailable,
+            isActive: user.isActive,
+            jwt_token
+        };
+
+        console.log("========== SIGNUP RESPONSE ==========");
+        console.log({
+            success: true,
+            message: "Patient account registered successfully",
+            data: responseData
+        });
+        console.log("========== SIGNUP END ==========\n");
+
+        return res.status(201).json({
+            success: true,
+            message: "Patient account registered successfully",
+            data: responseData
+        });
+
+    } catch (error) {
+        console.error("❌ SIGNUP ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
-
-    // Hash password manually since schema has no pre-save hook
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({
-      name,
-      email: email || null,
-      phoneNumber,
-      password: hashedPassword,
-      role: 'PATIENT',
-      hospitalId: null,
-      department: null,
-    });
-
-    const jwt_token = generateToken(user._id, user.role);
-console.log(jwt_token)
-    return res.status(201).json({
-      success: true,
-      message: 'Patient account registered successfully',
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        hospitalId: user.hospitalId,
-        department: user.department,
-        doctorCode: user.doctorCode,
-        qualification: user.qualification,
-        rating: user.rating,
-        isAvailable: user.isAvailable,
-        isActive: user.isActive,
-        jwt_token,
-      },
-    });
-  } catch (error) {
-    console.log(err.message);
-    return res.status(500).json({ success: false, error: error.message });
-  }
 };
-
 // 2. Create Staff User
 const createStaffUser = async (req, res, next) => {
   try {

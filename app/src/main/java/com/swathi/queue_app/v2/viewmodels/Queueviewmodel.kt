@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.v2.models.CreateQueueRequest
 import com.swathi.queue_app.v2.models.DashboardData
 import com.swathi.queue_app.v2.models.QueueActionRequest
+import com.swathi.queue_app.v2.models.QueueTicketData
 import com.swathi.queue_app.v2.models.SessionData
 import com.swathi.queue_app.v2.repo.AuthRepository
 import com.swathi.queue_app.v2.repo.QueueRepository
@@ -22,11 +23,10 @@ class Queueviewmodel : ViewModel() {
     private val _dashboardState = MutableLiveData<DashboardState>()
     val dashboardState: LiveData<DashboardState> get() = _dashboardState
 
-    // Change this line in your ViewModel:
     private val _queueState = MutableStateFlow<Resource<Any>?>(null)
     val queueState: StateFlow<Resource<Any>?> get() = _queueState
-
-
+private val _leaveQueueState=MutableStateFlow<Resource<Any>?>(null)
+    val leaveQueueState:StateFlow<Resource<Any>?> get()=_leaveQueueState
     fun createQueue(hospitalId: String, department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
@@ -35,7 +35,12 @@ class Queueviewmodel : ViewModel() {
                 val response = queueRepository.createQueue(request)
 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _queueState.value = Resource.Success<Any>(response.body()?.message ?: "Queue created successfully")
+                    val body = response.body()
+                    if (body?.data != null) {
+                        _queueState.value = Resource.Success(body.data)
+                    } else {
+                        _queueState.value = Resource.Success(body?.message ?: "Queue created successfully")
+                    }
                 } else {
                     _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to create queue")
                 }
@@ -44,6 +49,7 @@ class Queueviewmodel : ViewModel() {
             }
         }
     }
+
     fun updateQueueStatus(department: String, doctorCode: String, status: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
@@ -51,12 +57,59 @@ class Queueviewmodel : ViewModel() {
                 val response = queueRepository.updateQueueStatus(department, doctorCode, status)
 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
+                    val body = response.body()
+                    if (body?.data != null) {
+                        _queueState.value = Resource.Success(body.data)
+                    } else {
+                        _queueState.value = Resource.Success(body?.message ?: "Status updated successfully")
+                    }
                 } else {
                     _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to update queue status")
                 }
             } catch (e: Exception) {
                 _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
+            }
+        }
+    }
+    // Backing LiveData / StateFlow for the live ticket screen
+
+    private val _liveTicketState = MutableStateFlow<Resource<QueueTicketData>?>(null)
+    val liveTicketState: StateFlow<Resource<QueueTicketData>?> get() = _liveTicketState
+
+    fun fetchLiveTicket(queueId: String,userId:String) {
+        viewModelScope.launch {
+            _liveTicketState.value = Resource.Loading
+
+            try {
+                val result = queueRepository.getLiveTicket(queueId,userId)
+
+                if (result.isSuccess) {
+
+                    val response = result.getOrNull()
+
+                    if (response?.data != null) {
+                        _liveTicketState.value =
+                            Resource.Success(response.data)
+                    } else {
+                        _liveTicketState.value =
+                            Resource.Error("Ticket data not found")
+                    }
+
+                } else {
+
+                    _liveTicketState.value =
+                        Resource.Error(
+                            result.exceptionOrNull()?.message
+                                ?: "Failed to fetch live ticket"
+                        )
+                }
+
+            } catch (e: Exception) {
+
+                _liveTicketState.value =
+                    Resource.Error(
+                        e.localizedMessage ?: "Network error occurred"
+                    )
             }
         }
     }
@@ -67,7 +120,13 @@ class Queueviewmodel : ViewModel() {
                 val response = queueRepository.getActiveSession(department, doctorCode)
 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
+                    val body = response.body()
+                    if (body?.data != null) {
+                        _queueState.value = Resource.Success(body.data)
+                    } else {
+                        // Safe fallback when data is null but success is true (e.g. no active session)
+                        _queueState.value = Resource.Success(body?.message ?: "No active session found")
+                    }
                 } else {
                     _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to fetch active session")
                 }
@@ -76,6 +135,7 @@ class Queueviewmodel : ViewModel() {
             }
         }
     }
+
     private val _navigationEvent = MutableLiveData<DoctorNavigationEvent>()
     val navigationEvent: LiveData<DoctorNavigationEvent> get() = _navigationEvent
 
@@ -84,23 +144,20 @@ class Queueviewmodel : ViewModel() {
             try {
                 val response = queueRepository.getActiveSession(department, doctorCode)
 
-                if (response.isSuccessful && response.body()?.success == true) {
-                    // Active queue exists -> Trigger navigation to Home
+                if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
                     _navigationEvent.value = DoctorNavigationEvent.NavigateToHome(department, doctorCode)
                 } else {
-                    // No active queue -> Trigger navigation to Department selection
                     _navigationEvent.value = DoctorNavigationEvent.NavigateToDepartmentSelection
                 }
             } catch (e: Exception) {
-                // Fallback to department selection on error so they aren't blocked
                 _navigationEvent.value = DoctorNavigationEvent.NavigateToDepartmentSelection
             }
         }
     }
+
     fun loadDashboardData(userId: String) {
         _dashboardState.value = DashboardState.Loading
         viewModelScope.launch {
-            // Using queueRepository to fetch the dashboard data
             val result = queueRepository.fetchDashboard(userId)
             if (result.isSuccess) {
                 _dashboardState.value = DashboardState.Success(result.getOrNull())
@@ -109,18 +166,21 @@ class Queueviewmodel : ViewModel() {
             }
         }
     }
-   /* fun callNextPatient(department: String, doctorCode: String) {
+
+    fun callNextPatient(department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
             try {
-                val request = QueueActionRequest(department, doctorCode)
-                val response = queueRepository.callNextPatient(department,doctorCode)
-
-                if (response.isSuccessful && response.body()?.success == true) {
-
-                    _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
+                val response = queueRepository.callNextPatient(department, doctorCode)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.success == true && body.data != null) {
+                        _queueState.value = Resource.Success(body.data)
+                    } else {
+                        _queueState.value = Resource.Error(body?.message ?: "Failed to call next patient")
+                    }
                 } else {
-                    _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to call next patient")
+                    _queueState.value = Resource.Error("Failed to call next patient")
                 }
             } catch (e: Exception) {
                 _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
@@ -128,44 +188,28 @@ class Queueviewmodel : ViewModel() {
         }
     }
 
-    fun completeConsultation(department: String, doctorCode: String) {
-        viewModelScope.launch {
-            _queueState.value = Resource.Loading
-            try {
-                val request = QueueActionRequest(department, doctorCode)
-                val response = queueRepository.completeCurrent(department,doctorCode)
 
-                if (response.isSuccessful && response.body()?.success == true) {
-                    _queueState.value = Resource.Success<Any>(response.body()?.data as Any)
+    fun leaveQueue(queueId: String) {
+        viewModelScope.launch {
+            _leaveQueueState.value = Resource.Loading
+            try {
+                val response = queueRepository.leaveQueue(queueId)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.success == true) {
+                        // Pass data or message depending on your Resource type
+                        _leaveQueueState.value = Resource.Success(body.message ?: "Successfully left the queue")
+                    } else {
+                        _leaveQueueState.value = Resource.Error(body?.message ?: "Failed to leave queue")
+                    }
                 } else {
-                    _queueState.value = Resource.Error(response.errorBody()?.string() ?: "Failed to complete consultation")
+                    _leaveQueueState.value = Resource.Error("Failed to leave queue")
                 }
             } catch (e: Exception) {
-                _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
+                _leaveQueueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
             }
         }
-    } */
-   fun callNextPatient(department: String, doctorCode: String) {
-       viewModelScope.launch {
-           _queueState.value = Resource.Loading
-           try {
-               val response = queueRepository.callNextPatient(department, doctorCode)
-               if (response.isSuccessful) {
-                   val body = response.body()
-                   if (body?.success == true && body.data != null) {
-                       _queueState.value = Resource.Success<Any>(body.data as Any)
-                   } else {
-                       _queueState.value = Resource.Error(body?.message ?: "Failed to call next patient")
-                   }
-               } else {
-                   _queueState.value = Resource.Error("Failed to call next patient")
-               }
-           } catch (e: Exception) {
-               _queueState.value = Resource.Error(e.localizedMessage ?: "Network error occurred")
-           }
-       }
-   }
-
+    }
     fun completeConsultation(department: String, doctorCode: String) {
         viewModelScope.launch {
             _queueState.value = Resource.Loading
@@ -174,7 +218,7 @@ class Queueviewmodel : ViewModel() {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body?.success == true && body.data != null) {
-                        _queueState.value = Resource.Success<Any>(body.data as Any)
+                        _queueState.value = Resource.Success(body.data)
                     } else {
                         _queueState.value = Resource.Error(body?.message ?: "Failed to complete consultation")
                     }
@@ -199,7 +243,8 @@ sealed class Resource<out T> {
     data class Success<out T>(val data: T) : Resource<T>()
     data class Error(val message: String) : Resource<Nothing>()
 }
+
 sealed class DoctorNavigationEvent {
-    data class NavigateToHome(val department: String, val doctorCode: String) : DoctorNavigationEvent()
+    data class NavigateToHome(val department: String, val doctorCode:String) : DoctorNavigationEvent()
     object NavigateToDepartmentSelection : DoctorNavigationEvent()
 }

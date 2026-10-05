@@ -29,7 +29,7 @@ class AuthInterceptor : Interceptor {
 
 object RetrofitInstance {
     // Change this to match your PC's actual local IPv4 address (e.g., 192.168.x.x)
-    const val BASE_URL = "http://172.22.20.144:5001/"
+    const val BASE_URL = "http://172.22.23.104:5001/" //172.22.23.104
     val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -39,6 +39,8 @@ object RetrofitInstance {
         .addInterceptor(logging)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS) // <-- Added write timeout to prevent hanging uploads/writes
+        .retryOnConnectionFailure(true)
         .build()
 
 

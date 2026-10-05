@@ -5,12 +5,15 @@ package com.swathi.queue_app.v2.repo
 import com.swathi.queue_app.v2.models.ActiveSessionResponse
 import com.swathi.queue_app.v2.models.CreateQueueRequest
 import com.swathi.queue_app.v2.models.DashboardData
+import com.swathi.queue_app.v2.models.LeaveQueueRequest
 import com.swathi.queue_app.v2.network.RetrofitInstance
 import com.swathi.queue_app.v2.models.LoginRequest
 import com.swathi.queue_app.v2.models.QueueActionRequest
 import com.swathi.queue_app.v2.models.QueueActionResponse
 import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
+import com.swathi.queue_app.v2.models.QueueTicketResponse
 import com.swathi.queue_app.v2.models.SignupRequest
+import com.swathi.queue_app.v2.models.StandardResponse
 import com.swathi.queue_app.v2.models.VerifyHospitalRequest
 import retrofit2.Response
 
@@ -31,6 +34,22 @@ class QueueRepository {
                 Result.success(response.body()?.data)
             } else {
                 Result.failure(Exception("Failed to load queue dashboard"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun leaveQueue(queueId: String): Response<StandardResponse> {
+        val request = LeaveQueueRequest(queueId = queueId)
+        return RetrofitInstance.api.leaveQueue(request)
+    }
+    suspend fun getLiveTicket(queueId: String,userId: String): Result<QueueTicketResponse> {
+        return try {
+            val response = RetrofitInstance.api.getLiveTicket(userId,queueId)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Failed to fetch live ticket: ${response.errorBody()?.string() ?: response.message()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

@@ -127,68 +127,90 @@
                                 android:textColor="#4B5563"
                                 android:textSize="13sp" />
                         </LinearLayout>
-
-                        <!-- Divider Dot -->
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
-                            android:text="•"
-                            android:textColor="#9CA3AF" />
-
-                        <!-- Membership Status -->
-
                     </LinearLayout>
 
                     <!-- Action Buttons -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEditProfile"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#004D40"
-                            android:text="Edit Profile"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="12dp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnSettings"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@android:color/white"
-                            android:text="Settings"
-                            android:textColor="#1F2937"
-                            app:cornerRadius="12dp"
-                            app:strokeColor="#D1D5DB"
-                            app:strokeWidth="1dp" />
-                    </LinearLayout>
-
-                    <!-- SECTION: Account Information -->
+                    <!-- SECTION: My Activity -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
-                        android:text="ACCOUNT INFORMATION"
+                        android:text="MY ACTIVITY"
                         android:textColor="#9CA3AF"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <!-- Menu Item: User ID -->
-             <!--       <LinearLayout
-                        android:id="@+id/layoutUserId"
+                    <!-- Menu Item: Queue History -->
+                    <LinearLayout
+                        android:id="@+id/layoutQueueHistory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="8dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@android:drawable/ic_menu_recent_history"
+                            app:tint="#2E8B57" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Queue History"
+                                android:textColor="#111827"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View past tokens and visits"
+                                android:textColor="#6B7280"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@android:drawable/ic_media_play"
+                            app:tint="#9CA3AF" />
+                    </LinearLayout>
+
+                    <!-- Menu Item: Favorite Hospitals -->
+
+
+
+                    <!-- SECTION: Preferences -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="PREFERENCES"
+                        android:textColor="#9CA3AF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <!-- Menu Item: Notifications -->
+
+
+                    <!-- Menu Item: App Version / Info -->
+                    <LinearLayout
+                        android:id="@+id/layoutPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
@@ -210,47 +232,6 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Account ID"
-                                android:textColor="#111827"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvUserId"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="USR-882910"
-                                android:textColor="#6B7280"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout> -->
-
-                    <!-- Menu Item: Saved Preferences -->
-                    <LinearLayout
-                        android:id="@+id/layoutPreferences"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingVertical="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@android:drawable/ic_menu_manage"
-                            app:tint="#2E8B57" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:text="App Version"
                                 android:textColor="#111827"
                                 android:textStyle="bold" />
@@ -259,7 +240,7 @@
                                 android:id="@+id/tvPreferencesValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="2.0.0(mega)"
+                                android:text="2.0.0 (Mega)"
                                 android:textColor="#6B7280"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -275,12 +256,14 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
+
+
                     <!-- Menu Item: Log Out -->
                     <LinearLayout
                         android:id="@+id/layoutLogout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
@@ -307,9 +290,6 @@
                             android:src="@android:drawable/ic_media_play"
                             app:tint="#9CA3AF" />
                     </LinearLayout>
-
-                    <!-- Version Info -->
-
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

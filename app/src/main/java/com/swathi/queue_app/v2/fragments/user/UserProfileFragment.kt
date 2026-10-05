@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.UserProfileBinding // Ensure matches your layout filename
 import com.swathi.queue_app.v2.ui.auth.LoginActivity
 import com.swathi.queue_app.v2.utilis.TokenManager // Adjust package as needed
@@ -50,14 +51,16 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        binding.btnEditProfile.setOnClickListener {
-            Toast.makeText(requireContext(), "Edit Profile clicked", Toast.LENGTH_SHORT).show()
+        // Queue History / My Queues
+        binding.layoutQueueHistory.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragmentContainer,
+                    QueueDashboardFragment()
+                )
+                .addToBackStack(null)
+                .commit()
         }
-
-        binding.btnSettings.setOnClickListener {
-            Toast.makeText(requireContext(), "Settings clicked", Toast.LENGTH_SHORT).show()
-        }
-
         binding.layoutLogout.setOnClickListener {
             // Clear local session token
             tokenManager.clearSession()

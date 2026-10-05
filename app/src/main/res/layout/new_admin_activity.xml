@@ -25,28 +25,32 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_chip_green"
-                android:scaleType="centerCrop" />
+            <!-- Circle Logo -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivBack"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:padding="6dp"
+                android:src="@drawable/logo"
+                android:background="#FFFFFF"
+                android:contentDescription="Logo"
+                android:scaleType="centerInside"
+                app:shapeAppearanceOverlay="@style/CircleImage"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tvHospitalTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Serene Health Admin"
+                android:text="Queue"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_manage"
-            app:tint="#FFFFFF" />
+
     </LinearLayout>
 
     <!-- Navigation Host Fragment -->

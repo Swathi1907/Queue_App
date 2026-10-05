@@ -127,8 +127,8 @@ class AuthViewModel : ViewModel(){
                             email,
                             password
                         )
-                    Log.d("SIGNUP", response.code().toString())
-                    Log.d("SIGNUP", response.errorBody()?.string() ?: "")
+                    Log.d("signupppp", response.code().toString())
+                    Log.d("signuppp", response.errorBody()?.string() ?: "")
                     if(response.isSuccessful){
 
                         response.body()?.let {

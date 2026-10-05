@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/signupScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:clipToPadding="false">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,7 +20,7 @@
             android:id="@+id/cardSignup"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="150dp"
+            android:layout_marginTop="110dp"
             android:layout_marginHorizontal="24dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
@@ -60,6 +64,8 @@
                     app:layout_constraintTop_toBottomOf="@id/tvTitle"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Name Label -->
                 <TextView
                     android:id="@+id/name"
                     android:layout_width="match_parent"
@@ -72,22 +78,21 @@
                     app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
                     app:layout_constraintStart_toStartOf="parent" />
 
-
+                <!-- Name Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/titlename"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     app:boxCornerRadiusTopStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxStrokeColor="#CED4DA"
                     app:boxStrokeWidth="1dp"
-                    app:startIconDrawable="@drawable/ic_email"
                     app:startIconTint="#6C757D"
                     app:hintEnabled="false"
-                    android:layout_marginBottom="16dp"
                     app:layout_constraintTop_toBottomOf="@id/name"
                     app:layout_constraintStart_toStartOf="parent">
 
@@ -96,38 +101,42 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Enter your name"
-                        android:inputType="textEmailAddress"
+                        android:inputType="textPersonName"
                         android:textSize="14sp"
                         android:textColor="#212529"
                         android:paddingVertical="12dp" />
+
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Phone Label -->
                 <TextView
                     android:id="@+id/phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Phone Number"
                     android:textSize="13sp"
-                    android:layout_marginTop="13sp"
+                    android:layout_marginTop="13dp"
                     android:textStyle="bold"
                     android:textColor="#343A40"
                     android:layout_marginBottom="6dp"
                     app:layout_constraintTop_toBottomOf="@id/titlename"
                     app:layout_constraintStart_toStartOf="parent" />
+
+                <!-- Phone Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/titlephone"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     app:boxCornerRadiusTopStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxStrokeColor="#CED4DA"
                     app:boxStrokeWidth="1dp"
-                    app:startIconDrawable="@drawable/ic_email"
                     app:startIconTint="#6C757D"
                     app:hintEnabled="false"
-                    android:layout_marginBottom="16dp"
                     app:layout_constraintTop_toBottomOf="@id/phone"
                     app:layout_constraintStart_toStartOf="parent">
 
@@ -135,32 +144,35 @@
                         android:id="@+id/etPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="you@example.com"
-                        android:inputType="textEmailAddress"
+                        android:hint="Enter phone number"
+                        android:inputType="phone"
                         android:textSize="14sp"
                         android:textColor="#212529"
                         android:paddingVertical="12dp" />
+
                 </com.google.android.material.textfield.TextInputLayout>
-                <!-- Email Address Label -->
+
+                <!-- Email Label -->
                 <TextView
                     android:id="@+id/lblEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Email Address"
                     android:textSize="13sp"
-                    android:layout_marginTop="13sp"
+                    android:layout_marginTop="13dp"
                     android:textStyle="bold"
                     android:textColor="#343A40"
                     android:layout_marginBottom="6dp"
                     app:layout_constraintTop_toBottomOf="@id/titlephone"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <!-- Email Input Field -->
+                <!-- Email Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilEmail"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     app:boxCornerRadiusTopStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
@@ -170,7 +182,6 @@
                     app:startIconDrawable="@drawable/ic_email"
                     app:startIconTint="#6C757D"
                     app:hintEnabled="false"
-                    android:layout_marginBottom="16dp"
                     app:layout_constraintTop_toBottomOf="@id/lblEmail"
                     app:layout_constraintStart_toStartOf="parent">
 
@@ -183,39 +194,39 @@
                         android:textSize="14sp"
                         android:textColor="#212529"
                         android:paddingVertical="12dp" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Password Header Label -->
+                <!-- Password Label -->
                 <TextView
                     android:id="@+id/lblPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Password"
                     android:textSize="13sp"
-                    android:layout_marginTop="13sp"
+                    android:layout_marginTop="13dp"
                     android:textStyle="bold"
                     android:textColor="#343A40"
                     android:layout_marginBottom="6dp"
                     app:layout_constraintTop_toBottomOf="@id/tilEmail"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <!-- Password Input Field -->
+                <!-- Password Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/passwordLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     app:boxCornerRadiusTopStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxStrokeColor="#CED4DA"
-                    app:boxStrokeWidth="1dp"
                     app:startIconTint="#6C757D"
                     app:endIconMode="password_toggle"
                     app:endIconTint="#6C757D"
                     app:hintEnabled="false"
-                    android:layout_marginBottom="16dp"
                     app:layout_constraintTop_toBottomOf="@id/lblPassword"
                     app:layout_constraintStart_toStartOf="parent">
 
@@ -228,9 +239,10 @@
                         android:textSize="14sp"
                         android:textColor="#212529"
                         android:paddingVertical="12dp" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Hospital ID Input Field -->
+                <!-- Hospital ID -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/hospitalIdLayout"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -247,9 +259,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Doctor Code Input Field -->
+                <!-- Doctor Code -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilDoctorCode"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -266,9 +279,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textCapCharacters" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Login Button -->
+                <!-- Signup Button -->
                 <Button
                     android:id="@+id/btnSignup"
                     android:layout_width="match_parent"
@@ -284,19 +298,19 @@
                     app:layout_constraintTop_toBottomOf="@id/tilDoctorCode"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <!-- Divider Layout -->
-
-
-                <!-- Footer: Sign Up -->
+                <!-- Footer -->
                 <LinearLayout
+                    android:id="@+id/footerLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
                     android:layout_marginTop="15dp"
+                    android:layout_marginBottom="8dp"
                     app:layout_constraintTop_toBottomOf="@id/btnSignup"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -313,9 +327,11 @@
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textColor="#0B3C5D" />
+
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.cardview.widget.CardView>
 
         <!-- Floating Logo Card -->
@@ -323,10 +339,10 @@
             android:id="@+id/logoCard"
             android:layout_width="88dp"
             android:layout_height="88dp"
+            android:translationY="-44dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="8dp"
             app:cardBackgroundColor="@android:color/white"
-            android:translationY="-44dp"
             app:layout_constraintTop_toTopOf="@id/cardSignup"
             app:layout_constraintStart_toStartOf="@id/cardSignup"
             app:layout_constraintEnd_toEndOf="@id/cardSignup">
@@ -342,4 +358,5 @@
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

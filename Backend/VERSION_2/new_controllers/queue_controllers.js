@@ -1,31 +1,48 @@
 const QueueV2 = require('../new_models/new_queuev2');
 const UserV2 = require('../new_models/peron_model');
 const HospitalV2 = require('../new_models/new_hosp_model');
+const UserActiveQueue = require('../new_models/new_user_active_queue');
+const QueueHistory = require('../new_models/new_user_queue_history');
+const socket = require("../../socket");
+const {calculateETA}=require('../new_controllers/eta_control')
 const mongoose = require('mongoose');
 const oid = (v) => new mongoose.Types.ObjectId(v);
 const {
     sendNotification
 } = require("../new_controllers/notification_controller");
 
+
+
 const createDepartmentQueue = async (req, res) => {
   try {
     console.log("hit");
+
     const { hospitalId, department, doctorCode, queueStatus } = req.body;
 
-    // 1. Verify the doctor exists and is assigned to this department and hospital
-    const doctor = await UserV2.findOne({ doctorCode, hospitalId, role: 'DOCTOR' });
+    // 1. Verify doctor
+    const doctor = await UserV2.findOne({
+      doctorCode,
+      hospitalId,
+      role: 'DOCTOR'
+    });
+
     if (!doctor) {
-      return res.status(404).json({ success: false, message: 'Doctor not found in this hospital.' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found in this hospital.'
+      });
     }
-    
+
     if (!doctor.department.includes(department)) {
       return res.status(400).json({
         success: false,
         message: `Doctor belongs to the ${doctor.department.join(', ')} department, not ${department}.`
       });
     }
-const today = new Date().toISOString().split('T')[0];
-    // 2. Optional safety check: Prevent creating a new queue if an ACTIVE or PAUSED one already exists for this doctor/department
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // 2. Check existing queue
     const existingActiveQueue = await QueueV2.findOne({
       doctorCode,
       department,
@@ -40,7 +57,7 @@ const today = new Date().toISOString().split('T')[0];
       });
     }
 
-    // 3. Create a brand new independent queue document every time
+    // 3. Create new queue
     const newQueue = await QueueV2.create({
       hospitalId,
       department,
@@ -50,17 +67,35 @@ const today = new Date().toISOString().split('T')[0];
       tokens: []
     });
 
+    // 4. SOCKET EVENT
+    const io = socket.getIO();
+
+    io.emit("QUEUE_CREATED", {
+      queueId: newQueue._id.toString(),
+      hospitalId,
+      department,
+      doctorCode,
+      queueStatus: newQueue.queueStatus,
+      isActive: newQueue.isActive
+    });
+
+    console.log(
+      `QUEUE_CREATED emitted: ${newQueue._id}`
+    );
+
+    // 5. Admin notification
     await sendNotification({
-      hospitalId: hospitalId,
+      hospitalId,
       targetRole: "ADMIN",
       title: "Queue Started",
       message: `${department} queue has been started by Dr. ${doctor.name}.`,
       type: "QUEUE_STARTED",
-      department: department,
-      doctorCode: doctorCode
+      department,
+      doctorCode
     });
 
     console.log("created", newQueue);
+
     return res.status(201).json({
       success: true,
       message: 'Department queue created successfully.',
@@ -69,214 +104,521 @@ const today = new Date().toISOString().split('T')[0];
 
   } catch (error) {
     console.error("Error in createDepartmentQueue:", error);
-    return res.status(500).json({ success: false, error: error.message });
+
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 };
+
 const getLiveQueueTicket = async (req, res) => {
     try {
+
         const { queueId } = req.query;
-const userId=req.params.userId
-console.log(userId)
+        const userId = req.params.userId;
+
+        console.log("User:", userId);
+        console.log("Queue:", queueId);
+
         if (!queueId || !userId) {
             return res.status(400).json({
                 success: false,
-                message: 'queueId and userId are required query parameters.'
+                message: "queueId and userId are required."
             });
         }
 
-        // 1. Fetch the queue document
-        const queue = await QueueV2.findById(queueId).lean();
+        // ---------------------------------------
+        // 1. FIND USER'S ACTIVE QUEUE
+        // ---------------------------------------
+
+        const activeQueue = await UserActiveQueue.findOne({
+            userId: userId,
+            queueId: queueId
+        }).lean();
+
+        if (!activeQueue) {
+            return res.status(404).json({
+                success: false,
+                message: "User is not active in this queue."
+            });
+        }
+
+        // ---------------------------------------
+        // 2. FETCH LIVE QUEUE
+        // ---------------------------------------
+
+        const queue = await QueueV2.findById(queueId)
+            .lean();
+
         if (!queue) {
-            return res.status(404).json({ success: false, message: 'Queue session not found.' });
+            return res.status(404).json({
+                success: false,
+                message: "Queue session not found."
+            });
         }
 
-        // 2. Find the specific user's token in this queue
-        const userToken = queue.tokens.find(t => t.userId.toString() === userId);
+        // ---------------------------------------
+        // 3. FIND USER'S TOKEN
+        // ---------------------------------------
+
+        const userToken = queue.tokens.find(
+            token =>
+                token._id?.toString() ===
+                activeQueue.tokenId?.toString()
+        );
+
         if (!userToken) {
-            return res.status(404).json({ success: false, message: 'Token not found for this user in the queue.' });
+            return res.status(404).json({
+                success: false,
+                message: "User token not found in queue."
+            });
         }
 
-        // 3. Fetch hospital details
-        const hospital = await HospitalV2.findOne({ 
-            $or: [{ code: queue.hospitalId }, { _id: queue.hospitalId.match(/^[0-9a-fA-F]{24}$/) ? queue.hospitalId : null }] 
-        }).lean();
+        console.log(
+            "User token:",
+            userToken.tokenNumber
+        );
 
-        // 4. Fetch doctor details
-        const doctor = await UserV2.findOne({ 
-            $or: [
-                { doctorCode: queue.doctorCode }, 
-                { code: queue.doctorCode }, 
-                { _id: queue.doctorCode && queue.doctorCode.match(/^[0-9a-fA-F]{24}$/) ? queue.doctorCode : null }
-            ],
-            role: "DOCTOR"
-        }).lean();
+        console.log(
+            "User notes:",
+            userToken.notes
+        );
 
-        const rawName = doctor?.name ? doctor.name.replace(/^dr\.?\s*/i, '') : queue.doctorCode;
-        const doctorDisplayName = rawName ? `Dr. ${rawName}` : (queue.doctorCode || "Doctor");
+        // ---------------------------------------
+        // 4. FIND HOSPITAL + DOCTOR
+        // ---------------------------------------
 
-        // 5. Calculate people ahead and estimated wait time
-        const waitingTokens = queue.tokens.filter(t => t.status === "WAITING");
-        const userIndex = waitingTokens.findIndex(t => t.userId.toString() === userId && t.tokenNumber === userToken.tokenNumber);
-        const peopleAhead = userIndex > 0 ? userIndex : 0;
-        
-        // Use queue's avgServiceTime (default to 5 mins if not set)
-        const avgServiceTime = queue.avgServiceTime || 5;
-        const estWaitTime = peopleAhead * avgServiceTime;
+        const [hospital, doctor] = await Promise.all([
 
-        // Determine dynamic message
-        let queueMessage = "Please wait for your turn.";
-        if (peopleAhead === 0 && userToken.status === "WAITING") {
-            queueMessage = "You are next! Please proceed near Room 04";
-        } else if (userToken.status === "IN_CONSULTATION") {
-            queueMessage = "You are currently in consultation.";
+            HospitalV2.findOne({
+                code: queue.hospitalId
+            }).lean(),
+
+            UserV2.findOne({
+                doctorCode: queue.doctorCode,
+                role: "DOCTOR"
+            }).lean()
+
+        ]);
+
+        // ---------------------------------------
+        // 5. DOCTOR NAME
+        // ---------------------------------------
+
+        const rawName = doctor?.name
+            ? doctor.name.replace(/^dr\.?\s*/i, "")
+            : queue.doctorCode;
+
+        const doctorDisplayName =
+            rawName
+                ? `Dr. ${rawName}`
+                : (queue.doctorCode || "Doctor");
+
+        // ---------------------------------------
+        // 6. CALCULATE ETA
+        // ---------------------------------------
+
+        const etaData = await calculateETA(
+            queue,
+            activeQueue.tokenNumber
+        );
+
+        const peopleAhead =
+            etaData.peopleAhead || 0;
+
+        const estWaitTime =
+            etaData.eta || 0;
+
+        // ---------------------------------------
+        // 7. QUEUE MESSAGE
+        // ---------------------------------------
+
+        let queueMessage =
+            "Please wait for your turn.";
+
+        if (
+            activeQueue.status === "IN_CONSULTATION"
+        ) {
+
+            queueMessage =
+                "You are currently in consultation.";
+
+        } else if (
+            peopleAhead === 0
+        ) {
+
+            queueMessage =
+                "You are next! Please proceed near Room 04";
+
         } else {
-            queueMessage = `${peopleAhead} people ahead of you. Estimated wait: ${estWaitTime} min`;
+
+            queueMessage =
+                `${peopleAhead} people ahead of you. ` +
+                `Estimated wait: ${estWaitTime} min`;
         }
 
-        // 6. Response payload matching your layout components
+        // ---------------------------------------
+        // 8. RESPONSE
+        // ---------------------------------------
+
         return res.status(200).json({
+
             success: true,
+
             data: {
-                hospitalName: hospital ? hospital.name : "APOLLO HOSPITAL",
-                hospitalLogoUrl: hospital ? hospital.logoUrl : "",
-                doctorName: doctorDisplayName,
-                department: queue.department || "Emergency Department",
-                roomNumber: doctor?.roomNumber || "Room 04",
-                isDoctorOnDuty: queue.queueStatus === 'ACTIVE',
-                tokenNumber: userToken.tokenNumber,
-                status: userToken.status, // WAITING, IN_CONSULTATION, COMPLETED, CANCELLED
-                queueMessage: queueMessage,
-                peopleAheadText: `${peopleAhead} people`,
-                estWaitTimeText: `${estWaitTime} min`,
-                queueDate: queue.date,
-                isPaid: userToken.amountPaid > 0,
-                paymentText: userToken.amountPaid > 0 ? "✓ Paid" : "Pending"
+
+                hospitalName:
+                    hospital?.name ||
+                    "APOLLO HOSPITAL",
+
+                hospitalLogoUrl:
+                    hospital?.logoUrl || "",
+
+                notes:
+                    userToken.notes || "",
+
+                doctorName:
+                    doctorDisplayName,
+
+                department:
+                    queue.department ||
+                    "Emergency Department",
+
+                roomNumber:
+                    doctor?.roomNumber ||
+                    "Room 04",
+
+                isDoctorOnDuty:
+                    queue.queueStatus === "ACTIVE",
+
+                tokenNumber:
+                    activeQueue.tokenNumber,
+
+                status:
+                    activeQueue.status,
+
+                queueMessage:
+                    queueMessage,
+
+                peopleAheadText:
+                    `${peopleAhead} people`,
+
+                estWaitTimeText:
+                    `${estWaitTime} min`,
+
+                queueDate:
+                    queue.date,
+
+                isPaid:
+                    activeQueue.amountPaid > 0,
+
+                paymentText:
+                    activeQueue.amountPaid > 0
+                        ? "✓ Paid"
+                        : "Pending"
             }
         });
 
     } catch (error) {
-        console.error("Error fetching live queue ticket:", error);
-        return res.status(500).json({ success: false, error: error.message });
+
+        console.error(
+            "Error fetching live queue ticket:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 };
 const getUserQueuesDashboard = async (req, res) => {
-  try {
-    console.log("user queues dash hit")
-    const { userId } = req.params;
-    console.log(userId)
-    const today = new Date().toISOString().split('T')[0];
+    try {
+        console.log("uerqueuedashboardhit");
 
-    // 1. Fetch ALL queues where the user has at least one token
-    const allUserQueues = await QueueV2.find({
-      "tokens.userId": userId
-    })
-    .sort({ createdAt: -1 })
-    .lean();
+        const { userId } = req.params;
 
-    const activeQueueList = [];
-    const historyList = [];
-
-    // 2. Loop through all queues
-    for (const queue of allUserQueues) {
-      // Find ALL tokens belonging to this user in the queue (supports multiple joins)
-      const userTokens = queue.tokens.filter(t => t.userId.toString() === userId);
-      if (userTokens.length === 0) continue;
-
-      // Fetch hospital details
-      const hospital = await HospitalV2.findOne({ 
-        $or: [{ code: queue.hospitalId }, { _id: queue.hospitalId.match(/^[0-9a-fA-F]{24}$/) ? queue.hospitalId : null }] 
-      }).lean();
-
-      // Fetch doctor details
-      const doctor = await UserV2.findOne({ 
-        $or: [
-          { doctorCode: queue.doctorCode }, 
-          { code: queue.doctorCode }, 
-          { _id: queue.doctorCode && queue.doctorCode.match(/^[0-9a-fA-F]{24}$/) ? queue.doctorCode : null }
-        ],
-        role: { $in: ["DOCTOR", "COMPOUNDER"] }
-      }).lean();
-
-      const rawName = doctor?.name ? doctor.name.replace(/^dr\.?\s*/i, '') : queue.doctorCode;
-      const doctorDisplayName = rawName ? `Dr. ${rawName}` : (queue.doctorCode || "Doctor");
-
-      // Evaluate each token session separately
-      for (const userToken of userTokens) {
-      const isQueueActive =
-  queue.queueStatus === "ACTIVE" ||
-  queue.queueStatus === "PAUSED";
-const isActiveToday =
-  isQueueActive &&
-  userToken.status !== "COMPLETED" &&
-  userToken.status !== "CANCELLED";
-        const queueItemData = {
-          queueId: queue._id,
-          hospitalName: hospital ? hospital.name : "City Central Hospital",
-          tokenId: userToken._id,                                // add
-  feedbackStatus: userToken.feedback?.status || null, 
-          hospitalLogoUrl: hospital ? hospital.logoUrl : "",
-          doctorDetails: `${queue.department} •${doctorDisplayName}`,
-          status: userToken.status, 
-          tokenNumber: userToken.tokenNumber,
-          date: queue.date,
-          createdAt: queue.createdAt
-        };
-
-        if (isActiveToday) {
-          const waitingTokens = queue.tokens.filter(t => t.status === "WAITING");
-          const userIndex = waitingTokens.findIndex(t => t.userId.toString() === userId && t.tokenNumber === userToken.tokenNumber);
-          const peopleAhead = userIndex > 0 ? userIndex : 0;
-          const avgServiceTime = queue.avgServiceTime || 5;
-
-const estWaitTime = Math.max(1,Math.round(
-  peopleAhead * avgServiceTime
-));
-
-          activeQueueList.push({
-            ...queueItemData,
-            peopleAheadText: `${peopleAhead} people ahead`,
-            estWaitTimeText: `${estWaitTime} min`
-          });
-        } else {
-          historyList.push({
-            ...queueItemData,
-            subText: `${queue.department} • ${doctorDisplayName} (${queue.date})`
-          });
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "userId is required"
+            });
         }
-      }
+
+        // ==========================================
+        // 1. GET ACTIVE QUEUES
+        // ==========================================
+
+        const activeQueues = await UserActiveQueue.find({
+            userId: userId
+        })
+        .sort({ createdAt: -1 })
+        .lean();
+
+
+        // ==========================================
+        // 2. GET RECENT HISTORY
+        // ==========================================
+
+        const history = await QueueHistory.find({
+            userId: userId
+        })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
+
+
+        const activeQueueList = [];
+
+
+        // ==========================================
+        // 3. ACTIVE QUEUE DETAILS
+        // ==========================================
+
+        for (const active of activeQueues) {
+
+            const queue = await QueueV2.findById(active.queueId)
+                .select(
+                    "queueStatus avgServiceTime tokens date createdAt department hospitalId doctorCode"
+                )
+                .lean();
+
+            if (!queue) continue;
+
+
+            // ==========================================
+            // LIVE ETA
+            // ==========================================
+
+            const etaData = await calculateETA(
+                queue,
+                active.tokenNumber
+            );
+
+            const peopleAhead =
+                etaData.peopleAhead || 0;
+
+            const estWaitTime =
+                etaData.eta || 0;
+
+
+            // ==========================================
+            // ADD ACTIVE QUEUE
+            // ==========================================
+
+            activeQueueList.push({
+
+                queueId:
+                    active.queueId,
+
+                tokenId:
+                    active.tokenId,
+
+                tokenNumber:
+                    active.tokenNumber,
+
+
+                // --------------------------
+                // Hospital
+                // --------------------------
+
+                hospitalId:
+                    active.hospitalId,
+
+                hospitalName:
+                    active.hospitalName || "Hospital",
+
+                hospitalLogoUrl:
+                    active.hospitalLogoUrl || "",
+
+
+                // --------------------------
+                // Doctor
+                // --------------------------
+
+                doctorCode:
+                    active.doctorCode,
+
+                doctorName:
+                    active.doctorName || active.doctorCode,
+
+
+                // --------------------------
+                // Queue
+                // --------------------------
+
+                department:
+                    active.department || "",
+
+                roomNumber:
+                    active.roomNumber || "",
+
+                date:
+                    active.date || queue.date || "",
+
+
+                // --------------------------
+                // Status
+                // --------------------------
+
+                status:
+                    active.status,
+
+                queueStatus:
+                    queue.queueStatus,
+
+
+                // --------------------------
+                // Time
+                // --------------------------
+
+                createdAt:
+                    active.createdAt,
+
+                peopleAheadText:
+                    `${peopleAhead} people ahead`,
+
+                estWaitTimeText:
+                    `${estWaitTime} min`
+            });
+        }
+
+
+        // ==========================================
+        // 4. HISTORY
+        // ==========================================
+
+        const historyList = history.map(item => ({
+
+            queueId:
+                item.queueId,
+
+            tokenId:
+                item.tokenId,
+
+            tokenNumber:
+                item.tokenNumber,
+
+
+            // --------------------------
+            // Hospital
+            // --------------------------
+
+            hospitalName:
+                item.hospitalName || "Hospital",
+
+            hospitalLogoUrl:
+                item.hospitalLogoUrl || "",
+
+
+            // --------------------------
+            // Doctor
+            // --------------------------
+
+            doctorCode:
+                item.doctorCode,
+
+            doctorName:
+                item.doctorName || "",
+
+
+            // --------------------------
+            // Queue
+            // --------------------------
+
+            department:
+                item.department || "",
+
+            roomNumber:
+                item.roomNumber || "",
+
+
+            // --------------------------
+            // Status
+            // --------------------------
+
+            status:
+                item.status,
+
+
+            // --------------------------
+            // Date
+            // --------------------------
+
+            date:
+                item.date,
+
+            createdAt:
+                item.createdAt,
+
+
+            // --------------------------
+            // Feedback
+            // --------------------------
+
+            feedbackStatus:
+                item.feedback?.status || null,
+
+
+            // --------------------------
+            // Display strings
+            // --------------------------
+
+            doctorDetails:
+                `${item.department || ""} • Dr. ${item.doctorName || ""}`,
+
+            subText:
+                `${item.department || ""} • Dr. ${item.doctorName || ""} (${item.date || ""})`
+        }));
+
+
+        // ==========================================
+        // 5. FINAL RESPONSE
+        // ==========================================
+
+        return res.status(200).json({
+
+            success: true,
+
+            data: {
+
+                activeQueue:
+                    activeQueueList,
+
+                recentHistory:
+                    historyList
+            }
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error fetching user dashboard:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
-
-    // 3. Sort both lists descending by creation/date
-    activeQueueList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    historyList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        activeQueue: activeQueueList,
-        recentHistory: historyList.slice(0, 5)
-      }
-    });
-
-  } catch (error) {
-    console.log(error.message)
-    return res.status(500).json({ success: false, error: error.message });
-  }
 };
 const leaveQueue = async (req, res) => {
   try {
     const { queueId } = req.body;
-    const userId  = req.user.id;  // Or req.user.id if you use auth middleware
+    const userId = req.user.id;
 
     if (!queueId || !userId) {
       return res.status(400).json({
         success: false,
-        message: 'queueId in parameters and userId in body are required.'
+        message: 'queueId and userId are required.'
       });
     }
 
-    // 1. Find the queue document
+    // 1. Find the queue
     const queue = await QueueV2.findById(queueId);
+
     if (!queue) {
       return res.status(404).json({
         success: false,
@@ -284,15 +626,19 @@ const leaveQueue = async (req, res) => {
       });
     }
 
-    // 2. Find the user's token index (must be in WAITING state to leave)
+    // 2. Find user's WAITING token
     const tokenIndex = queue.tokens.findIndex(
-      t => t.userId.toString() === userId.toString() && t.status === 'WAITING'
+      t =>
+        t.userId.toString() === userId.toString() &&
+        t.status === 'WAITING'
     );
 
     if (tokenIndex === -1) {
-      // Check if they have any token at all to give a more accurate error message
-      const existingToken = queue.tokens.find(t => t.userId.toString() === userId.toString());
-      
+
+      const existingToken = queue.tokens.find(
+        t => t.userId.toString() === userId.toString()
+      );
+
       if (!existingToken) {
         return res.status(404).json({
           success: false,
@@ -302,34 +648,145 @@ const leaveQueue = async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message: `Cannot leave queue. Your token status is already ${existingToken.status}.`
+        message:
+          `Cannot leave queue. Your token status is already ${existingToken.status}.`
       });
     }
 
-    // 3. Update the token status to CANCELLED (as defined in your schema enum)
-    queue.tokens[tokenIndex].status = 'CANCELLED';
+    // 3. Store token before changing anything
+    const token = queue.tokens[tokenIndex];
+
+    // 4. Mark token as CANCELLED in QueueV2
+    token.status = 'CANCELLED';
+
     await queue.save();
 
-    console.log(`User ${userId} left queue ${queueId}, token #${queue.tokens[tokenIndex].tokenNumber} marked as CANCELLED`);
+    // 5. Create history record
+   // 5. Fetch hospital + doctor details for history snapshot
 
+const [hospital, doctor] = await Promise.all([
+
+  HospitalV2.findOne({
+    $or: [
+      { code: queue.hospitalId },
+      {
+        _id:
+          queue.hospitalId &&
+          queue.hospitalId.toString().match(/^[0-9a-fA-F]{24}$/)
+            ? queue.hospitalId
+            : null
+      }
+    ]
+  }).lean(),
+
+  UserV2.findOne({
+    $or: [
+      { doctorCode: queue.doctorCode },
+      { code: queue.doctorCode },
+      {
+        _id:
+          queue.doctorCode &&
+          queue.doctorCode.toString().match(/^[0-9a-fA-F]{24}$/)
+            ? queue.doctorCode
+            : null
+      }
+    ],
+    role: "DOCTOR"
+  }).lean()
+
+]);
+
+// Remove "Dr." if already present
+const doctorName = doctor?.name
+  ? doctor.name.replace(/^dr\.?\s*/i, '')
+  : queue.doctorCode;
+
+
+// 6. Create history snapshot
+
+await QueueHistory.create({
+
+  userId: userId,
+
+  queueId: queue._id,
+
+  tokenId: token._id,
+
+  tokenNumber: token.tokenNumber,
+
+  // Hospital
+  hospitalId: queue.hospitalId,
+
+  hospitalName:
+    hospital?.name || "Hospital",
+
+  hospitalLogoUrl:
+    hospital?.logoUrl || "",
+
+  // Doctor
+  doctorCode: queue.doctorCode,
+
+  doctorName: doctorName,
+
+  roomNumber:
+    doctor?.roomNumber || "",
+
+  // Queue
+  department: queue.department,
+
+  date: queue.date,
+
+  status: "CANCELLED",
+
+  // Time
+  joinedAt:
+    token.joinedAt || queue.createdAt,
+
+  completedAt:
+    new Date(),
+
+  feedback: {
+    status: "PENDING"
+  }
+
+});
+    // 6. Remove user from active queues
+    await UserActiveQueue.deleteOne({
+      userId: userId,
+      queueId: queue._id,
+      tokenId: token._id
+    });
+
+    console.log(
+      `User ${userId} left queue ${queueId}, ` +
+      `token #${token.tokenNumber} marked as CANCELLED`
+    );
+
+    // 7. Response
     return res.status(200).json({
       success: true,
+
       message: 'Successfully left the queue.',
+
       data: {
         queueId: queue._id,
-        tokenNumber: queue.tokens[tokenIndex].tokenNumber,
+        tokenId: token._id,
+        tokenNumber: token.tokenNumber,
         status: 'CANCELLED'
       }
     });
 
   } catch (error) {
+
     console.error("Error in leaveQueue:", error);
+
     return res.status(500).json({
       success: false,
       error: error.message
     });
   }
 };
+
 const getPendingFeedback = async (req, res) => {
   try {
     const userId = oid(req.user.id);

@@ -19,7 +19,7 @@
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:backgroundTint="#054A42"
-android:src="@drawable/baseline_local_hospital_24"
+
             android:scaleType="centerCrop"
 
             app:layout_constraintStart_toStartOf="parent"

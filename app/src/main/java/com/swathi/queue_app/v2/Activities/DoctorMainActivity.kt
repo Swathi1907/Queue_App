@@ -7,6 +7,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.DoctorMainAcitvityBinding
+import com.swathi.queue_app.v2.utilis.SocketManager
 
 class DoctorMainActivity : AppCompatActivity() {
 
@@ -16,7 +17,7 @@ class DoctorMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DoctorMainAcitvityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        SocketManager.connect()
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.doctorfragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController

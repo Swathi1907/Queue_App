@@ -66,11 +66,7 @@
             </LinearLayout>
 
             <!-- Arrow Action Icon -->
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/outline_arrow_forward_24"
-                app:tint="#0B2545" />
+
         </LinearLayout>
 
         <!-- Metrics Row: Waiting & Average Wait Cards -->

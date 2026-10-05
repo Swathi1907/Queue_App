@@ -271,8 +271,22 @@
                         android:inputType="textLongMessage"
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
-
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLogout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="Log Out"
+                    android:textColor="#D32F2F"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@android:color/white"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="#D32F2F"
+                    app:strokeWidth="1dp" />
             </LinearLayout>
+            <!-- Logout Button -->
+
         </androidx.cardview.widget.CardView>
 
     </LinearLayout>

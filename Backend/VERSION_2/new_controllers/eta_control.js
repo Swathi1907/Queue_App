@@ -12,12 +12,20 @@ async function calculateETA(queue, targetTokenNumber) {
         };
     }
 
+    // -----------------------------------------
+    // Current serving token
+    // -----------------------------------------
+
     const servingToken = tokens.find(
         t => t.status === 'IN_CONSULTATION'
     );
 
+    // Average consultation time in minutes
     const avgServiceTime =
-        queue.avgServiceTime || 5;
+    Math.ceil(queue.avgServiceTime || 5);
+    // -----------------------------------------
+    // Queue statistics
+    // -----------------------------------------
 
     const activeCount = tokens.filter(
         t =>
@@ -33,12 +41,14 @@ async function calculateETA(queue, targetTokenNumber) {
         t => t.status === 'COMPLETED'
     ).length;
 
+    // People waiting BEFORE target token
     const waitingAhead = tokens.filter(
         t =>
             t.tokenNumber < targetTokenNumber &&
             t.status === 'WAITING'
     ).length;
 
+    // People currently ahead of target
     const peopleAhead = tokens.filter(
         t =>
             t.tokenNumber < targetTokenNumber &&
@@ -63,10 +73,10 @@ async function calculateETA(queue, targetTokenNumber) {
                 ).getTime()
             ) / (1000 * 60);
 
-        remaining =
-            elapsed < avgServiceTime
-                ? avgServiceTime - elapsed
-                : 1;
+        remaining = Math.max(
+            0,
+            avgServiceTime - elapsed
+        );
     }
 
 
@@ -91,8 +101,6 @@ async function calculateETA(queue, targetTokenNumber) {
 
         if (
             completedCount === 0 &&
-            tokens.length > 0 &&
-            tokens[0].tokenNumber === targetTokenNumber &&
             waitingAhead === 0
         ) {
 
@@ -121,6 +129,7 @@ async function calculateETA(queue, targetTokenNumber) {
 
     let eta = 0;
 
+    // ETA is needed only for waiting patients
     if (
         ![
             'IN_CONSULTATION',
@@ -131,37 +140,40 @@ async function calculateETA(queue, targetTokenNumber) {
 
         if (!servingToken) {
 
+            // Nobody is currently being served.
+            // Only people before the target matter.
             eta =
-                (
-                    completedCount === 0 &&
-                    waitingAhead === 0
-                )
-                    ? 0
-                    : waitingAhead * avgServiceTime;
+                waitingAhead * avgServiceTime;
 
         } else {
 
+            // Current consultation remaining time
+            // + estimated time for people waiting ahead
             eta =
                 remaining +
                 (waitingAhead * avgServiceTime);
         }
     }
 
-    eta = Math.round(eta);
+    // Never return negative ETA
+    eta = Math.max(
+        0,
+        Math.ceil(eta)
+    );
 
 
     // -----------------------------------------
     // Progress
     // -----------------------------------------
 
-    let progress =
+    const progress =
         completedCount +
         (servingToken ? 1 : 0);
 
-    if (targetToken.status === 'IN_CONSULTATION') {
-        progress = totalPeople;
-    }
 
+    // -----------------------------------------
+    // Return
+    // -----------------------------------------
 
     return {
 

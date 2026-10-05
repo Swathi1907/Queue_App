@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import kotlin.math.roundToInt
+import com.swathi.queue_app.v2.utilis.SocketManager
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +16,7 @@ import com.swathi.queue_app.R
 import com.swathi.queue_app.databinding.FragmentDoctorHomeBinding
 import com.swathi.queue_app.v2.adapter.doctor.NextMembersAdapter
 import com.swathi.queue_app.v2.models.SessionData
+import com.swathi.queue_app.v2.viewmodels.DoctorViewModel
 import com.swathi.queue_app.v2.viewmodels.Queueviewmodel
 import com.swathi.queue_app.v2.viewmodels.Resource
 import kotlinx.coroutines.flow.collectLatest
@@ -22,6 +25,7 @@ import kotlinx.coroutines.launch
 class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
     private val tokenManager by lazy { com.swathi.queue_app.v2.utilis.TokenManager(requireContext()) }
     private val viewModel: Queueviewmodel by viewModels()
+    private val viewmodel: DoctorViewModel by viewModels()
     private var _binding: FragmentDoctorHomeBinding? = null
     private val binding get() = _binding!!
     private var department: String? = null
@@ -40,7 +44,22 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
 
         // Initialize RecyclerView properly
         setupRecyclerView()
+binding.btnEndSession.setOnClickListener {
+    Toast.makeText(requireContext(),"clicked",Toast.LENGTH_SHORT).show()
+    if (department.isNullOrEmpty() || doctorCode.isNullOrEmpty()) {
+        Toast.makeText(
+            requireContext(),
+            "Missing department or doctor code",
+            Toast.LENGTH_SHORT
+        ).show()
+        return@setOnClickListener
+    }
 
+    viewmodel.endSession(
+        department!!,
+        doctorCode!!
+    )
+}
         if (!department.isNullOrEmpty() && !doctorCode.isNullOrEmpty()) {
             viewModel.fetchActiveSession(department!!, doctorCode!!)
         } else {
@@ -123,14 +142,60 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
 
             viewModel.createQueue(hospitalId, department!!, doctorCode!!)
         }
-
+        observeEndSession()
         observeQueueState()
+        setupSocketListeners()
     }
 
     private fun setupRecyclerView() {
         binding.rvUpNext.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = nextMembersAdapter
+        }
+    }
+    private fun observeEndSession() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewmodel.doctorEndSession.collectLatest { resource ->
+                    when (resource) {
+                        is Resource.Loading -> {
+                            binding.btnEndSession.isEnabled = false
+                            binding.btnEndSession.text = "Ending Session..."
+                        }
+
+                        is Resource.Success<*> -> {
+                            binding.btnEndSession.isEnabled = true
+                            binding.btnEndSession.text = "End Session"
+
+                            Toast.makeText(
+                                requireContext(),
+                                "Session ended successfully",
+                                Toast.LENGTH_SHORT
+                            ).show() // Fixed missing parentheses here
+
+                            lastKnownSessionData = null
+                            updateSessionUI(null) // Immediately clear UI to show no session state
+
+                            if (!department.isNullOrEmpty() && !doctorCode.isNullOrEmpty()) {
+                                viewModel.fetchActiveSession(department!!, doctorCode!!)
+                            }
+                        }
+
+                        is Resource.Error -> {
+                            binding.btnEndSession.isEnabled = true
+                            binding.btnEndSession.text = "End Session"
+
+                            Toast.makeText(
+                                requireContext(),
+                                resource.message ?: "Failed to end session",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+
+                        else -> {}
+                    }
+                }
+            }
         }
     }
     private fun observeQueueState() {
@@ -145,16 +210,47 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
                             val data = resource.data
                             when (data) {
                                 is SessionData -> {
-                                    lastKnownSessionData = data // Cache the active session state
+
+                                    lastKnownSessionData = data
+
                                     updateSessionUI(data)
+
+                                    // Join this doctor's queue Socket.IO room
+                                    val queueId = data.sessionId
+
+                                    if (!queueId.isNullOrEmpty()) {
+
+                                        SocketManager.joinQueue(queueId)
+
+                                        Log.d(
+                                            "DoctorSocket",
+                                            "Joined queue room: queue_$queueId"
+                                        )
+                                    }
                                 }
                                 is String -> {
-                                    Toast.makeText(requireContext(), data, Toast.LENGTH_SHORT).show()
+                                    lastKnownSessionData = null
+
+                                    Toast.makeText(
+                                        requireContext(),
+                                        data,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+
+                                    updateSessionUI(null)
+                                }
+                                null -> {
+                                    // Handle null data payload safely after actions like createQueue
+                                    lastKnownSessionData = null
+                                    updateSessionUI(null)
+
+                                    // If a queue was just created, fetch the active session to load it onto the UI
                                     if (!department.isNullOrEmpty() && !doctorCode.isNullOrEmpty()) {
                                         viewModel.fetchActiveSession(department!!, doctorCode!!)
                                     }
                                 }
                                 else -> {
+                                    // Fallback for any other unexpected type safely without casting crashes
                                     if (lastKnownSessionData == null) {
                                         updateSessionUI(null)
                                     }
@@ -165,8 +261,6 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
                             Log.d("dhf", "${resource.message}")
                             Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
 
-                            // FIX: If we have a cached session, ALWAYS keep showing it on action/network errors.
-                            // Do not wipe the screen or reset lastKnownSessionData to null!
                             if (lastKnownSessionData != null) {
                                 updateSessionUI(lastKnownSessionData)
                             } else {
@@ -209,14 +303,15 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
             it.status == "WAITING" || it.status == "PENDING"
         } ?: emptyList()
 
+
         // Set Total in Queue Count
         binding.tvStatStatusValue.text = waitingTokens.size.toString()
 
         // Set Average Service Time (defaults to 5 mins if null)
         val avgTime = sessionData.avgServiceTime ?: 5
-        binding.tvAvgServiceTime.text = "$avgTime mins"
+        binding.tvAvgServiceTime.text = "${avgTime.toDouble().toInt()} mins"
         // --------------------------
-
+//"${metrics.avgServiceTime.roundToInt()} min"
         if (isPaused) {
             binding.btnPauseResume.text = "Resume"
             binding.btnCompleteNext.alpha = 0.5f
@@ -254,8 +349,164 @@ class DoctorHomeFragment : Fragment(R.layout.fragment_doctor_home) {
 
         nextMembersAdapter.submitList(waitingTokens)
     }
+    private fun setupSocketListeners() {
 
+        // -----------------------------------------
+        // PAUSE / RESUME
+        // -----------------------------------------
+        SocketManager.on("QUEUE_STATUS_CHANGED") { data ->
+
+            val queueId = data.optString("queueId")
+            val queueStatus = data.optString("queueStatus")
+
+            Log.d(
+                "DoctorSocket",
+                "QUEUE_STATUS_CHANGED queue=$queueId status=$queueStatus"
+            )
+
+            requireActivity().runOnUiThread {
+
+                if (!isAdded) return@runOnUiThread
+
+                // Refresh the doctor's queue immediately
+                if (!department.isNullOrEmpty() &&
+                    !doctorCode.isNullOrEmpty()
+                ) {
+
+                    viewModel.fetchActiveSession(
+                        department!!,
+                        doctorCode!!
+                    )
+                }
+            }
+        }
+
+
+        // -----------------------------------------
+        // TOKEN COMPLETED
+        // -----------------------------------------
+        SocketManager.on("TOKEN_COMPLETED") { data ->
+
+            val queueId = data.optString("queueId")
+            val tokenNumber = data.optInt("tokenNumber")
+
+            Log.d(
+                "DoctorSocket",
+                "TOKEN_COMPLETED queue=$queueId token=$tokenNumber"
+            )
+
+            requireActivity().runOnUiThread {
+
+                if (!isAdded) return@runOnUiThread
+
+                if (!department.isNullOrEmpty() &&
+                    !doctorCode.isNullOrEmpty()
+                ) {
+
+                    viewModel.fetchActiveSession(
+                        department!!,
+                        doctorCode!!
+                    )
+                }
+            }
+        }
+
+
+        // -----------------------------------------
+        // NEXT TOKEN CALLED
+        // -----------------------------------------
+        SocketManager.on("TOKEN_CALLED") { data ->
+
+            val queueId = data.optString("queueId")
+            val tokenNumber = data.optInt("tokenNumber")
+
+            Log.d(
+                "DoctorSocket",
+                "TOKEN_CALLED queue=$queueId token=$tokenNumber"
+            )
+
+            requireActivity().runOnUiThread {
+
+                if (!isAdded) return@runOnUiThread
+
+                if (!department.isNullOrEmpty() &&
+                    !doctorCode.isNullOrEmpty()
+                ) {
+
+                    viewModel.fetchActiveSession(
+                        department!!,
+                        doctorCode!!
+                    )
+                }
+            }
+        }
+        // -----------------------------------------
+// QUEUE SESSION ENDED
+// -----------------------------------------
+
+        SocketManager.on("QUEUE_SESSION_ENDED") { data ->
+
+            val queueId = data.optString("queueId")
+
+            Log.d(
+                "DoctorSocket",
+                "QUEUE_SESSION_ENDED queue=$queueId"
+            )
+
+            requireActivity().runOnUiThread {
+
+                if (!isAdded) return@runOnUiThread
+
+                lastKnownSessionData = null
+                updateSessionUI(null)
+
+                Toast.makeText(
+                    requireContext(),
+                    "Queue session ended",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        // -----------------------------------------
+// QUEUE CREATED / SESSION STARTED
+// -----------------------------------------
+        SocketManager.on("QUEUE_CREATED") { data ->
+
+            val queueId = data.optString("queueId")
+            val departmentFromSocket = data.optString("department")
+            val doctorCodeFromSocket = data.optString("doctorCode")
+
+            Log.d(
+                "DoctorSocket",
+                "QUEUE_CREATED queue=$queueId department=$departmentFromSocket doctor=$doctorCodeFromSocket"
+            )
+
+            requireActivity().runOnUiThread {
+
+                if (!isAdded) return@runOnUiThread
+
+                // Only react if this queue belongs to this doctor
+                if (departmentFromSocket == department &&
+                    doctorCodeFromSocket == doctorCode
+                ) {
+
+                    // Fetch the newly created session
+                    viewModel.fetchActiveSession(
+                        department!!,
+                        doctorCode!!
+                    )
+                }
+            }
+        }
+    }
     override fun onDestroyView() {
+
+        SocketManager.off("QUEUE_STATUS_CHANGED")
+        SocketManager.off("TOKEN_COMPLETED")
+        SocketManager.off("TOKEN_CALLED")
+        SocketManager.off("QUEUE_SESSION_ENDED")
+        SocketManager.off("QUEUE_CREATED")
         super.onDestroyView()
         _binding = null
     }

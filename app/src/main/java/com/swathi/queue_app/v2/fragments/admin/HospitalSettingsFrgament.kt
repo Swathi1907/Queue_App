@@ -1,5 +1,6 @@
 package com.swathi.queue_app.v2.fragments.admin
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.swathi.queue_app.databinding.NewAdminSettingsBinding
 import com.swathi.queue_app.v2.models.HospitalAddress
 import com.swathi.queue_app.v2.models.HospitalUpdateRequest
+import com.swathi.queue_app.v2.ui.auth.LoginActivity
 import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +30,7 @@ class HospitalSettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HospitalViewModel by viewModels()
-
+    private lateinit var tokenManager: TokenManager
     private var selectedBannerUri: Uri? = null
     private var uploadedBannerUrl: String? = null
 
@@ -51,23 +53,30 @@ class HospitalSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        tokenManager = TokenManager(requireContext())
         val hospitalId = TokenManager(requireContext()).getHospitalId() ?: ""
         if (hospitalId.isNotEmpty()) {
             viewModel.loadHospitalById(hospitalId)
         }
-
         binding.ivHospitalBanner.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
-
         binding.btnSaveHospitalDetails.setOnClickListener {
             saveHospitalDetails()
         }
+binding.btnLogout.setOnClickListener {
+    tokenManager.clearSession()
+    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
 
+    // Navigate to LoginActivity and clear the back stack
+    val intent = Intent(requireContext(), LoginActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    startActivity(intent)
+    requireActivity().finish()
+}
         observeViewModel()
     }
-
     private fun saveHospitalDetails() {
         val name = binding.etHospitalName.text.toString().trim()
         val description = binding.etHospitalDescription.text.toString().trim()

@@ -1,139 +1,312 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:padding="20dp">
+    android:padding="4sp"
+    android:background="#FAFCFB">
 
-    <!-- Scrollable Content Area -->
-    <!-- Scrollable Content Area -->
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/btnConfirmJoin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+
+    <!-- ================= TOP BAR ================= -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:paddingHorizontal="10dp"
+        android:layout_marginTop="20sp"
         app:layout_constraintTop_toTopOf="parent">
+
+
+        <!-- Back Button -->
+
+
+        <!-- Title -->
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join Queue"
+            android:textColor="#0A2540"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <!-- Info Button -->
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingHorizontal="9dp"
+        android:paddingBottom="90dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomButtonContainer"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="16dp">
+            android:orientation="vertical">
 
-            <!-- Header / Doctor Card -->
-            <androidx.cardview.widget.CardView
+
+            <!-- ================= DOCTOR CARD ================= -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/doctorCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#E8F5E9"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardUseCompatPadding="false">
+                android:layout_marginTop="4dp"
+                app:cardBackgroundColor="#F0F8F5"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:layout_height="match_parent"
+                    android:padding="9dp">
 
-                    <ImageView
-                        android:id="@+id/imgDoctor"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="@drawable/bg_chip_green"
-                        android:scaleType="centerCrop" />
 
-                    <LinearLayout
+                    <!-- Doctor Image -->
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivDoctor"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:scaleType="centerCrop"
+
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                         />
+
+
+                    <!-- Online Dot -->
+
+
+                    <!-- Doctor Name -->
+
+                    <TextView
+                        android:id="@+id/tvDoctorName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginStart="10dp"
+                        android:text="Dr. Emilia Emelson"
+                        android:textColor="#092E42"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/ivDoctor"
+                        app:layout_constraintTop_toTopOf="@id/ivDoctor" />
 
-                        <TextView
-                            android:id="@+id/tvDoctorName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Dr. Emilia Emelson"
-                            android:textColor="#0B2545"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/tvSpecialty"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="General Practice"
-                            android:textColor="#495057"
-                            android:textSize="14sp" />
+                    <!-- Speciality -->
 
-                        <TextView
-                            android:id="@+id/tvWaitTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="🕒 Current Wait: ~45 mins"
-                            android:textColor="#134074"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/tvDoctorSpeciality"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:text="General Practice • Joint • Specialist"
+                        android:textColor="#628078"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/tvDoctorName"
+                        app:layout_constraintTop_toBottomOf="@id/tvDoctorName" />
 
-            <!-- Symptoms Section Title -->
+
+                    <!-- Current Wait -->
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- ================= SYMPTOMS ================= -->
+
             <TextView
+                android:id="@+id/tvSymptomsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:text="What are your symptoms?"
-                android:textColor="#0B2545"
-                android:textSize="15sp"
+                android:textColor="#092E42"
+                android:textSize="19sp"
                 android:textStyle="bold" />
 
+
             <TextView
+                android:id="@+id/tvSymptomsSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="8dp"
-                android:text="Providing this helps the doctor prepare for your visit. (Optional)"
-                android:textColor="#6C757D"
-                android:textSize="12sp" />
+                android:layout_marginTop="3dp"
+                android:text="Providing this helps the doctor prepare for your visit."
+                android:textColor="#84918F"
+                android:textSize="13sp" />
 
-            <!-- EditText with Background Container -->
-            <EditText
-                android:id="@+id/etSymptoms"
+
+            <!-- ================= SYMPTOM CHIPS ================= -->
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/symptomChipGroup"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:background="@drawable/bg_chip_green"
-                android:gravity="top|start"
-                android:hint="Briefly describe what you're experiencing..."
-                android:padding="14dp"
-                android:textColor="#0B2545"
-                android:textColorHint="#ADB5BD"
-                android:textSize="14sp" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                app:chipSpacingHorizontal="5dp"
+                app:chipSpacingVertical="3dp"
+                app:singleSelection="false">
+
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipHeadache"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Headache"
+                    android:textColor="#45615D"
+                    android:textSize="10sp"
+                    app:chipBackgroundColor="#FFFFFF"
+                    app:chipCornerRadius="15dp"
+                    app:chipStrokeColor="#DDE7E4"
+                    app:chipStrokeWidth="1dp" />
+
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipJointPain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Joint Pain"
+                    android:textColor="#45615D"
+                    android:textSize="10sp"
+                    app:chipBackgroundColor="#FFFFFF"
+                    app:chipCornerRadius="15dp"
+                    app:chipStrokeColor="#DDE7E4"
+                    app:chipStrokeWidth="1dp" />
+
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFever"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Fever"
+                    android:textColor="#45615D"
+                    android:textSize="10sp"
+                    app:chipBackgroundColor="#FFFFFF"
+                    app:chipCornerRadius="15dp"
+                    app:chipStrokeColor="#DDE7E4"
+                    app:chipStrokeWidth="1dp" />
+
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipCough"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Cough"
+                    android:textColor="#45615D"
+                    android:textSize="10sp"
+                    app:chipBackgroundColor="#FFFFFF"
+                    app:chipCornerRadius="15dp"
+                    app:chipStrokeColor="#DDE7E4"
+                    app:chipStrokeWidth="1dp" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+
+            <!-- ================= DESCRIPTION ================= -->
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSymptoms"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="7dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxBackgroundColor="#F2F8F6"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="#E0EBE8"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#9AA9A6">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSymptoms"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:hint="Briefly describe what you're experiencing..."
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    android:padding="12dp"
+                    android:textColor="#294642"
+                    android:textSize="15sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <!-- ================= DIGITAL TICKET INFO ================= -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/digitalTicketInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E4EBE9"
+                app:strokeWidth="1dp">
+
+
+            </com.google.android.material.card.MaterialCardView>
+
 
         </LinearLayout>
-    </ScrollView>
 
-    <!-- Confirm & Join Queue Button Locked to Bottom -->
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnConfirmJoin"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_chip_light_green"
-        android:text="Confirm &amp; Join Queue →"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:backgroundTint="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scrollView" />
+    </androidx.core.widget.NestedScrollView>
+
+
+    <!-- ================= BOTTOM BUTTON ================= -->
+
+    <LinearLayout
+        android:id="@+id/bottomButtonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#FAFCFB"
+        android:gravity="center"
+        android:paddingHorizontal="9dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmJoin"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="CONFIRM &amp; JOIN QUEUE  →"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:backgroundTint="#00635F"
+            app:cornerRadius="11dp"
+            app:elevation="4dp" />
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

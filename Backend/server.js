@@ -6,7 +6,7 @@ require("./firebase");
 app.use(express.json());
 const crypto = require('crypto');
 const PORT = 5001;
-const Razorpay = require('razorpay');
+
 
 const QueueModel = require('./VERSION_2/new_models/new_queuev2')
 const mongoose=require('mongoose');
@@ -33,14 +33,39 @@ const io = new Server(server, {
     }
 });
 io.on("connection", (socket) => {
+
     console.log("Connected:", socket.id);
+
+    socket.on("JOIN_QUEUE_ROOM", (queueId) => {
+
+        socket.join(`queue_${queueId}`);
+
+        console.log(
+            `Socket ${socket.id} joined queue_${queueId}`
+        );
+    });
+
+    socket.on("LEAVE_QUEUE_ROOM", (queueId) => {
+
+        socket.leave(`queue_${queueId}`);
+
+        console.log(
+            `Socket ${socket.id} left queue_${queueId}`
+        );
+    });
 
     socket.on("disconnect", () => {
         console.log("Disconnected:", socket.id);
     });
+
 });
 
+const Razorpay = require("razorpay");
 
+const razorpayInstance = new Razorpay({
+    key_id: process.env.PAYMENT_TEST_API_KEY,
+    key_secret: process.env.PAYMENT_TEST_KEY_SECRET
+});
 const authroutes=require('./routes/auth');
 const dashboard=require('./admin/dashboard')
 const queueroutes=require('./routes/queue');
@@ -97,119 +122,413 @@ app.use('/api/v2/auth', v2AuthRoutes);
 const v2QueueRoutes = require('./VERSION_2/new_routes/new_queue');
 app.use('/api/v2/queue', v2QueueRoutes);
 
-app.post('/api/v2/payment/verify', async (req, res) => {
-    try {
-        console.log("=== PAYMENT VERIFY HIT ===");
-        console.log("Request Body Received:", JSON.stringify(req.body, null, 2));
 
-        const { 
-            razorpay_order_id, 
-            razorpay_payment_id, 
-            razorpay_signature, 
-            doctorCode, 
-            hospitalId, 
-            department, 
-            userId, 
+const UserActiveQueue = require('./VERSION_2/new_models/new_user_active_queue');
+const UserV2 = require('./VERSION_2/new_models/peron_model');
+const HospitalV2 = require('./VERSION_2/new_models/new_hosp_model');
+
+app.post('/api/v2/payment/verify', async (req, res) => {
+
+    try {
+
+        console.log("=== PAYMENT VERIFY HIT ===");
+
+        console.log(
+            "Request Body Received:",
+            JSON.stringify(req.body, null, 2)
+        );
+
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+
+            doctorCode,
+            hospitalId,
+            department,
+            userId,
+
             patientName,
-            amount ,
+            amount,
             notes
         } = req.body;
 
-        // Validate required fields before proceeding with database operations
-        if (!hospitalId || !department || !userId || !doctorCode) {
-            console.log("Validation Failed! Missing fields:", { hospitalId, department, userId, doctorCode });
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Validation failed: hospitalId, department, userId, and doctorCode are required.' 
+
+        // ---------------------------------------
+        // 1. VALIDATION
+        // ---------------------------------------
+
+        if (
+            !hospitalId ||
+            !department ||
+            !userId ||
+            !doctorCode ||
+            !razorpay_order_id ||
+            !razorpay_payment_id ||
+            !razorpay_signature
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Required payment and queue fields are missing.'
             });
+
         }
 
-        // Your Razorpay Key Secret from the dashboard
-        const secret = process.env.PAYMENT_TEST_KEY_SECRET; 
 
-        // Create the expected signature using HMAC SHA256
-        const generated_signature = crypto
-            .createHmac('sha256', secret)
-            .update(razorpay_order_id + '|' + razorpay_payment_id)
-            .digest('hex');
+        // ---------------------------------------
+        // 2. VERIFY RAZORPAY SIGNATURE
+        // ---------------------------------------
 
-        if (generated_signature !== razorpay_signature) {
-            console.log("Signature Mismatch! Expected:", generated_signature, "Got:", razorpay_signature);
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Payment verification failed: Invalid signature.' 
+        const secret =
+            process.env.PAYMENT_TEST_KEY_SECRET;
+
+        const generated_signature =
+            crypto
+                .createHmac('sha256', secret)
+                .update(
+                    razorpay_order_id +
+                    '|' +
+                    razorpay_payment_id
+                )
+                .digest('hex');
+
+
+        if (
+            generated_signature !==
+            razorpay_signature
+        ) {
+
+            console.log(
+                "Signature mismatch"
+            );
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Payment verification failed: Invalid signature.'
             });
+
         }
 
-        console.log("Signature verified successfully. Updating database...");
 
-        // Signature matches! Payment is authentic. Now update the queue database.
-        const todayDate = new Date().toISOString().split('T')[0];
+        console.log(
+            "Signature verified successfully."
+        );
 
-        // 1. Atomically find the queue document for today or create one if it doesn't exist
-       /* const queueDoc = await QueueModel.findOneAndUpdate(
-            { doctorCode: doctorCode, date: todayDate },
-            { 
-                $setOnInsert: { 
-                    hospitalId: hospitalId, 
-                    department: department,
-                    isActive: true 
-                } 
-            },
-            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-        );*/
-        // Change this block in server.js around line 150:
-const queueDoc = await QueueModel.findOneAndUpdate(
-    { doctorCode: doctorCode, date: todayDate },
-    { 
-        $set: { 
-            hospitalId: hospitalId, 
-            department:department,
-            isActive: true 
-        }
-    },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+
+        // ---------------------------------------
+        // 3. TODAY
+        // ---------------------------------------
+
+        const todayDate =
+            new Date()
+                .toISOString()
+                .split('T')[0];
+
+
+        // ---------------------------------------
+// 4. FIND QUEUE
+// ---------------------------------------
+
+console.log("\n======================================");
+console.log("QUEUE LOOKUP");
+console.log("======================================");
+
+console.log("hospitalId:", hospitalId);
+console.log("department:", department);
+console.log("doctorCode:", doctorCode);
+
+// Find queue using doctorCode only
+let queueDoc = await QueueModel.findOne({
+    doctorCode: doctorCode
+}).sort({ createdAt: -1 });
+
+console.log("\nQUEUE FOUND:");
+
+if (queueDoc) {
+    console.log({
+        queueId: queueDoc._id.toString(),
+        hospitalId: queueDoc.hospitalId,
+        department: queueDoc.department,
+        doctorCode: queueDoc.doctorCode,
+        queueStatus: queueDoc.queueStatus,
+        isActive: queueDoc.isActive,
+        tokenCount: queueDoc.tokens?.length || 0
+    });
+} else {
+    console.log("❌ NO QUEUE FOUND");
+}
+
+// ---------------------------------------
+// IF NO QUEUE
+// ---------------------------------------
+
+if (!queueDoc) {
+
+    return res.status(400).json({
+        success: false,
+        message: "No queue found for this doctor."
+    });
+}
+
+console.log(
+    "Using Queue ID:",
+    queueDoc._id.toString()
 );
 
-        console.log("Queue Document fetched/created:", queueDoc._id);
+console.log(
+    "Tokens BEFORE:",
+    queueDoc.tokens?.length || 0
+);
 
-        // 2. Determine the next sequential token number
-        const nextTokenNumber = queueDoc.tokens.length + 1;
+// ---------------------------------------
+// 5. GENERATE TOKEN
+// ---------------------------------------
 
-        // 3. Push the patient token into the array with payment details
-        queueDoc.tokens.push({
-            tokenNumber: nextTokenNumber,
-            userId: userId,
-            patientName: patientName,
-            orderId: razorpay_order_id,
-            paymentId: razorpay_payment_id,
-            amountPaid: amount || 0,
-            status: 'WAITING',
-            notes: notes||" "
+const nextTokenNumber =
+    queueDoc.tokens.length + 1;
+
+console.log(
+    "Next Token Number:",
+    nextTokenNumber
+);
+
+
+// ---------------------------------------
+// 6. CREATE TOKEN
+// ---------------------------------------
+
+const newToken = {
+
+    tokenNumber: nextTokenNumber,
+
+    userId: userId,
+
+    patientName: patientName,
+
+    orderId: razorpay_order_id,
+
+    paymentId: razorpay_payment_id,
+
+    amountPaid: amount || 0,
+
+    status: "WAITING",
+
+    notes: notes || ""
+};
+
+console.log("\nNEW TOKEN:");
+console.log(newToken);
+
+
+// ---------------------------------------
+// 7. ADD TOKEN TO QUEUE
+// ---------------------------------------
+
+queueDoc.tokens.push(newToken);
+
+console.log(
+    "Tokens AFTER PUSH:",
+    queueDoc.tokens.length
+);
+
+await queueDoc.save();
+
+console.log(
+    "✅ QUEUE SAVED"
+);
+
+console.log(
+    "Tokens AFTER SAVE:",
+    queueDoc.tokens.length
+);
+
+
+// ---------------------------------------
+// GET CREATED TOKEN
+// ---------------------------------------
+
+const createdToken =
+    queueDoc.tokens[
+        queueDoc.tokens.length - 1
+    ];
+
+console.log("\nCREATED TOKEN:");
+
+console.log({
+    tokenId: createdToken._id,
+    tokenNumber: createdToken.tokenNumber,
+    userId: createdToken.userId,
+    status: createdToken.status
+});
+
+
+// ---------------------------------------
+// 8. CREATE USER ACTIVE QUEUE
+// ---------------------------------------
+// ---------------------------------------
+// 8. GET HOSPITAL + DOCTOR DETAILS
+// ---------------------------------------
+
+let hospital = null;
+let doctor = null;
+
+// Hospital ID may be either MongoDB _id or hospital code
+if (
+    typeof queueDoc.hospitalId === "string" &&
+    /^[0-9a-fA-F]{24}$/.test(queueDoc.hospitalId)
+) {
+
+    hospital = await HospitalV2.findById(
+        queueDoc.hospitalId
+    ).lean();
+
+} else {
+
+    hospital = await HospitalV2.findOne({
+        code: queueDoc.hospitalId
+    }).lean();
+}
+
+
+// Find doctor
+doctor = await UserV2.findOne({
+    doctorCode: queueDoc.doctorCode,
+    role: "DOCTOR"
+}).lean();
+
+
+console.log("HOSPITAL FOR ACTIVE QUEUE:", hospital);
+console.log("DOCTOR FOR ACTIVE QUEUE:", doctor);
+
+
+// ---------------------------------------
+// 9. CREATE USER ACTIVE QUEUE
+// ---------------------------------------
+
+const activeQueue =
+    await UserActiveQueue.create({
+
+        userId: userId,
+
+        queueId: queueDoc._id,
+
+        tokenId: createdToken._id,
+
+        tokenNumber: nextTokenNumber,
+
+
+        // -------------------------
+        // Hospital
+        // -------------------------
+
+        hospitalId:
+            queueDoc.hospitalId,
+
+        hospitalName:
+            hospital?.name || "",
+
+        hospitalLogoUrl:
+            hospital?.logoUrl || "",
+
+
+        // -------------------------
+        // Doctor
+        // -------------------------
+
+        doctorCode:
+            queueDoc.doctorCode,
+
+        doctorName:
+            doctor?.name || "",
+
+
+        // -------------------------
+        // Queue
+        // -------------------------
+
+        department:
+            queueDoc.department || department || "",
+
+        roomNumber:
+            queueDoc.roomNumber || "",
+
+        date:
+            queueDoc.date || "",
+
+
+        // -------------------------
+        // Status
+        // -------------------------
+
+        status: "WAITING",
+
+        joinedAt: new Date()
+    });
+
+console.log("\n✅ USER ACTIVE QUEUE CREATED");
+
+console.log({
+    activeQueueId: activeQueue._id,
+    userId: activeQueue.userId,
+    queueId: activeQueue.queueId,
+    tokenId: activeQueue.tokenId,
+    tokenNumber: activeQueue.tokenNumber,
+    doctorCode: activeQueue.doctorCode,
+    department: activeQueue.department,
+    status: activeQueue.status
+});
+
+console.log("\n======================================");
+console.log("PAYMENT → QUEUE SUCCESS");
+console.log("Queue ID:", queueDoc._id.toString());
+console.log("Token ID:", createdToken._id.toString());
+console.log("Token Number:", nextTokenNumber);
+console.log("======================================\n");
+
+        // ---------------------------------------
+        // 9. RESPONSE
+        // ---------------------------------------
+
+        return res.status(200).json({
+
+            success: true,
+
+            message:
+                'Payment verified successfully and queue slot confirmed.',
+
+            tokenNumber:
+                nextTokenNumber,
+
+            queueId:
+                queueDoc._id,
+
+            tokenId:
+                createdToken._id
         });
 
-        await queueDoc.save();
-        console.log("Queue updated successfully with token number:", nextTokenNumber);
-
-        return res.status(200).json({ 
-            success: true, 
-            message: 'Payment verified successfully and queue slot confirmed.',
-            tokenNumber: nextTokenNumber
-        });
 
     } catch (error) {
-        console.error('Error verifying payment and updating queue:', error);
-        return res.status(500).json({ 
-            success: false, 
-            error: error.message 
+
+        console.error(
+            'Error verifying payment and updating queue:',
+            error
+        );
+
+        return res.status(500).json({
+
+            success: false,
+
+            error:
+                error.message
         });
+
     }
+
 });
-// Initialize Razorpay instance with your test/live keys
-const razorpayInstance = new Razorpay({
-    key_id: process.env.PAYMENT_TEST_API_KEY,
-    key_secret: process.env.PAYMENT_TEST_KEY_SECRET
-});
+
 // Create Order Endpoint
 // Create Order Endpoint
 app.post('/api/v2/payment/create-order', async (req, res) => {

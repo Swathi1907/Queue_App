@@ -1,6 +1,7 @@
 const User = require('../new_models/peron_model');
 const Queue = require('../new_models/new_queuev2');
-const HospitalV2= require('../new_models/new_hosp_model');const getAdminDashboardData = async (req, res) => {
+const HospitalV2= require('../new_models/new_hosp_model');
+const getAdminDashboardData = async (req, res) => {
     try {
         console.log("admin entered");
 
@@ -57,9 +58,9 @@ const HospitalV2= require('../new_models/new_hosp_model');const getAdminDashboar
             : {};
 
         // For Queue collection
-        const queueFilter = mongoHospitalId
-            ? { hospitalId: mongoHospitalId }
-            : {};
+      const queueFilter = hospitalcode
+    ? { hospitalId: hospitalcode }
+    : {};
 
         console.log("User filter:", userFilter);
         console.log("Queue filter:", queueFilter);
@@ -76,20 +77,12 @@ const HospitalV2= require('../new_models/new_hosp_model');const getAdminDashboar
         // -----------------------------------------
         // 5. Active queues
         // -----------------------------------------
-
-        const activeQueues =
-            await Queue.countDocuments({
-                ...queueFilter,
-                queueStatus: {
-                    $in: [
-                        "ACTIVE",
-                        "PAUSED",
-                        "active",
-                        "paused"
-                    ]
-                }
-            });
-
+const activeQueues = await Queue.countDocuments({
+    ...queueFilter,
+    queueStatus: {
+        $regex: /^(ACTIVE|PAUSED)$/i
+    }
+});
 
         // -----------------------------------------
         // 6. Total doctors
@@ -110,21 +103,15 @@ const HospitalV2= require('../new_models/new_hosp_model');const getAdminDashboar
         // Queue uses Mongo hospital ID
         // -----------------------------------------
 
-        const activeQueueDocs =
-            await Queue.find({
-                ...queueFilter,
-                queueStatus: {
-                    $in: [
-                        "ACTIVE",
-                        "PAUSED",
-                        "active",
-                        "paused"
-                    ]
-                }
-            }).distinct("doctorCode");
+      const activeQueueDocs = await Queue.find({
+    ...queueFilter,
+    queueStatus: {
+        $regex: /^(ACTIVE|PAUSED)$/i
+    }
+}).distinct("doctorCode");
 
-        const doctorsWithQueues =
-            activeQueueDocs.length;
+const doctorsWithQueues = activeQueueDocs.length;
+      
 
 
         // -----------------------------------------
@@ -233,7 +220,7 @@ const getGlobalQueues = async (req, res) => {
         // -----------------------------------------
 
         const filter = mongoHospitalId
-            ? { hospitalId: mongoHospitalId }
+            ? { hospitalId: hospitalcode }
             : {};
 
         console.log("Queue filter:", filter);
@@ -490,9 +477,14 @@ console.log("Doctor codes:", doctorCodes);
 // Queue.hospitalId stores Mongo hospital ID
 // Example: "6a7edcd1552bf90070deabd8"
 // -----------------------------------------
+// -----------------------------------------
+// 5. Get queues
+// Queue.hospitalId stores hospital CODE
+// Example: "A-5198"
+// -----------------------------------------
 
 const queues = await Queue.find({
-    hospitalId: hospitalId,
+    hospitalId: hospitalcode,
     doctorCode: { $in: doctorCodes }
 })
 .sort({ updatedAt: -1 })

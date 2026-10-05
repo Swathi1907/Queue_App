@@ -157,10 +157,35 @@ data class RegisterDoctorRequest(
     val rating: Double?
 )
 
+data class NotificationModel(
+    val _id: String,
+    val hospitalId: String,
+    val targetRole: String,
+    val title: String,
+    val message: String,
+    val type: String,
+    val department: String? = null,
+    val doctorCode: String? = null,
+    val isRead: Boolean = false,
+    val createdAt: String,
+    val updatedAt: String
+)
 data class RegisterDoctorResponse(
     val success: Boolean,
     val message: String,
     val data: DoctorRegistrationData?
+)
+
+
+data class EndSessionResponse(
+    val success: Boolean,
+    val message: String,
+    val data: EndSessionData?
+)
+
+data class EndSessionData(
+    val sessionId: String,
+    val queueStatus: String
 )
 
 data class DoctorRegistrationData(
@@ -176,13 +201,34 @@ data class DoctorRegistrationData(
 )
 data class ActiveQueueDto(
     val queueId: String = "",
+    val tokenId: String = "",
+    val tokenNumber: Int = 0,
+
+    // Hospital
+    val hospitalId: String = "",
     val hospitalName: String = "",
     val hospitalLogoUrl: String? = null,
-    val doctorDetails: String = "",
+
+    // Doctor
+    val doctorCode: String = "",
+    val doctorName: String = "",
+
+    // Queue
+    val department: String = "",
+    val roomNumber: String = "",
+    val date: String = "",
+
+    // Patient status
     val status: String = "",
+
+    // Queue status
+    val queueStatus: String = "",
+
+    val createdAt: String? = null,
+
+    // ETA
     val peopleAheadText: String = "",
-    val estWaitTimeText: String = "",
-    val tokenNumber: Int = 0
+    val estWaitTimeText: String = ""
 )
 data class DoctorProfileResponse(
     @SerializedName("success")
@@ -196,6 +242,35 @@ data class ActiveSessionResponse(
     val message: String,
     val data: SessionData?
 )
+
+
+data class QueueTicketResponse(
+    val success: Boolean,
+    val data: QueueTicketData?
+)
+
+data class QueueTicketData(
+    val hospitalName: String,
+    val hospitalLogoUrl: String,
+    val doctorName: String,
+    val department: String,
+    val roomNumber: String,
+    val isDoctorOnDuty: Boolean,
+    val tokenNumber: Int,
+    val status: String,
+    val queueMessage: String,
+    val peopleAheadText: String,
+    val estWaitTimeText: String,
+    val queueDate: String,
+    val isPaid: Boolean,
+    val paymentText: String,
+    val notes: String = ""
+)
+
+data class LeaveQueueRequest(
+    val queueId: String
+)
+
 /*
 data class SessionData(
     val sessionId: String,
@@ -206,7 +281,7 @@ data class SessionData(
 data class SessionData(
     val sessionId: String,
     val queueStatus: String?, // "ACTIVE", "PAUSED", "CLOSED"
-    val avgServiceTime: Int?, // <-- Added to capture active session service time
+    val avgServiceTime: Double?, // <-- Added to capture active session service time
     val tokens: List<TokenItem>?
 )
 

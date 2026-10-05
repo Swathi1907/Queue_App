@@ -3,6 +3,7 @@ package com.swathi.queue_app.v2.fragments.admin
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -158,7 +159,7 @@ class ScanResumeFragment : Fragment() {
                                 val analysisFragment = AIAnalysisFragment.newInstance(response)
                                 requireActivity().supportFragmentManager.beginTransaction()
                                     .replace(R.id.nav_admin_graph, analysisFragment)
-                                    .addToBackStack(null)
+
                                     .commit()
 
                             } else {
@@ -177,6 +178,19 @@ class ScanResumeFragment : Fragment() {
                     }
                 }
             }
+        }
+        parentFragmentManager.setFragmentResultListener(
+            "DISCARD_RESUME",
+            viewLifecycleOwner
+        ) { _, _ ->
+
+            selectedFileUri = null
+
+            // Clear the UI
+            binding.tvBrowse.text = ""
+            binding.btnScanResume.isEnabled = false
+
+            Log.d("RESUME_SCAN", "Selected file cleared after discard")
         }
     }
 

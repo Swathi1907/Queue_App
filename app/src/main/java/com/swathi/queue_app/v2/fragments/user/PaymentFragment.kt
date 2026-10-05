@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -21,6 +20,7 @@ import com.swathi.queue_app.v2.utilis.TokenManager
 import com.swathi.queue_app.v2.viewmodels.HospitalViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 
 class PaymentFragment : Fragment(), PaymentResultWithDataListener {
@@ -35,7 +35,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     private var consultationFeeINR: Int = 500
     private var departmentName: String = ""
     private var hospitalId: String = ""
-    private var symptoms:String=""
+    private var symptoms: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +47,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
             departmentName = it.getString("DEPARTMENT_NAME", "")
             hospitalId = it.getString("HOSPITAL_CODE", "")
             symptoms = it.getString("SYMPTOMS", "")
+            Log.d("PAYMENT_DEPARTMENT", "Department = $departmentName")
         }
     }
 
@@ -75,34 +76,48 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
         val userEmail = tokenManager.getEmail() ?: "user@example.com"
         val userContact = tokenManager.getContact() ?: "9876543210"
 
-        // Disable button safely to prevent multiple clicks
-        _binding?.btnPayNow?.isEnabled = false
+        // Prevent multiple clicks
+        binding.btnPayNow.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Fetch real order ID dynamically from your backend via ViewModel
-                val serverGeneratedOrderId = viewModel.createRazorpayOrder(amountInINR, doctorCode)
+                Log.d("PaymentFragment", "Creating Razorpay order...")
 
-                // Safely update UI components once coroutine finishes
-                _binding?.let { safeBinding ->
-                    safeBinding.btnPayNow.isEnabled = true
+                // Wrap network call in a 20-second timeout block
+                val serverGeneratedOrderId = withTimeout(20_000L) {
+                    viewModel.createRazorpayOrder(amountInINR, doctorCode)
+                }
 
-                    if (!serverGeneratedOrderId.isNullOrEmpty()) {
-                        Log.d("pf","starting razor payment")
-                        startRazorpayPayment(serverGeneratedOrderId, amountInINR, userEmail, userContact)
-                    } else {
-                        if (isAdded) {
-                            Toast.makeText(requireContext(), "Failed to generate payment order", Toast.LENGTH_SHORT).show()
-                        }
+                if (!serverGeneratedOrderId.isNullOrEmpty()) {
+                    Log.d("PaymentFragment", "Order created: $serverGeneratedOrderId")
+                    if (isAdded) {
+                        startRazorpayPayment(
+                            serverGeneratedOrderId,
+                            amountInINR,
+                            userEmail,
+                            userContact
+                        )
                     }
+                } else {
+                    Log.e("PaymentFragment", "Order ID is empty")
+                    handleOrderError("Failed to generate payment order")
                 }
+
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                Log.e("PaymentFragment", "Create order timed out", e)
+                handleOrderError("Request timed out. Please check your network.")
+
             } catch (e: Exception) {
-                _binding?.btnPayNow?.isEnabled = true
-                if (isAdded) {
-                    Toast.makeText(requireContext(), "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-                }
-                e.printStackTrace()
+                Log.e("PaymentFragment", "Create order failed", e)
+                handleOrderError("Unable to create payment order")
             }
+        }
+    }
+
+    private fun handleOrderError(message: String) {
+        if (isAdded) {
+            binding.btnPayNow.isEnabled = true
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,7 +125,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
         val currentActivity = activity ?: return
         val checkout = Checkout()
         checkout.setKeyID("rzp_test_TL8wCC2G31Lu5O")
-//rzp_test_TL8wCC2G31Lu5O
+
         try {
             val options = JSONObject().apply {
                 put("name", "Queue App")
@@ -122,16 +137,15 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                 put("prefill.email", email)
                 put("prefill.contact", contact)
                 put("theme.color", "#0B3C5D")
-
             }
 
-            // Ensure it opens on the main thread safely
             currentActivity.runOnUiThread {
                 checkout.open(currentActivity, options)
             }
         } catch (e: Exception) {
             Log.e("RazorpayCrash", "Failed to open checkout: ${e.localizedMessage}", e)
             if (isAdded) {
+                binding.btnPayNow.isEnabled = true // Re-enable button on crash
                 Toast.makeText(requireContext(), "Error opening payment gateway: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -144,6 +158,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
 
         if (orderId.isEmpty() || signature.isEmpty() || paymentId.isEmpty()) {
             if (isAdded) {
+                binding.btnPayNow.isEnabled = true
                 Toast.makeText(requireContext(), "Payment data missing from Razorpay callback", Toast.LENGTH_SHORT).show()
             }
             return
@@ -167,10 +182,8 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
             notes = symptoms
         )
 
+        // Trigger verification (handled safely via ViewModel and observed via state)
         viewModel.verifyPayment(verifyRequest)
-
-        // INSTANT NAVIGATION: Pop right back to your Queues Fragment safely
-
     }
 
     private fun observePaymentState() {
@@ -180,7 +193,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
 
                 when (resource) {
                     is HospitalViewModel.Resource.Loading -> {
-                        // Show progress bar if needed
+                        // Optional: show a loading indicator if you have one
                     }
                     is HospitalViewModel.Resource.Success -> {
                         val tokenNumber = resource.data
@@ -190,9 +203,7 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                             Toast.LENGTH_LONG
                         ).show()
                         try {
-                            // Pop back stack cleanly to your queues fragment destination ID
                             findNavController().popBackStack(R.id.nav_queues, false)
-
                         } catch (e: Exception) {
                             Log.e("NavigationError", "Failed to navigate after payment: ${e.message}")
                             requireActivity().onBackPressedDispatcher.onBackPressed()
@@ -204,6 +215,8 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
                             "Verification Failed: ${resource.message}",
                             Toast.LENGTH_LONG
                         ).show()
+                        // Re-enable button so user isn't stuck if verification fails
+                        binding.btnPayNow.isEnabled = true
                         Log.d("payfrag", "${resource.message}")
                     }
                     is HospitalViewModel.Resource.Idle -> {}
@@ -215,7 +228,9 @@ class PaymentFragment : Fragment(), PaymentResultWithDataListener {
     override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
         Log.e("RazorpayError", "Error Code: $code, Response: $response")
         if (isAdded) {
-            Toast.makeText(requireContext(), "Payment Failed: $response", Toast.LENGTH_LONG).show()
+            // CRITICAL FIX: Re-enable button when user cancels or payment fails
+            binding.btnPayNow.isEnabled = true
+            Toast.makeText(requireContext(), "Payment Failed or Cancelled", Toast.LENGTH_LONG).show()
         }
     }
 

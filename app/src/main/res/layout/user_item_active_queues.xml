@@ -167,7 +167,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
             android:backgroundTint="#004D40"
-            android:text="View QR Code"
+            android:text="View token details"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="14sp"

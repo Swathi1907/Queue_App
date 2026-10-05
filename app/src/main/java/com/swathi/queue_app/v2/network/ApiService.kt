@@ -9,12 +9,15 @@ import com.swathi.queue_app.v2.models.DepartmentResponseWrapper
 import com.swathi.queue_app.v2.models.DoctorDirectoryResponse
 import com.swathi.queue_app.v2.models.DoctorProfileResponse
 import com.swathi.queue_app.v2.models.DoctorResponse
+import com.swathi.queue_app.v2.models.EndSessionResponse
 import com.swathi.queue_app.v2.models.GlobalQueueResponseWrapper
 import com.swathi.queue_app.v2.models.HospitalDetailResponse
 import com.swathi.queue_app.v2.models.HospitalIdRequest
 import com.swathi.queue_app.v2.models.HospitalResponse
 import com.swathi.queue_app.v2.models.HospitalUpdateRequest
+import com.swathi.queue_app.v2.models.LeaveQueueRequest
 import com.swathi.queue_app.v2.models.LoginRequest
+import com.swathi.queue_app.v2.models.NotificationModel
 import com.swathi.queue_app.v2.models.OrderCreateRequest
 import com.swathi.queue_app.v2.models.OrderCreateResponse
 import com.swathi.queue_app.v2.models.PaymentVerifyRequest
@@ -24,6 +27,7 @@ import com.swathi.queue_app.v2.models.QueueActionResponse
 import com.swathi.queue_app.v2.models.QueueDashboardResponse
 import com.swathi.queue_app.v2.models.QueueResponseWrapper
 import com.swathi.queue_app.v2.models.QueueStatusUpdateRequest
+import com.swathi.queue_app.v2.models.QueueTicketResponse
 import com.swathi.queue_app.v2.models.RegisterDoctorRequest
 import com.swathi.queue_app.v2.models.RegisterDoctorResponse
 import com.swathi.queue_app.v2.models.ResumeScanResponse
@@ -103,6 +107,8 @@ interface ApiService {
         @Path("hospitalId") hospitalId: String
     ): Response<DepartmentResponseWrapper>
 
+
+
     @POST("api/v2/payment/verify")
     suspend fun verifyPayment(
         @Body request: PaymentVerifyRequest
@@ -118,6 +124,16 @@ interface ApiService {
         @Path("hospitalId") hospitalId: String,
         @Path("departmentName") departmentName: String
     ): Response<DoctorResponse>
+    @GET("api/v2/notifications")
+    suspend fun getNotifications(
+        @Query("targetRole") targetRole: String
+    ): Response<List<NotificationModel>>
+@POST("api/v2/doctor/end_session")
+suspend fun end_session(
+    @Query("department") department: String?,
+    @Query("doctorCode") doctorCode: String?
+):Response<EndSessionResponse>
+
 
 
     @POST("api/v2/auth/registerDoctor")
@@ -141,18 +157,20 @@ interface ApiService {
         @Path("userId") userId: String
     ): Response<QueueDashboardResponse>
 
+    @GET("api/v2/queue/getLiveQueueTicket/{userId}")
+    suspend fun getLiveTicket(
+        @Path("userId") userId: String,
+        @Query("queueId") queueId: String
+    ): Response<QueueTicketResponse>
     @POST("/api/v2/doctor/updateQueueStatus")
     suspend fun updateQueueStatus(
 @Body request: QueueStatusUpdateRequest
     ): Response<QueueActionResponse>
 
-
     @POST("api/v2/admin/doctors-directory")
     suspend fun getDoctorDirectory(
         @Body request: HospitalIdRequest
     ): Response<DoctorDirectoryResponse>
-
-
     @PUT("api/v2/hospital/update")
     suspend fun updateHospitalDetails(
         @Body request: HospitalUpdateRequest
@@ -160,7 +178,10 @@ interface ApiService {
 
 
 
-
+@POST("api/v2/queue/leaveQueue")
+suspend fun leaveQueue(
+    @Body request: LeaveQueueRequest,
+): Response<StandardResponse>
     @POST("api/v2/admin/global-monitor")
     suspend fun getGlobalDepartments(
         @Body request: HospitalIdRequest

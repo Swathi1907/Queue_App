@@ -1,6 +1,9 @@
 const UserV2 = require('../new_models/peron_model');
 const HospitalV2 = require('../new_models/new_hosp_model');
 const Queue = require("../new_models/new_queuev2");
+const socket =require('../../socket');
+const UserActiveQueue = require("../new_models/new_user_active_queue");
+const QueueHistory = require("../new_models/new_user_queue_history");
 const { calculateETA } = require("../new_controllers/eta_control");
 const {
     sendNotification
@@ -135,7 +138,14 @@ const next = async (req, res) => {
      nextToken.status = 'IN_CONSULTATION';
 nextToken.consultationStartedAt = new Date();
         await queueDoc.save();
+const io = socket.getIO();
 
+io.to(`queue_${queueDoc._id}`).emit("TOKEN_CALLED", {
+    queueId: queueDoc._id,
+    tokenId: nextToken._id,
+    tokenNumber: nextToken.tokenNumber,
+    status: "IN_CONSULTATION"
+});
         // Calculate dynamic ETA metrics for the newly called token
         const etaData = await calculateETA(queueDoc, nextToken.tokenNumber);
 
@@ -145,7 +155,7 @@ nextToken.consultationStartedAt = new Date();
             data: {
                 sessionId: queueDoc._id,
                 queueStatus: queueDoc.queueStatus,
-                avgServiceTime: queueDoc.avgServiceTime || 5,
+            avgServiceTime: Math.ceil(queueDoc.avgServiceTime || 5),
                 calledToken: nextToken,
                 metrics: etaData, // Full breakdown including progress, activeCount, remaining times
                 tokens: queueDoc.tokens
@@ -157,7 +167,6 @@ nextToken.consultationStartedAt = new Date();
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
-
 const completeCurrent = async (req, res) => {
     try {
         const { department, doctorCode } = req.body;
@@ -184,6 +193,10 @@ const completeCurrent = async (req, res) => {
             });
         }
 
+        // ==========================================
+        // 1. FIND CURRENT PATIENT
+        // ==========================================
+
         const activeToken = queueDoc.tokens.find(
             t => t.status === 'IN_CONSULTATION'
         );
@@ -197,7 +210,24 @@ const completeCurrent = async (req, res) => {
 
 
         // ==========================================
-        // 1. CALCULATE ACTUAL SERVICE TIME
+        // 2. FIND USER ACTIVE QUEUE
+        // ==========================================
+
+        const activeQueue = await UserActiveQueue.findOne({
+            queueId: queueDoc._id,
+            tokenId: activeToken._id
+        });
+
+        if (!activeQueue) {
+            return res.status(404).json({
+                success: false,
+                message: "Active queue record not found for this patient"
+            });
+        }
+
+
+        // ==========================================
+        // 3. CALCULATE ACTUAL SERVICE TIME
         // ==========================================
 
         const completedAt = new Date();
@@ -214,14 +244,13 @@ const completeCurrent = async (req, res) => {
                     ).getTime()
                 ) / (1000 * 60);
 
-            // Keep a reasonable precision
             serviceTime =
                 Number(serviceTime.toFixed(2));
         }
 
 
         // ==========================================
-        // 2. SAVE COMPLETION INFORMATION
+        // 4. MARK TOKEN AS COMPLETED
         // ==========================================
 
         activeToken.status = 'COMPLETED';
@@ -234,7 +263,7 @@ const completeCurrent = async (req, res) => {
 
 
         // ==========================================
-        // 3. RECALCULATE AVERAGE SERVICE TIME
+        // 5. RECALCULATE AVERAGE SERVICE TIME
         // ==========================================
 
         const completedTokens =
@@ -253,31 +282,110 @@ const completeCurrent = async (req, res) => {
                     0
                 );
 
-            queueDoc.avgServiceTime =
-                Number(
-                    (
-                        totalServiceTime /
-                        completedTokens.length
-                    ).toFixed(2)
-                );
+            queueDoc.avgServiceTime = Math.ceil(
+    totalServiceTime / completedTokens.length
+);
         }
 
 
         // ==========================================
-        // 4. SAVE QUEUE
+        // 6. SAVE QUEUE
         // ==========================================
 
         await queueDoc.save();
 
 
         // ==========================================
-        // 5. CALCULATE NEXT PATIENT ETA
+        // 7. CREATE QUEUE HISTORY
+        // ==========================================
+
+    
+    // ==========================================
+// 7. GET HOSPITAL + DOCTOR DETAILS
+// ==========================================
+const hospital = await HospitalV2.findOne({
+    code: queueDoc.hospitalId
+}).lean();
+
+const doctor = await UserV2.findOne({
+    doctorCode: queueDoc.doctorCode,
+    role: "DOCTOR"
+}).lean();
+
+
+// ==========================================
+// 8. CREATE QUEUE HISTORY
+// ==========================================
+const history = new QueueHistory({
+
+    userId: activeQueue.userId,
+
+    queueId: queueDoc._id,
+
+    tokenId: activeToken._id,
+
+    tokenNumber: activeToken.tokenNumber,
+
+    hospitalId: queueDoc.hospitalId,
+
+    hospitalName:
+        hospital?.name || "",
+
+    hospitalLogoUrl:
+        hospital?.logoUrl || "",
+
+    doctorCode:
+        queueDoc.doctorCode,
+
+    doctorName:
+        doctor?.name || "",
+
+    department:
+        queueDoc.department,
+
+    roomNumber:
+        queueDoc.roomNumber || "",
+
+    status: "COMPLETED",
+
+    date:
+        queueDoc.date,
+
+    feedback:
+        activeToken.feedback || {},
+
+    joinedAt:
+        activeQueue.joinedAt,
+
+    completedAt:
+        completedAt
+});
+
+
+
+await history.save();
+        // ==========================================
+        // 8. DELETE FROM USER ACTIVE QUEUE
+        // ==========================================
+
+        await UserActiveQueue.deleteOne({
+            _id: activeQueue._id
+        });
+
+
+        // ==========================================
+        // 9. FIND NEXT WAITING PATIENT
         // ==========================================
 
         const nextWaitingToken =
             queueDoc.tokens.find(
                 t => t.status === 'WAITING'
             );
+
+
+        // ==========================================
+        // 10. CALCULATE NEXT PATIENT ETA
+        // ==========================================
 
         let nextMetrics = null;
 
@@ -292,7 +400,27 @@ const completeCurrent = async (req, res) => {
 
 
         // ==========================================
-        // 6. RESPONSE
+        // 11. SOCKET EVENT
+        // ==========================================
+
+        const io = socket.getIO();
+
+        io.to(`queue_${queueDoc._id}`).emit(
+            "TOKEN_COMPLETED",
+            {
+                queueId: queueDoc._id,
+                tokenId: activeToken._id,
+                tokenNumber: activeToken.tokenNumber,
+                status: "COMPLETED",
+                nextTokenNumber:
+                    nextWaitingToken?.tokenNumber || null,
+                metrics: nextMetrics
+            }
+        );
+
+
+        // ==========================================
+        // 12. RESPONSE
         // ==========================================
 
         return res.status(200).json({
@@ -310,16 +438,17 @@ const completeCurrent = async (req, res) => {
                 queueStatus:
                     queueDoc.queueStatus,
 
-                // THIS IS NOW DYNAMIC
                 avgServiceTime:
                     queueDoc.avgServiceTime,
 
-                // Actual duration of this consultation
                 serviceTime:
                     serviceTime,
 
                 completedToken:
                     activeToken,
+
+                historyId:
+                    history._id,
 
                 nextMetrics:
                     nextMetrics,
@@ -384,7 +513,33 @@ const updateQueueStatus = async (req, res) => {
 
         queueDoc.queueStatus = queueStatus;
         queueDoc.isActive = (queueStatus === 'ACTIVE');
-        await queueDoc.save();
+       await queueDoc.save();
+
+const io = socket.getIO();
+
+const roomName = `queue_${queueDoc._id}`;
+
+console.log("=================================");
+console.log("QUEUE STATUS UPDATED");
+console.log("Queue ID:", queueDoc._id.toString());
+console.log("New Status:", queueDoc.queueStatus);
+console.log("Room:", roomName);
+
+const room = io.sockets.adapter.rooms.get(roomName);
+
+console.log(
+    "Sockets in room:",
+    room ? [...room] : "NO SOCKETS"
+);
+
+io.to(roomName).emit("QUEUE_STATUS_CHANGED", {
+    queueId: queueDoc._id.toString(),
+    queueStatus: queueDoc.queueStatus,
+    isActive: queueDoc.isActive
+});
+
+console.log("QUEUE_STATUS_CHANGED emitted");
+console.log("=================================");
 await sendNotification({
             hospitalId: queueDoc.hospitalId,
             targetRole: 'ADMIN',
@@ -410,8 +565,7 @@ await sendNotification({
         console.error("Error updating queue status:", error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
-};
-const end_session = async (req, res) => {
+};const end_session = async (req, res) => {
     try {
         const { department, doctorCode } = req.query;
 
@@ -454,7 +608,21 @@ const end_session = async (req, res) => {
         queueDoc.isActive = false;
 
         await queueDoc.save();
-await sendNotification({
+
+        // 🔥 REAL-TIME SOCKET EVENT
+        const io = socket.getIO();
+
+        io.to(`queue_${queueDoc._id}`).emit("QUEUE_SESSION_ENDED", {
+            queueId: queueDoc._id.toString(),
+            queueStatus: "CLOSED",
+            isActive: false
+        });
+
+        console.log(
+            `QUEUE_SESSION_ENDED emitted to queue_${queueDoc._id}`
+        );
+
+        await sendNotification({
             hospitalId: queueDoc.hospitalId,
             targetRole: 'ADMIN',
             title: "Queue Session Closed",
@@ -463,6 +631,7 @@ await sendNotification({
             department,
             doctorCode
         });
+
         return res.status(200).json({
             success: true,
             message: "Session ended successfully",
@@ -480,7 +649,7 @@ await sendNotification({
             message: "Internal server error"
         });
     }
-}
+};
 const getDoctorAnalytics = async (req, res) => {
     try {
         const {

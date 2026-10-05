@@ -123,21 +123,26 @@ class AdminDoctorsFragment : Fragment() {
         }
     }
 
+
+
     private fun populateDepartmentSpinner() {
-        val rawDepartments = tokenManager.getUserDepartments()
-        val hospitalDepartments = (rawDepartments as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+        val rawDepartments = tokenManager.getHospitalDepartments()
 
-        // Use a Set to avoid duplicates while combining official departments and active doctor specializations
-        val departments = mutableSetOf("All Departments")
-        departments.addAll(hospitalDepartments)
+        val departments = (rawDepartments as? List<*>)
+            ?.filterIsInstance<String>()
+            ?.filter { it.isNotBlank() }
+            ?.distinct()
+            ?: emptyList()
 
-        allDoctorsList.forEach { doc ->
-            if (doc.specialization.isNotBlank()) {
-                departments.add(doc.specialization)
-            }
-        }
+        val departmentList = mutableListOf("All Departments")
+        departmentList.addAll(departments)
 
-        val deptAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, departments.toList())
+        val deptAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            departmentList
+        )
+
         binding.spinnerDepartment.adapter = deptAdapter
     }
     private fun filterDoctors() {

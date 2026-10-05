@@ -36,7 +36,7 @@
             app:layout_constraintTop_toTopOf="@id/ivUserProfile"
             app:layout_constraintBottom_toBottomOf="@id/ivUserProfile"
             app:layout_constraintStart_toEndOf="@id/ivUserProfile"
-            app:layout_constraintEnd_toStartOf="@id/notificationIcon">
+          >
 
 
 
@@ -50,15 +50,7 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/notificationIcon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/baseline_circle_notifications_24"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="#FFFFFF"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Page Title -->

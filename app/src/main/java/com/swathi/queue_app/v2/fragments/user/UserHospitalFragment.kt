@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class UserHospitalFragment : Fragment(R.layout.user_hospital_page) {
 
     private lateinit var viewModel: HospitalViewModel
-    private lateinit var toolbar: Toolbar
+
     private lateinit var tvHospitalName: TextView
     private lateinit var tvHospitalAddress: TextView
     private lateinit var recyclerView: RecyclerView
@@ -39,16 +39,14 @@ class UserHospitalFragment : Fragment(R.layout.user_hospital_page) {
         hospitalId = arguments?.getString("HOSPITAL_CODE") ?: ""
 Log.d("userhospfrag","${hospitalId} received")
         // Bind Views
-        toolbar = view.findViewById(R.id.toolbar)
+
         tvHospitalName = view.findViewById(R.id.tvHospitalName)
         tvHospitalAddress = view.findViewById(R.id.tvAddress)
         recyclerView = view.findViewById(R.id.recyclerDepartments)
         progressBar = view.findViewById(R.id.progressBarDepartments)
 
         // Setup toolbar back navigation
-        toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
+
 
         // Setup RecyclerView Grid
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -79,6 +77,7 @@ Log.d("userhospfrag","sending ${hospitalId}")
 
         // Load data if ID is valid
         if (hospitalId.isNotEmpty()) {
+            println("calling hospital")
             viewModel.loadHospitalById(hospitalId)
             viewModel.fetchDepartments(hospitalId)
         }
@@ -88,7 +87,7 @@ Log.d("userhospfrag","sending ${hospitalId}")
         // Observe Hospital Details LiveData
         viewModel.hospitalDetail.observe(viewLifecycleOwner) { response ->
             response?.data?.let { hospital ->
-                toolbar.title = hospital.name
+println("got hospital details ")
                 tvHospitalName.text = hospital.name
 
                 // Format the nested address object into a displayable string

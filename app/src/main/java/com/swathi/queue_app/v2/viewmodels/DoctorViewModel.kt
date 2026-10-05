@@ -3,6 +3,7 @@ package com.swathi.queue_app.v2.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swathi.queue_app.v2.models.DoctorProfileResponse
+import com.swathi.queue_app.v2.models.EndSessionResponse
 import com.swathi.queue_app.v2.models.ResumeScanResponse
 import com.swathi.queue_app.v2.repo.DoctorRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,22 @@ class DoctorViewModel(
                 _doctorProfileState.value = Resource.Error(exception.localizedMessage ?: "Unknown error occurred")
             }
         }
+    }
+    private val _doctorEndSession = MutableStateFlow<Resource<EndSessionResponse>>(Resource.Idle)
+    val doctorEndSession : StateFlow<Resource<EndSessionResponse>> = _doctorEndSession.asStateFlow()
+
+    fun  endSession(department: String?, doctorCode: String?){
+viewModelScope.launch{
+    _doctorEndSession.value= Resource.Loading
+    val result = repository.endSession(department,doctorCode)
+    result.onSuccess {
+        response->
+        _doctorEndSession.value= Resource.Success(response)
+
+    }.onFailure { exception ->
+        _doctorEndSession.value= Resource.Error(exception.localizedMessage?:"Unknown error occurred")
+    }
+}
     }
     private val _resumeScanState = MutableStateFlow<Resource<ResumeScanResponse>>(Resource.Idle)
     val resumeScanState: StateFlow<Resource<ResumeScanResponse>> = _resumeScanState.asStateFlow()

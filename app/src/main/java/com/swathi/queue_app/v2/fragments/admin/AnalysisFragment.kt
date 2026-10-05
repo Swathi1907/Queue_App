@@ -140,7 +140,16 @@ Log.d("analysis","${state.data.message}")
             confirmAndAddDoctor()
         }
         binding.btnDiscard.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+
+            // Tell previous fragment to clear the selected file
+            parentFragmentManager.setFragmentResult(
+                "DISCARD_RESUME",
+                Bundle()
+            )
+
+            requireActivity()
+                .onBackPressedDispatcher
+                .onBackPressed()
         }
     }
     private fun confirmAndAddDoctor() {
@@ -227,28 +236,61 @@ Log.d("analysis","${state.data.message}")
     }
     private fun setupDepartments() {
 
+        Log.d("DEPARTMENT_DEBUG", "========== setupDepartments START ==========")
+
         binding.chipGroupDepartments.removeAllViews()
         selectedDepartments.clear()
 
-        val hospitalDepartments =
-            tokenManager.getHospitalDepartments()
+        // Check hospital ID
+        val hospitalId = tokenManager.getHospitalId()
 
         Log.d(
-            "AIAnalysis",
-            "Departments from TokenManager: $hospitalDepartments"
+            "DEPARTMENT_DEBUG",
+            "Hospital ID from TokenManager = $hospitalId"
+        )
+
+        // Get departments
+        val hospitalDepartments = tokenManager.getHospitalDepartments()
+
+        Log.d(
+            "DEPARTMENT_DEBUG",
+            "Departments from TokenManager = $hospitalDepartments"
+        )
+
+        Log.d(
+            "DEPARTMENT_DEBUG",
+            "Department count = ${hospitalDepartments.size}"
         )
 
         if (hospitalDepartments.isEmpty()) {
+
+            Log.e(
+                "DEPARTMENT_DEBUG",
+                "❌ NO DEPARTMENTS FOUND IN TOKEN MANAGER"
+            )
+
             binding.tvMatchSummary.text =
                 "No hospital departments are available."
+
             return
         }
 
+        Log.d(
+            "DEPARTMENT_DEBUG",
+            "✅ Departments found, creating chips..."
+        )
+
         for (department in hospitalDepartments) {
+
+            Log.d(
+                "DEPARTMENT_DEBUG",
+                "Creating chip for department = $department"
+            )
 
             val chip = Chip(requireContext()).apply {
 
                 text = department
+
                 isCheckable = true
                 isClickable = true
                 isChecked = false
@@ -264,14 +306,24 @@ Log.d("analysis","${state.data.message}")
                     }
 
                     Log.d(
-                        "AIAnalysis",
-                        "Selected departments: $selectedDepartments"
+                        "DEPARTMENT_DEBUG",
+                        "Selected departments = $selectedDepartments"
                     )
                 }
             }
 
             binding.chipGroupDepartments.addView(chip)
         }
+
+        Log.d(
+            "DEPARTMENT_DEBUG",
+            "Total chips added = ${binding.chipGroupDepartments.childCount}"
+        )
+
+        Log.d(
+            "DEPARTMENT_DEBUG",
+            "========== setupDepartments END =========="
+        )
     }
     private fun populateData(data: com.swathi.queue_app.v2.models.DoctorResumeData) {
         // 1. Basic Candidate Info

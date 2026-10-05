@@ -61,7 +61,7 @@ class DepartmentDoctorFragment : Fragment(R.layout.department_doctor_fragment) {
                     putInt("CONSULTATION_FEE_INR", selectedDoctor.consultationFee.toInt())
                     putString("DOCTOR_NAME", selectedDoctor.name)
                     putString("HOSPITAL_CODE", hospitalId)
-                    putString("DEPARTMENT_NAME", selectedDoctor.specialty ?: departmentName)
+                    putString("DEPARTMENT_NAME", departmentName)
                     putString("WAIT_TIME", "🕒 Current Wait: ~${selectedDoctor.estimatedWaitTime} mins")
                 }
 

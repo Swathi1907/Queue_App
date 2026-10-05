@@ -19,8 +19,7 @@ class UserDepartmentAdapter(
 
         fun bind(department: DepartmentItem) {
             tvDepartmentName.text = department.name
-            // Uncomment if waiting count is available in your DepartmentItem model
-             tvWaitingCount?.text = "${department.waitingCount} waiting"
+             tvWaitingCount?.text = "${department.waitingCount} Queues"
 
             itemView.setOnClickListener {
                 onDepartmentClick(department)
