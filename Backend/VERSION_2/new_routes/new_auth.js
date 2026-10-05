@@ -20,7 +20,10 @@ console.log('registerUser type:', typeof registerUser); // <-- Change auth_contr
 console.log('---------------------');
 // 3. Public Routes (DO NOT put authmiddleware here)
 router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post('/login', (req, res, next) => {
+    console.log("🔥 LOGIN ROUTE HIT");
+    next();
+}, loginUser);
 
 // 4. Protected Routes (Must invoke authorize as a function with 'SUPER_ADMIN')
 
