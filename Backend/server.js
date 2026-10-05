@@ -113,6 +113,11 @@ app.use('/api/v2/ai', v2AiRoutes); // Mounted under /api/v2/ai/scanResume
 
 // Import v2 Auth Routes
 const v2AuthRoutes = require('./VERSION_2/new_routes/new_auth');
+app.use((req, res, next) => {
+    console.log("🔥 INCOMING REQUEST:", req.method, req.originalUrl);
+    next();
+});
+
 // Mount v2 Auth Router under /api/v2/auth
 app.use('/api/v2/auth', v2AuthRoutes);
 
