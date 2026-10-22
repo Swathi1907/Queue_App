@@ -54,7 +54,17 @@ const queueHistorySchema = new mongoose.Schema(
 
     joinedAt: Date,
 
-    completedAt: Date
+    completedAt: Date,
+    consultationStartedAt: {
+    type: Date,
+    default: null
+},
+
+serviceTime: {
+    type: Number,
+    default: null,
+    min: 0
+}
   },
   { timestamps: true }
 );

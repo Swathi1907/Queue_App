@@ -128,15 +128,7 @@ feedback: {
 }, {
     timestamps: true
 });
-queueSchema.index(
-    {
-        hospitalId: 1,
-        doctorCode: 1
-    },
-    {
-        unique: true
-    }
-);
+
 module.exports =
     mongoose.models.new_queueV2 ||
     mongoose.model('new_queueV2', queueSchema);
